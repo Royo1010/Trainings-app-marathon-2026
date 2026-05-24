@@ -9,10 +9,10 @@
     <meta name="apple-mobile-web-app-title" content="Marathon" />
     <meta name="mobile-web-app-capable" content="yes" />
     <meta name="format-detection" content="telephone=no" />
-    <link rel="manifest" href="./manifest.json?v=20260524-6" />
+    <link rel="manifest" href="./manifest.json?v=20260524-8" />
     <link rel="icon" href="./icon.svg" type="image/svg+xml" />
     <link rel="apple-touch-icon" href="./icon.svg" />
-    <link rel="stylesheet" href="./style.css?v=20260524-6" />
+    <link rel="stylesheet" href="./style.css?v=20260524-8" />
     <title>Marathon Training</title>
   </head>
   <body>
@@ -27,7 +27,7 @@
           <p class="eyebrow">Marathon schema</p>
           <h1>Training</h1>
         </div>
-        <div id="today-pill" class="date-pill"></div>
+        <button id="today-pill" class="date-pill" type="button" aria-label="Countdown tot marathon openen"></button>
       </header>
 
       <div id="menu-overlay" class="menu-overlay" hidden>
@@ -39,14 +39,25 @@
           <button class="menu-item is-active" type="button" data-view="today">Vandaag</button>
           <button class="menu-item" type="button" data-view="week">Week</button>
           <button class="menu-item" type="button" data-view="phases">Fases</button>
+          <button class="menu-item" type="button" data-view="runBuild">Hardloopopbouw</button>
           <button class="menu-item" type="button" data-view="stats">Statistieken</button>
         </nav>
+      </div>
+
+      <div id="countdown-overlay" class="countdown-overlay" hidden>
+        <section class="countdown-sheet" role="dialog" aria-modal="true" aria-labelledby="countdown-title">
+          <div class="menu-head">
+            <span id="countdown-title">Countdown tot marathon</span>
+            <button class="close-button" type="button" data-countdown-close aria-label="Countdown sluiten">×</button>
+          </div>
+          <div id="countdown-content" class="countdown-content"></div>
+        </section>
       </div>
 
       <main id="app" class="content" aria-live="polite"></main>
     </div>
 
-    <script src="./training-data.js?v=20260524-6"></script>
-    <script src="./app.js?v=20260524-6"></script>
+    <script src="./training-data.js?v=20260524-8"></script>
+    <script src="./app.js?v=20260524-8"></script>
   </body>
 </html>

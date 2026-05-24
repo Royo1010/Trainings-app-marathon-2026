@@ -5,7 +5,7 @@
     sourceFile: "trainingsschema_marathon_codex.md",
     startDate: "2026-05-25",
     startCalendarWeek: 22,
-    version: "2026.05.24.6",
+    version: "2026.05.24.8",
   };
 
   const PHASES = [
@@ -657,6 +657,7 @@
       sessionNumber: number,
       title,
       type,
+      plannedOffset: Number.isFinite(options.plannedOffset) ? options.plannedOffset : null,
       goal: options.goal || "",
       warmup: options.warmup || "500 meter roeien waar dit een gymtraining is.",
       exercises: exercises || [],
@@ -851,22 +852,35 @@
       outdoor: "Rustig en technisch. Geen extra lange marathonpace-run midweek.",
       notes: "Doel: fris genoeg zijn voor de 28 km generale repetitie.",
     }),
-    43: cardio("3:30 Marathonpace Run", "10 min 9,5; 20 min 10,5-11,0; 5 min 9,5; 25 min 11,8-12,0; 5 min uitlopen", { outdoor: "Nog een sterke marathonpace-prikkel, gecontroleerd." }),
-    44: cardio("3:30 Marathonpace Run", "10 min 9,5; 10 min 10,5; 5 min 9,5; 15 min 11,8-12,0; 5 min uitlopen", { outdoor: "Kort, scherp en gecontroleerd; fris blijven voor taper." }),
+    43: cardio("Gecontroleerde kwaliteit", "10 min 9,5; 10 min 10,5-11,0; 5 min 9,5; 3 x 5 min 11,8-12,0; 4 min herstel; 5 min uitlopen", {
+      outdoor: "Niet maximaal. De 30-32 km long run blijft de hoofdprikkel van deze week.",
+    }),
+    44: cardio("Lichtere marathonpace/techniek", "10 min 9,5; 8 min 10,5; 4 min 9,5; 2 x 6 min 11,8-12,0; 4 min herstel; 5 min uitlopen", {
+      outdoor: "Geen zware piektraining. Kort, scherp en gecontroleerd richting taper.",
+    }),
   };
 
   const F4_RUN3 = {
     37: cardio("Tempo / Interval Run", "10 min 9,5; 4 x 3 min 13,0 km/u; 3 min herstel 9,5; 5 min uitlopen", { outdoor: "4 korte snelle blokken, zwaar maar beheerst." }),
     38: cardio("Tempo / Interval Run", "10 min 9,5; 5 x 3 min 13,0 km/u; 3 min herstel 9,5; 5 min uitlopen", { outdoor: "5 snelle blokken, sneller dan marathontempo maar niet maximaal." }),
-    39: cardio("Tempo / Interval Run", "10 min 9,5; 4 x 4 min 12,8-13,0 km/u; 3 min herstel 9,5; 5 min uitlopen", { outdoor: "4 langere snelle blokken, technisch netjes." }),
+    39: cardio("Easy Run + techniek", "35-45 min easy op 9,5-10,0 km/u; optioneel 4 x 20 sec soepel versnellen", {
+      outdoor: "Zeer lichte techniek/souplesse of easy. Geen zware interval deze week.",
+      notes: "De 24 km long run met MP is de hoofdprikkel.",
+    }),
     40: cardio("Tempo / Interval Run", "10 min 9,5; 3 x 3 min 12,8-13,0 km/u; 3 min herstel 9,5; 5 min uitlopen", { outdoor: "Cutback: kort en scherp, niet diep gaan." }),
-    41: cardio("Tempo / Interval Run", "10 min 9,5; 5 x 4 min 12,8-13,0 km/u; 3 min herstel 9,5; 5 min uitlopen", { outdoor: "5 stevige blokken sneller dan marathontempo." }),
+    41: cardio("Easy Run + korte techniek", "35-45 min easy op 9,5-10,0 km/u; optioneel 4 x 20 sec soepel versnellen", {
+      outdoor: "Geen extra zware interval. Licht houden voor de 26 km progressieve long run.",
+    }),
     42: cardio("Easy Run + strides", "35-45 min easy op 9,5-10,0 km/u; 4 x 20 sec soepel versnellen; ruim herstel", {
       outdoor: "Geen zware intervaltraining deze week. Alleen souplesse en ritme.",
       notes: "Deze prikkel vervangt de zware kwaliteitstraining zodat de long run de hoofdtraining blijft.",
     }),
-    43: cardio("Tempo / Interval Run", "10 min 9,5; 6 x 3 min 13,0-13,5 km/u; 2-3 min herstel 9,5; 5 min uitlopen", { outdoor: "6 korte snelle blokken, zwaar en scherp, geen sprint." }),
-    44: cardio("Tempo / Interval Run", "10 min 9,5; 4 x 3 min 12,8-13,0 km/u; 3 min herstel 9,5; 5 min uitlopen", { outdoor: "Laatste lichte kwaliteitstraining voor taper.", notes: "Bij bovenbeen/heupzeur: vervangen door 30-45 min steady op 10,5-11,0 km/u." }),
+    43: cardio("Easy Run + techniek", "30-45 min easy op 9,5-10,0 km/u; eventueel 4 x 20 sec soepel versnellen", {
+      outdoor: "Licht houden. De langste duurloop is de hoofdtraining.",
+    }),
+    44: cardio("Easy Run", "30-40 min easy op 9,5-10,0 km/u", {
+      outdoor: "Rustig. Geen zware piektraining meer richting taper.",
+    }),
   };
 
   const F4_RUN4 = {
@@ -1238,8 +1252,8 @@
       : calendarWeek === 41
         ? "Kort marathontempo vasthouden, maar de week niet stapelen."
         : "12 km/u steeds normaler laten voelen.";
-    const run3Goal = calendarWeek === 42
-      ? "Fris blijven voor de belangrijkste generale repetitie."
+    const run3Goal = [39, 41, 42, 43, 44].includes(calendarWeek)
+      ? "Licht houden zodat de long run de hoofdtraining blijft."
       : "Snelheidsreserve bouwen boven marathontempo.";
     const lowerNote = calendarWeek === 42
       ? "Week 42: onderhoudend houden. Geen zware benen maken voor de 28 km generale repetitie."
@@ -1315,10 +1329,10 @@
       ];
     }
     return [
-      session(1, "Run 1 — Easy Run + korte prikkel", "run", [], cardio("Easy Run + korte prikkel", "25-30 min op 9,5 km/u; 3 x 1 min op 11,8-12,0; 2 min 9,5 tussen blokken; rustig uitlopen", { outdoor: "Rustig lopen met 3 korte stukjes op marathontempo-gevoel." }), { phaseId }),
-      session(2, "Optionele Activatiegym", "kracht", activationGym(), null, { phaseId, warmup: "5-10 min rustig bewegen of 500 meter roeien.", notes: "Logisch vroeg in marathonweek of vóór de shake-out/marathon. Niet doen als je moe, druk of gespannen bent. Geen dips, zware leg press, RDL of split squats." }),
-      session(3, "Run 2 — Shake-out Run", "run", [], cardio("Shake-out Run", "15-20 min op 9,5 km/u; eventueel 3 x 20 sec rond 11,8-12,5 met veel rust", { outdoor: "15-20 min heel rustig, eventueel 3 korte versnellingen.", notes: "Bij voorkeur 1-3 dagen voor de marathon." }), { phaseId }),
-      session(4, "Run 3 — Marathon", "marathon", [], cardio("Marathon", "Zondag 22 november 2026. A-doel richting 3:30, B-doel sterk finishen rond 3:45.", { outdoor: "Start gecontroleerd, ritme vasthouden, voeding/drinken volgens plan. Na 30–32 km pas denken aan vasthouden of voorzichtig versnellen." }), { phaseId, goal: "Fris aan de start en gecontroleerd lopen." }),
+      session(1, "Run 1 — Easy Run + korte prikkel", "run", [], cardio("Easy Run + korte prikkel", "25-30 min op 9,5 km/u; 3 x 1 min op 11,8-12,0; 2 min 9,5 tussen blokken; rustig uitlopen", { outdoor: "Rustig lopen met 3 korte stukjes op marathontempo-gevoel." }), { phaseId, plannedOffset: 0 }),
+      session(2, "Optionele Activatiegym", "kracht", activationGym(), null, { phaseId, plannedOffset: 1, warmup: "5-10 min rustig bewegen of 500 meter roeien.", notes: "Logisch vroeg in marathonweek of vóór de shake-out/marathon. Niet doen als je moe, druk of gespannen bent. Geen dips, zware leg press, RDL of split squats." }),
+      session(3, "Run 2 — Shake-out Run", "run", [], cardio("Shake-out Run", "15-20 min op 9,5 km/u; eventueel 3 x 20 sec rond 11,8-12,5 met veel rust", { outdoor: "15-20 min heel rustig, eventueel 3 korte versnellingen.", notes: "Bij voorkeur 1-3 dagen voor de marathon." }), { phaseId, plannedOffset: 4 }),
+      session(4, "Run 3 — Marathon", "marathon", [], cardio("Marathon", "Zondag 22 november 2026. A-doel richting 3:30, B-doel sterk finishen rond 3:45.", { outdoor: "Start gecontroleerd, ritme vasthouden, voeding/drinken volgens plan. Na 30–32 km pas denken aan vasthouden of voorzichtig versnellen." }), { phaseId, plannedOffset: 6, goal: "Fris aan de start en gecontroleerd lopen." }),
     ];
   }
 
