@@ -1,0 +1,53 @@
+<!doctype html>
+<html lang="nl">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="theme-color" content="#0F141A" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-title" content="Marathon" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="format-detection" content="telephone=no" />
+    <link rel="manifest" href="./manifest.json?v=20260524-2" />
+    <link rel="icon" href="./icon.svg" type="image/svg+xml" />
+    <link rel="apple-touch-icon" href="./icon.svg" />
+    <link rel="stylesheet" href="./style.css?v=20260524-2" />
+    <title>Marathon Training</title>
+  </head>
+  <body>
+    <div class="app-shell">
+      <header class="topbar">
+        <div>
+          <p class="eyebrow">Marathon schema</p>
+          <h1>Training</h1>
+        </div>
+        <div id="today-pill" class="date-pill"></div>
+      </header>
+
+      <main id="app" class="content" aria-live="polite"></main>
+
+      <nav class="tabbar" aria-label="Hoofdnavigatie">
+        <button class="tab is-active" type="button" data-view="today">
+          <span class="tab-icon">●</span>
+          Vandaag
+        </button>
+        <button class="tab" type="button" data-view="week">
+          <span class="tab-icon">▦</span>
+          Week
+        </button>
+        <button class="tab" type="button" data-view="phases">
+          <span class="tab-icon">≡</span>
+          Fases
+        </button>
+        <button class="tab" type="button" data-view="stats">
+          <span class="tab-icon">↗</span>
+          Statistieken
+        </button>
+      </nav>
+    </div>
+
+    <script src="./training-data.js?v=20260524-2"></script>
+    <script src="./app.js?v=20260524-2"></script>
+  </body>
+</html>

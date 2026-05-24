@@ -1,0 +1,19 @@
+{
+  "name": "Marathon & Kracht Training",
+  "short_name": "Marathon",
+  "description": "Praktisch marathon- en krachttrainingsschema met lokale logging.",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#0F141A",
+  "theme_color": "#0F141A",
+  "orientation": "portrait",
+  "icons": [
+    {
+      "src": "./icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}
