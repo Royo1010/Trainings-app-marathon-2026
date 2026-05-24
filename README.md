@@ -38,7 +38,16 @@ Alle fases van week 22 t/m 52 zijn opgenomen. Waar het bronschema met terugkeren
 - Fase 5: taperweken, marathonweek en lichte gym.
 - Fase 6: herstel en terugkeer naar krachttraining.
 
-Fasedoelen, blessureregels, alternatieven en herstelvarianten zijn samengevat in ingeklapte UI-onderdelen. De exacte trainingsdetails voor oefeningen en hardloopblokken zijn in `training-data.js` gestructureerd opgenomen.
+Fasedoelen, blessureregels, alternatieven en uitgebreide fase-uitleg zijn samengevat in ingeklapte UI-onderdelen. De exacte trainingsdetails voor oefeningen en hardloopblokken zijn in `training-data.js` gestructureerd opgenomen.
+
+Fase 4 is racespecifieker gemaakt richting een 3:30 marathon:
+
+- Week 39: 24 km met 2 × 3 km marathontempo.
+- Week 41: 26 km met 6–8 km marathontempo aan het einde.
+- Week 42: 28 km met 10–12 km marathontempo als generale repetitie.
+- Week 44: optioneel 22–24 km met 6 km marathontempo.
+
+De zware marathontempo-long-runs vervangen deels midweekse kwaliteit. Ze zijn dus niet bovenop alle bestaande zware tempo/intervalbelasting gestapeld.
 
 ## Home screen
 
@@ -49,6 +58,8 @@ De app bevat manifest- en iOS-meta-tags voor gebruik via "Zet op beginscherm". E
 Het Vandaag-scherm is compact gemaakt voor iPhone-gebruik: geen vaste ondernavigatie, een klein hamburgermenu bovenin en direct zicht op de oefeningen. In hybride upper/lower/gym + run-sessies toont de app kracht eerst en hardlopen daarna. Echte run-first sessies, zoals long runs, shake-outs, marathon en easy run + mini strength, tonen hardlopen eerst.
 
 Het Week-scherm is interactief: tik op een sessie om een preview te openen. In preview-modus kun je vooruitkijken zonder loggingvelden of afrondknop, zodat toekomstige sessies niet per ongeluk worden gelogd.
+
+De oude groen/oranje/rood herstelknoppen zijn verwijderd. De app blijft een eenvoudige schema-lezer/logger en geen coachingsflow.
 
 ## Offline
 

@@ -5,82 +5,7 @@
     sourceFile: "trainingsschema_marathon_codex.md",
     startDate: "2026-05-25",
     startCalendarWeek: 22,
-    version: "2026.05.24.5",
-  };
-
-  const RECOVERY = {
-    "fase-1": {
-      green: "Doe de volledige training zoals uitgeschreven.",
-      orange:
-        "Doe de eerste 4 oefeningen, maximaal 2 sets per oefening. Brachialis-rehab alleen licht, hardlopen easy of korter, geen extra core/finisher.",
-      red:
-        "Geen zware kracht. 500 meter roeien, 10 min mobiliteit, lichte pijnvrije machines 1-2 sets, calf/tibialis 2 sets, dead bug/side plank 2 sets, eventueel easy wandelen/joggen 10-15 min.",
-      subRules: [
-        "Brachialis 6+/10: geen pijnlijke rows, geen dips, geen curls.",
-        "Schouderpijn: range verkleinen of oefening vervangen.",
-        "Heup/bovenbeen zeurt: tempo-run vervangen door easy run.",
-      ],
-    },
-    "fase-2": {
-      green: "Doe de volledige training zoals uitgeschreven.",
-      orange:
-        "Doe de eerste 4 oefeningen, maximaal 2 sets per oefening. Hardlopen eventueel 5-10 minuten korter. Mini-strength maximaal 4 oefeningen.",
-      red:
-        "Geen zware kracht. Rustig wandelen/roeien, 10 min mobiliteit, calf/tibialis 2 sets, dead bug of side plank 2 sets, eventueel 10-20 min easy jog/walk.",
-      subRules: [
-        "Brachialis 6+/10: geen dips, geen pijnlijke rows, geen curls.",
-        "Bovenbeen/heupklacht: geen 3:30-tempo-run; maak er easy van.",
-        "Lower body verkorten als loopfrequentie zwaar voelt.",
-      ],
-    },
-    "fase-3": {
-      green: "Doe de volledige training zoals uitgeschreven.",
-      orange:
-        "Doe de eerste 3-4 oefeningen, maximaal 2 sets per oefening, een core/prehab-oefening en lichte brachialis-rehab. Lower: geen zware RDL, calf/tibialis houden.",
-      red:
-        "Geen zware kracht. 500 meter roeien, 10-15 min mobiliteit, calf/tibialis 2 sets, dead bug of side plank 2 sets, eventueel lichte machine chest press of row 1-2 sets.",
-      subRules: [
-        "Bovenbeen/heupklacht: geen fast finish; marathonpace-run vervangen door steady/easy.",
-        "Lower body verkorten als de long run in gevaar komt.",
-        "Brachialis 6+/10: geen dips, geen pijnlijke rows, geen curls.",
-      ],
-    },
-    "fase-4": {
-      green: "Doe de volledige training zoals uitgeschreven.",
-      orange:
-        "Doe oefening 1 t/m 4, maximaal 2 sets per oefening, een core/prehab-oefening, geen extra pompwerk en geen zware benen vlak voor de long run.",
-      red:
-        "Geen zware kracht. 500 meter roeien, 10 min mobiliteit, calf/tibialis 2 sets, dead bug of side plank 2 sets, lichte machine chest press of row 1-2 sets.",
-      subRules: [
-        "Bovenbeen/heupklacht: geen tempo/interval en geen fast finish.",
-        "Long run langzamer als heup, bovenbeen, kuit of enkel zeurt.",
-        "Brachialis 6+/10: geen dips, geen pijnlijke rows, geen curls.",
-      ],
-    },
-    "fase-5": {
-      green: "Doe de tapertraining zoals uitgeschreven.",
-      orange:
-        "Maak alles korter: easy run 5-10 min korter, marathonpace-blokken halveren, gym alleen bovenlichaam/prehab, geen lower body belasting.",
-      red:
-        "Geen kwaliteitstraining. 15-25 min wandelen of easy jog, lichte mobiliteit, calf/tibialis licht en eventueel dead bug.",
-      subRules: [
-        "Voorzijde bovenbeenpijn: geen snelle blokken, geen fast finish, geen lower gym.",
-        "Marathonweek: geen nieuwe prikkels, geen spierpijn, geen testtraining.",
-        "Bij twijfel in taper: korter of rust.",
-      ],
-    },
-    "fase-6": {
-      green: "Je volgt de week zoals uitgeschreven.",
-      orange:
-        "Doe 2-3 gymtrainingen, geen zware lower body, runs maximaal 20-30 min easy, geen RDL, geen split squats als bovenbeen/heup gevoelig is.",
-      red:
-        "Wandelen, mobiliteit, lichte upper body, calf/tibialis heel licht. Geen hardlopen als benen/heupen/kuiten zeuren en geen zware gym.",
-      subRules: [
-        "Week 48 is herstel, geen trainingsweek.",
-        "Geen tempo's, intervals, lange duurloop of fast finish.",
-        "Heup, bovenbeen, kuit en enkel bepalen het tempo van opbouwen.",
-      ],
-    },
+    version: "2026.05.24.6",
   };
 
   const PHASES = [
@@ -95,6 +20,42 @@
       structure: "Upper/Lower A/B, runs na upper body.",
       rules:
         "500 meter roeien als warming-up. Meestal 1-3 reps in reserve. Brachialis/bicep links ontzien, heup/kuit/tibialis/enkel structureel aandacht.",
+      phaseDetails: {
+        runsPerWeek: "2",
+        gymPerWeek: "4",
+        primaryGoal: "Rustige start waarin kracht dominant blijft en hardlopen voorzichtig wordt toegevoegd.",
+        stats: ["1 easy run", "1 korte 3:30-tempo-intro", "nog geen aparte long run"],
+        sections: [
+          {
+            title: "Korte samenvatting",
+            text: "Fase 1 is de rustige start van de marathonvoorbereiding. Je traint nog niet als volledige marathonloper, maar als sterke sporter die zijn lichaam laat wennen aan twee vaste loopprikkels per week.",
+          },
+          {
+            title: "Waarom deze fase?",
+            text: "Deze fase bouwt loopbelasting op zonder krachttraining, spiermassa en herstel meteen te verstoren. Hardlopen wordt bekend, maar de totale belasting blijft beheersbaar.",
+          },
+          {
+            title: "Hardlopen",
+            text: "Easy runs zijn meestal 20-30 minuten rond 9,5 km/u. De tempo-intro's raken kort 11,5-12,0 km/u aan. Het doel is gewenning, niet testen.",
+          },
+          {
+            title: "Marathontempo",
+            text: "12 km/u wordt kort aangeraakt met blokken zoals 3 x 2 min, 4 x 2 min, 3 x 3 min en 4 x 3 min. Dit is gewenning, geen bewijs.",
+          },
+          {
+            title: "Krachttraining",
+            text: "Upper/lower A/B blijft de hoofdstructuur. Borst, rug, schouders, benen, billen, core, kuiten en tibialis krijgen veel aandacht.",
+          },
+          {
+            title: "Let op",
+            text: "Extra aandacht voor brachialis/bicep links, schouder, heup/voorzijde bovenbeen, linker enkel, kuiten en tibialis.",
+          },
+          {
+            title: "Mentale focus",
+            text: "Rustig beginnen. Niet bewijzen dat je 3:30 al aankan. Alleen consistent worden.",
+          },
+        ],
+      },
     },
     {
       phaseId: "fase-2",
@@ -107,6 +68,38 @@
       structure: "Upper + Easy, Lower, Upper + Marathonpace Intro, Easy Run + Mini Strength.",
       rules:
         "Kracht blijft serieus, maar de vierde sessie is compact. Geen PR-jacht; extra loopfrequentie rustig laten wennen.",
+      phaseDetails: {
+        runsPerWeek: "3",
+        gymPerWeek: "3 + mini-strength",
+        primaryGoal: "De overgang maken van kracht-dominant naar hybride marathonopbouw.",
+        stats: ["1 easy run", "1 marathonpace-intro", "1 extra easy run", "geen echte long-runfase"],
+        sections: [
+          {
+            title: "Korte samenvatting",
+            text: "Fase 2 voegt de derde run toe. Hardlopen wordt een vaste pijler van de week, terwijl krachttraining nog duidelijk aanwezig blijft.",
+          },
+          {
+            title: "Waarom deze fase?",
+            text: "De sprong van twee naar drie runs per week is belangrijk. Je krijgt meer loopfrequentie zonder meteen in een zware marathonfase te zitten.",
+          },
+          {
+            title: "Hardlopen",
+            text: "Easy runs worden ongeveer 30-35 minuten. De marathonpace-blokken worden iets langer dan in fase 1, maar blijven gecontroleerd.",
+          },
+          {
+            title: "Marathontempo",
+            text: "Je loopt bijvoorbeeld 4 x 3 min of 3 x 5 min rond 11,8-12,0 km/u. Het doel is langer vasthouden, niet forceren.",
+          },
+          {
+            title: "Krachttraining",
+            text: "Je gaat van vier volledige gymdagen naar drie gymdagen plus mini-strength. Dat geeft hardlopen meer ruimte terwijl kracht en spiermassa onderhouden blijven.",
+          },
+          {
+            title: "Mentale focus",
+            text: "Wennen aan meer loopfrequentie. Niet forceren. Deze fase moet je klaarzetten voor de echte hybride opbouw.",
+          },
+        ],
+      },
     },
     {
       phaseId: "fase-3",
@@ -119,6 +112,42 @@
       structure: "Run 1 Easy, Run 2 Marathonpace, Run 3 Long Run, Gym 1 Upper, Gym 2 Lower, Gym 3 Full Body.",
       rules:
         "Runs krijgen prioriteit. Lower strength liever niet vlak voor long run. Vanaf 75-90 min voeding en hydratatie oefenen.",
+      phaseDetails: {
+        runsPerWeek: "3",
+        gymPerWeek: "3",
+        primaryGoal: "De marathonmotor bouwen terwijl krachttraining serieus maar onderhoudender wordt.",
+        stats: ["Run 1 easy", "Run 2 3:30-marathonpace", "Run 3 long run", "long run richting ongeveer 2 uur"],
+        sections: [
+          {
+            title: "Korte samenvatting",
+            text: "Fase 3 is de eerste echte hybride fase. Hardlopen wordt een hoofdpijler naast krachttraining: drie runs en drie gymtrainingen per week.",
+          },
+          {
+            title: "Waarom deze fase?",
+            text: "Je lichaam moet wennen aan structurele kilometers, langere duurlopen en wekelijks marathontempo, terwijl je sterk blijft.",
+          },
+          {
+            title: "Hardlopen",
+            text: "Easy runs lopen op van ongeveer 35 naar 50 minuten. De marathonpace-run bouwt op van korte blokken naar langere stukken rond 11,8-12,0 km/u.",
+          },
+          {
+            title: "Marathontempo",
+            text: "Je traint 12 km/u wekelijks met voorbeelden zoals 3 × 4 min, 3 × 5 min, 2 × 8 min, 2 × 10 min en later 20 min + 8 min.",
+          },
+          {
+            title: "Lange duurloop",
+            text: "De long run is meestal rustig op 9,5-10,0 km/u. Het doel is duurvermogen, pezen/gewrichten, energiehuishouding en mentale gewenning.",
+          },
+          {
+            title: "Krachttraining",
+            text: "Krachttraining wordt onderhoudender. Geen PR-jacht, wel benen, billen, core, kuiten, tibialis en blessurepreventie blijven belangrijk.",
+          },
+          {
+            title: "Mentale focus",
+            text: "Leren dat hardlopen geen losse toevoeging meer is, maar een hoofdonderdeel van de week.",
+          },
+        ],
+      },
     },
     {
       phaseId: "fase-4",
@@ -127,10 +156,62 @@
       startDate: "2026-09-07",
       endDate: "2026-11-01",
       goal:
-        "4 hardloopmomenten per week, 12 km/u als marathontempo, 13 km/u als snelheidsreserve en long runs tot 30-32 km.",
-      structure: "4 runs leidend, 2 gymtrainingen aanbevolen, 3e gym optioneel bij groen herstel.",
+        "4 hardloopmomenten per week, 12 km/u als marathontempo, 13 km/u als snelheidsreserve en long runs tot 30–32 km.",
+      structure: "4 runs leidend, 2 gymtrainingen aanbevolen, 3e gym alleen als herstel goed is.",
       rules:
         "Gym is onderhoud. Geen PR's, geen spierpijn najagen. Week 40 is cutback, week 43 zwaarste long-run week.",
+      phaseDetails: {
+        runsPerWeek: "4",
+        gymPerWeek: "2-3",
+        primaryGoal: "Racespecifiek vertrouwen bouwen voor een 3:30 marathon.",
+        stats: ["easy run", "marathonpace/techniek", "tempo of strides", "long run", "3 echte MP-long-runs + 1 optioneel"],
+        sections: [
+          {
+            title: "Korte samenvatting",
+            text: "Fase 4 is de belangrijkste marathonspecifieke fase. Het schema is minder veilig en specifieker richting 3:30: niet alleen lange duurlopen, maar ook marathontempo op vermoeide benen.",
+          },
+          {
+            title: "Waarom deze fase?",
+            text: "Een marathon van 3:30 vraagt het vermogen om ongeveer 12 km/u lang vol te houden. Echte vertrouwenstraining ontstaat wanneer je dit tempo loopt nadat je al veel kilometers in de benen hebt.",
+          },
+          {
+            title: "Hardlopen",
+            text: "De long runs lopen op richting 30–32 km. Daarnaast komen marathonpace-blokken en snellere prikkels terug, maar zware long runs vervangen deels de midweekse belasting.",
+          },
+          {
+            title: "3:30-marathontempo",
+            text: "MP betekent hier 11,8-12,0 km/u. Exact 3:30 tempo is ongeveer 12,06 km/u; 12,0 km/u is de praktische trainingsreferentie.",
+          },
+          {
+            title: "Belangrijkste marathonpace-long-runs",
+            text: "Week 39: 24 km met 2 × 3 km MP. Week 41: 26 km met 6–8 km MP aan het einde. Week 42: 28 km met 10–12 km aaneengesloten MP. Week 44: optioneel 22–24 km met 6 km MP.",
+          },
+          {
+            title: "Waarom deze aanpassing?",
+            text: "De oorspronkelijke lange duurlopen waren vooral rustig. Dat is veilig, maar voor een 3:30-poging geeft het extra vertrouwen om een paar keer marathontempo op vermoeide benen te lopen.",
+          },
+          {
+            title: "Totaal marathontempo in long runs",
+            text: "Zonder optionele week 44: ongeveer 22-26 km MP, circa 1u50 tot 2u10 specifieke ervaring. Met week 44: ongeveer 28-32 km MP, circa 2u20 tot 2u40 specifieke ervaring.",
+          },
+          {
+            title: "Waarom niet elke long run hard?",
+            text: "Dat kost te veel herstel en verhoogt het blessurerisico. De kunst is genoeg specifieke prikkels krijgen zonder jezelf kapot te trainen.",
+          },
+          {
+            title: "Langste duurloop",
+            text: "Week 43 blijft 30–32 km rustig. Die training is voor afstand, mentale hardheid en voeding/hydratatie, niet voor snelheid.",
+          },
+          {
+            title: "Krachttraining",
+            text: "Krachttraining wordt ondersteunend. Geen zware beentraining vlak voor de belangrijkste long runs, geen PR-jacht, wel core, heupen, kuiten, tibialis en blessurepreventie.",
+          },
+          {
+            title: "Mentale focus",
+            text: "Vertrouwen opbouwen: niet alleen hopen dat 12 km/u lukt, maar ervaren dat je 12 km/u kunt lopen terwijl je benen al moe zijn.",
+          },
+        ],
+      },
     },
     {
       phaseId: "fase-5",
@@ -143,6 +224,42 @@
       structure: "Volume omlaag: korte runs, lichte gym, marathonweek simpel houden.",
       rules:
         "Geen nieuwe oefeningen, geen spierpijn, geen testtraining. Rust is productief.",
+      phaseDetails: {
+        runsPerWeek: "3-4, dalend",
+        gymPerWeek: "0-2 licht",
+        primaryGoal: "Vermoeidheid laten zakken en scherp blijven voor zondag 22 november 2026.",
+        stats: ["minder kilometers", "korte MP-prikkels", "lichte gym", "marathonweek fris"],
+        sections: [
+          {
+            title: "Korte samenvatting",
+            text: "Fase 5 is de taper. De trainingsomvang gaat omlaag, maar korte marathontempo-prikkels blijven aanwezig zodat je scherp blijft.",
+          },
+          {
+            title: "Waarom deze fase?",
+            text: "Je wordt niet fitter door in de laatste weken extra te forceren. Je wordt beter door de opgebouwde training te laten landen.",
+          },
+          {
+            title: "Hardlopen",
+            text: "Long runs worden korter. Intensiteit blijft kort aanwezig, maar het volume daalt duidelijk.",
+          },
+          {
+            title: "Marathontempo",
+            text: "Korte prikkels zoals 2 × 10 min, 2 × 6 min en in marathonweek alleen korte stukjes of strides.",
+          },
+          {
+            title: "Krachttraining",
+            text: "Alleen onderhoud. Geen zware benen, geen spierpijn najagen en geen nieuwe oefeningen.",
+          },
+          {
+            title: "Wedstrijddag",
+            text: "Niet te hard starten, eerste kilometers controleren, rond 12,0 km/u blijven en voeding/hydratatie uitvoeren zoals geoefend.",
+          },
+          {
+            title: "Mentale focus",
+            text: "Rustig blijven. Vertrouwen op de voorbereiding. Niet in paniek extra trainen.",
+          },
+        ],
+      },
     },
     {
       phaseId: "fase-6",
@@ -155,6 +272,38 @@
       structure: "Week 48 herstel, daarna lichte full body, rustige upper/lower en nieuwe basis.",
       rules:
         "Geen tempo's, intervals of lange duurlopen. Geen PR's in november/december. Opbouw wordt bepaald door heup, bovenbeen, kuit, enkel en brachialis.",
+      phaseDetails: {
+        runsPerWeek: "0-2 optioneel",
+        gymPerWeek: "1-4 oplopend",
+        primaryGoal: "Herstellen van de marathon en gecontroleerd terug naar krachttraining.",
+        stats: ["week 48 herstel", "geen tempo", "geen lange duurloop", "kracht rustig herstarten"],
+        sections: [
+          {
+            title: "Korte samenvatting",
+            text: "Fase 6 begint na de marathon. De focus ligt op herstel, rustig bewegen en daarna stap voor stap terug naar normale krachttraining.",
+          },
+          {
+            title: "Waarom deze fase?",
+            text: "Na een marathon heeft het lichaam tijd nodig voordat zware benen, tempo's en PR-jacht weer logisch zijn.",
+          },
+          {
+            title: "Hardlopen",
+            text: "Alleen korte rustige loopjes als benen, heupen, kuiten en enkel goed voelen. Geen tempo, intervals of lange duurloop.",
+          },
+          {
+            title: "Krachttraining",
+            text: "Eerst lichte full body en mobiliteit, daarna terug naar upper/lower. Onderlichaam bouwt langzamer op dan bovenlichaam.",
+          },
+          {
+            title: "Let op",
+            text: "Geen zware lower body als heup, bovenbeen, kuit of enkel nog reageren. Geen nieuwe prikkels om herstel te bewijzen.",
+          },
+          {
+            title: "Mentale focus",
+            text: "De marathon is achter de rug. Rustig opnieuw bouwen is winst, geen terugval.",
+          },
+        ],
+      },
     },
   ];
 
@@ -512,7 +661,6 @@
       warmup: options.warmup || "500 meter roeien waar dit een gymtraining is.",
       exercises: exercises || [],
       cardio: cardioBlock || null,
-      recovery: RECOVERY[options.phaseId],
       notes: options.notes || "",
       infoBlocks: options.infoBlocks || [],
     };
@@ -535,17 +683,22 @@
       return [infoBlock("Voeding/hydratatie", `${base} ${fastFinish[calendarWeek] || "Long run rustig houden."}`)];
     }
     if (phaseId === "fase-4") {
-      const fastFinish = {
-        39: "Optioneel: laatste 3 km naar 10,5-11,0 km/u.",
-        41: "Optioneel: laatste 4 km naar 10,8-11,2 km/u.",
-        42: "Optioneel: laatste 5 km naar 11,0-11,5 km/u; als je heel goed voelt laatste 1-2 km richting 11,8 km/u.",
-        43: "Geen verplichte fast finish; de afstand is zwaar genoeg.",
-        44: "Geen fast finish; fris blijven.",
+      const specifics = {
+        39: "Deze long run bevat 6 km rond MP: 2 blokken van 3 km op 11,8-12,0 km/u. Zie dit als controletraining, niet als wedstrijd.",
+        40: "Cutbackweek: geen marathontempo en geen fast finish. De winst zit in herstellen van week 39.",
+        41: "Progressieve finish: 6–8 km rond MP aan het einde. Bij twijfel steady houden in plaats van forceren.",
+        42: "Belangrijkste generale repetitie: 10–12 km rond MP binnen 28 km. Midweek is bewust lichter gemaakt.",
+        43: "Langste duurloop blijft rustig. Geen verplicht MP; afstand, voeding en mentale hardheid zijn het doel.",
+        44: "Optioneel 6 km MP alleen als week 42 en 43 goed verteerd zijn. Bij vermoeidheid volledig rustig.",
       };
       return [
         infoBlock(
           "Voeding/hydratatie",
-          `Bij runs langer dan 90 min en 20 km+: oefen water, sportdrank, gelletjes, koolhydraten en timing. Geen verrassingen op marathondag. ${fastFinish[calendarWeek] || "Long run grotendeels rustig houden."}`
+          `Bij runs langer dan 90 min en 20 km+: oefen water, sportdrank, gelletjes, koolhydraten en timing. Geen verrassingen op marathondag. ${specifics[calendarWeek] || "Long run grotendeels rustig houden."}`
+        ),
+        infoBlock(
+          "Waarom marathontempo in long runs?",
+          "Voor een 3:30-poging geeft het vertrouwen om 11,8-12,0 km/u ook op vermoeide benen te oefenen. Deze blokken vervangen deels midweekse zware marathonpace/intervalbelasting; ze komen er niet zomaar bovenop."
         ),
       ];
     }
@@ -685,10 +838,19 @@
   const F4_RUN2 = {
     37: cardio("3:30 Marathonpace Run", "10 min 9,5; 10 min 10,5; 5 min 9,5; 2 x 12 min 11,8-12,0; 5 min herstel; 5 min uitlopen", { outdoor: "2 lange blokken op 3:30-tempo-gevoel." }),
     38: cardio("3:30 Marathonpace Run", "10 min 9,5; 12 min 10,5-11,0; 5 min 9,5; 15 min 11,8-12,0; 5 min 9,5; 10 min 12,0; 5 min uitlopen", { outdoor: "Lang blok, herstel, daarna korter stevig blok." }),
-    39: cardio("3:30 Marathonpace Run", "10 min 9,5; 15 min 10,5-11,0; 5 min 9,5; 20 min 11,8-12,0; 5 min 9,5; 10 min 12,0-12,1; 5 min uitlopen", { outdoor: "Serieuze marathonpace-training, niet bewijzen." }),
+    39: cardio("Easy Run + korte strides", "45 min easy op 9,5-10,0 km/u; daarna 4 x 20 sec soepel versnellen; ruim herstel tussendoor", {
+      outdoor: "Rustig lopen, daarna 4 korte soepele versnellingen. Geen zware 12 km/u-blokken deze week.",
+      notes: "Doel: herstel, souplesse en techniek behouden zonder de week te zwaar te maken.",
+    }),
     40: cardio("3:30 Marathonpace Run", "10 min 9,5; 10 min 10,5; 5 min 9,5; 12 min 11,8-12,0; 5 min uitlopen", { outdoor: "Cutback: korter en gecontroleerd." }),
-    41: cardio("3:30 Marathonpace Run", "10 min 9,5; 15 min 10,8-11,0; 5 min 9,5; 25 min 11,8-12,0; 5 min 9,5; 10 min 12,0-12,1; 5 min uitlopen", { outdoor: "Langere blokken voor ritme, controle en vertrouwen." }),
-    42: cardio("3:30 Marathonpace Run", "10 min 9,5; 15 min 10,8-11,0; 5 min 9,5; 30 min 11,8-12,0; 5 min 9,5; 10 min 12,0; 5 min uitlopen", { outdoor: "Zware, belangrijke training; stevig maar niet slopend." }),
+    41: cardio("Korte 3:30-marathontempo Run", "10 min easy; 2 x 8 min op 11,8-12,0 km/u; 4 min rustig herstel; verder easy uitlopen", {
+      outdoor: "Maximaal 2 x 8 min op 3:30-marathontempo. Verder easy, geen extra intervalbelasting.",
+      notes: "Korter gehouden omdat de long run deze week al racespecifiek is.",
+    }),
+    42: cardio("Easy Run + korte techniekblokken", "40-45 min easy op 9,5-10,0 km/u; optioneel 4 x 20 sec soepel versnellen", {
+      outdoor: "Rustig en technisch. Geen extra lange marathonpace-run midweek.",
+      notes: "Doel: fris genoeg zijn voor de 28 km generale repetitie.",
+    }),
     43: cardio("3:30 Marathonpace Run", "10 min 9,5; 20 min 10,5-11,0; 5 min 9,5; 25 min 11,8-12,0; 5 min uitlopen", { outdoor: "Nog een sterke marathonpace-prikkel, gecontroleerd." }),
     44: cardio("3:30 Marathonpace Run", "10 min 9,5; 10 min 10,5; 5 min 9,5; 15 min 11,8-12,0; 5 min uitlopen", { outdoor: "Kort, scherp en gecontroleerd; fris blijven voor taper." }),
   };
@@ -699,7 +861,10 @@
     39: cardio("Tempo / Interval Run", "10 min 9,5; 4 x 4 min 12,8-13,0 km/u; 3 min herstel 9,5; 5 min uitlopen", { outdoor: "4 langere snelle blokken, technisch netjes." }),
     40: cardio("Tempo / Interval Run", "10 min 9,5; 3 x 3 min 12,8-13,0 km/u; 3 min herstel 9,5; 5 min uitlopen", { outdoor: "Cutback: kort en scherp, niet diep gaan." }),
     41: cardio("Tempo / Interval Run", "10 min 9,5; 5 x 4 min 12,8-13,0 km/u; 3 min herstel 9,5; 5 min uitlopen", { outdoor: "5 stevige blokken sneller dan marathontempo." }),
-    42: cardio("Tempo / Interval Run", "10 min 9,5; 3 x 6 min 12,5-12,8 km/u; 3 min herstel 9,5; 5 min uitlopen", { outdoor: "3 langere tempoblokken, drempelachtig werk." }),
+    42: cardio("Easy Run + strides", "35-45 min easy op 9,5-10,0 km/u; 4 x 20 sec soepel versnellen; ruim herstel", {
+      outdoor: "Geen zware intervaltraining deze week. Alleen souplesse en ritme.",
+      notes: "Deze prikkel vervangt de zware kwaliteitstraining zodat de long run de hoofdtraining blijft.",
+    }),
     43: cardio("Tempo / Interval Run", "10 min 9,5; 6 x 3 min 13,0-13,5 km/u; 2-3 min herstel 9,5; 5 min uitlopen", { outdoor: "6 korte snelle blokken, zwaar en scherp, geen sprint." }),
     44: cardio("Tempo / Interval Run", "10 min 9,5; 4 x 3 min 12,8-13,0 km/u; 3 min herstel 9,5; 5 min uitlopen", { outdoor: "Laatste lichte kwaliteitstraining voor taper.", notes: "Bij bovenbeen/heupzeur: vervangen door 30-45 min steady op 10,5-11,0 km/u." }),
   };
@@ -707,12 +872,30 @@
   const F4_RUN4 = {
     37: cardio("Long Run", "20 km op 9,5-10,0 km/u", { outdoor: "Lange rustige duurloop." }),
     38: cardio("Long Run", "22 km op 9,5-10,0 km/u", { outdoor: "Lang en comfortabel." }),
-    39: cardio("Long Run", "24 km op 9,5-10,0 km/u", { outdoor: "Rustig, gecontroleerd.", notes: "Optioneel fast finish: laatste 3 km naar 10,5-11,0 km/u." }),
-    40: cardio("Long Run", "18-20 km op 9,5 km/u", { outdoor: "Cutback long run." }),
-    41: cardio("Long Run", "26 km op 9,5-10,0 km/u", { outdoor: "Lange rustige duurloop.", notes: "Optioneel fast finish: laatste 4 km naar 10,8-11,2 km/u." }),
-    42: cardio("Long Run", "28 km op 9,5-10,0 km/u", { outdoor: "Lang, beheerst, mentaal sterk.", notes: "Optioneel fast finish: laatste 5 km naar 11,0-11,5 km/u; als je heel goed voelt laatste 1-2 km richting 11,8 km/u." }),
-    43: cardio("Long Run", "30-32 km op 9,5-10,0 km/u", { outdoor: "Langste duurloop.", notes: "Geen verplichte fast finish; afstand is zwaar genoeg." }),
-    44: cardio("Long Run", "22-24 km op 9,5 km/u", { outdoor: "Korter, fris blijven.", notes: "Geen fast finish." }),
+    39: cardio("Long Run 24 km met 2 × 3 km marathontempo", "10 km rustig op 9,5-10,0; 3 km op 11,8-12,0; 1 km rustig herstel; 3 km op 11,8-12,0; 7 km rustig uitlopen", {
+      outdoor: "24 km totaal met 6 km rond 3:30-marathontempo. Eerste echte marathonpace-long-run.",
+      notes: "Doel: leren dat MP controleerbaar blijft nadat je al een tijdje onderweg bent.",
+    }),
+    40: cardio("Long Run 18-20 km rustig", "18-20 km rustig op 9,5 km/u of ontspannen buitenvariant", {
+      outdoor: "Cutbackweek: volledig rustig, geen marathontempo en geen fast finish.",
+      notes: "Niet compenseren, niet harder maken. Belasting van week 39 verwerken.",
+    }),
+    41: cardio("Long Run 26 km met progressieve finish richting marathontempo", "Standaard: 18 km rustig; 2 km steady op 10,8-11,2; 6 km op 11,8-12,0. Sterker: 16 km rustig; 2 km steady; 8 km op 11,8-12,0", {
+      outdoor: "26 km totaal met 6–8 km rond 3:30-marathontempo aan het einde.",
+      notes: "Als je lichaam niet goed voelt, maak je het progressieve deel steady in plaats van marathontempo.",
+    }),
+    42: cardio("Long Run 28 km met 10–12 km marathontempo", "Standaard: 12 km rustig; 4 km steady op 10,8-11,2; 10 km op 11,8-12,0; 2 km uitlopen. Agressiever: 10 km rustig; 4 km steady; 12 km MP; 2 km uitlopen", {
+      outdoor: "Belangrijkste generale repetitie: 28 km totaal met 10–12 km rond 3:30-marathontempo.",
+      notes: "Geen volledige marathontest, wel een stevige vertrouwenstraining.",
+    }),
+    43: cardio("Long Run 30–32 km rustig", "30–32 km rustig op 9,5-10,0 km/u", {
+      outdoor: "Langste duurloop, geen verplicht marathontempo en geen verplichte fast finish.",
+      notes: "Belasting zit in de afstand: duurvermogen, mentale hardheid, voeding en hydratatie oefenen.",
+    }),
+    44: cardio("Long Run 22–24 km met optioneel 6 km marathontempo", "Standaard: 22–24 km rustig op 9,5-10,0. Optie bij goed herstel: 12–14 km rustig; 6 km op 11,8-12,0; resterend rustig uitlopen", {
+      outdoor: "Geen testweek. Alleen marathontempo toevoegen als week 42 en 43 goed verteerd zijn.",
+      notes: "Bij vermoeidheid volledig rustig houden.",
+    }),
   };
 
   const upperA = () => [
@@ -1047,6 +1230,25 @@
   function f4Sessions(calendarWeek) {
     const phaseId = "fase-4";
     const isA = [37, 39, 41, 43].includes(calendarWeek);
+    const run2 = F4_RUN2[calendarWeek];
+    const run3 = F4_RUN3[calendarWeek];
+    const longRun = F4_RUN4[calendarWeek];
+    const run2Goal = [39, 42].includes(calendarWeek)
+      ? "Herstel, souplesse en techniek bewaren zonder extra zware marathonpace-belasting."
+      : calendarWeek === 41
+        ? "Kort marathontempo vasthouden, maar de week niet stapelen."
+        : "12 km/u steeds normaler laten voelen.";
+    const run3Goal = calendarWeek === 42
+      ? "Fris blijven voor de belangrijkste generale repetitie."
+      : "Snelheidsreserve bouwen boven marathontempo.";
+    const lowerNote = calendarWeek === 42
+      ? "Week 42: onderhoudend houden. Geen zware benen maken voor de 28 km generale repetitie."
+      : isA && calendarWeek === 43
+        ? "Week 43: houd lower body kort/licht als je 30–32 km loopt."
+        : "Niet vlak voor de long run plannen.";
+    const fullBodyNote = calendarWeek === 42
+      ? "Optioneel en licht houden. De 28 km long run is deze week de hoofdtraining."
+      : "3e gym is optioneel als herstel goed is. Houd hem compact zodat tempo en long run goed blijven.";
     return [
       session(1, isA ? "Gym 1 — Upper Maintenance A" : "Gym 1 — Upper Maintenance B", "kracht", isA ? upperA() : [
         exercise("Shoulder Press Machine", "2-3×8-12"),
@@ -1058,8 +1260,8 @@
         exercise("Brachialis Rehab — Hammer Curl Isometric Hold", "2×20-30 sec/arm"),
       ], null, { phaseId, goal: "Onderhoud voor borst, rug en schouders." }),
       session(2, "Run 1 — Easy Run", "run", [], F4_RUN1[calendarWeek], { phaseId, goal: "Rustige kilometers, herstel en aerobe basis." }),
-      session(3, isA ? "Gym 2 — Lower Runner Strength A" : "Gym 2 — Lower Runner Strength B", "kracht", isA ? peakLowerA() : peakLowerB(), null, { phaseId, notes: isA && calendarWeek === 43 ? "Week 43: liever oranje variant als je 30-32 km loopt." : "Niet vlak voor de long run plannen." }),
-      session(4, "Run 2 — 3:30 Marathonpace Run", "run", [], F4_RUN2[calendarWeek], { phaseId, goal: "12 km/u steeds normaler laten voelen." }),
+      session(3, isA ? "Gym 2 — Lower Runner Strength A" : "Gym 2 — Lower Runner Strength B", "kracht", isA ? peakLowerA() : peakLowerB(), null, { phaseId, notes: lowerNote }),
+      session(4, `Run 2 — ${run2.title}`, "run", [], run2, { phaseId, goal: run2Goal }),
       session(5, isA ? "Gym 3 — Full Body + Core A" : "Gym 3 — Full Body + Core B", "kracht", isA ? fullBodyA() : [
         exercise("Machine Chest Press", "2×8-12"),
         exercise("Chest-Supported Row Machine", "2×8-12"),
@@ -1069,9 +1271,9 @@
         exercise("Landmine Rotation", "2×8-10/kant"),
         exercise("Side Plank", "2×30-45 sec/kant"),
         exercise("Tibialis Raise", "2×15-25"),
-      ], null, { phaseId, notes: "3e gym is optioneel bij groen herstel. Houd hem compact zodat tempo en long run goed blijven." }),
-      session(6, "Run 3 — Tempo / Interval Run", "run", [], F4_RUN3[calendarWeek], { phaseId, goal: "Snelheidsreserve bouwen boven marathontempo." }),
-      session(7, "Run 4 — Long Run", "long-run", [], F4_RUN4[calendarWeek], {
+      ], null, { phaseId, notes: fullBodyNote }),
+      session(6, `Run 3 — ${run3.title}`, "run", [], run3, { phaseId, goal: run3Goal }),
+      session(7, `Run 4 — ${longRun.title}`, "long-run", [], longRun, {
         phaseId,
         goal: "Marathonmotor, peesbelasting en energiehuishouding.",
         infoBlocks: longRunInfo(phaseId, calendarWeek),
@@ -1116,7 +1318,7 @@
       session(1, "Run 1 — Easy Run + korte prikkel", "run", [], cardio("Easy Run + korte prikkel", "25-30 min op 9,5 km/u; 3 x 1 min op 11,8-12,0; 2 min 9,5 tussen blokken; rustig uitlopen", { outdoor: "Rustig lopen met 3 korte stukjes op marathontempo-gevoel." }), { phaseId }),
       session(2, "Optionele Activatiegym", "kracht", activationGym(), null, { phaseId, warmup: "5-10 min rustig bewegen of 500 meter roeien.", notes: "Logisch vroeg in marathonweek of vóór de shake-out/marathon. Niet doen als je moe, druk of gespannen bent. Geen dips, zware leg press, RDL of split squats." }),
       session(3, "Run 2 — Shake-out Run", "run", [], cardio("Shake-out Run", "15-20 min op 9,5 km/u; eventueel 3 x 20 sec rond 11,8-12,5 met veel rust", { outdoor: "15-20 min heel rustig, eventueel 3 korte versnellingen.", notes: "Bij voorkeur 1-3 dagen voor de marathon." }), { phaseId }),
-      session(4, "Run 3 — Marathon", "marathon", [], cardio("Marathon", "Zondag 22 november 2026. A-doel richting 3:30, B-doel sterk finishen rond 3:45.", { outdoor: "Start gecontroleerd, ritme vasthouden, voeding/drinken volgens plan. Na 30-32 km pas denken aan vasthouden of voorzichtig versnellen." }), { phaseId, goal: "Fris aan de start en gecontroleerd lopen." }),
+      session(4, "Run 3 — Marathon", "marathon", [], cardio("Marathon", "Zondag 22 november 2026. A-doel richting 3:30, B-doel sterk finishen rond 3:45.", { outdoor: "Start gecontroleerd, ritme vasthouden, voeding/drinken volgens plan. Na 30–32 km pas denken aan vasthouden of voorzichtig versnellen." }), { phaseId, goal: "Fris aan de start en gecontroleerd lopen." }),
     ];
   }
 
@@ -1301,7 +1503,6 @@
 
   const TRAINING_PLAN = PHASES.map((phase) => ({
     ...phase,
-    recovery: RECOVERY[phase.phaseId],
     weeks: WEEKS.filter((week) => week.phaseId === phase.phaseId),
   }));
 

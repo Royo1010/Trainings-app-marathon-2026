@@ -279,21 +279,6 @@ button:disabled {
   font-size: 12px;
 }
 
-.recovery-box {
-  padding: 8px;
-  margin-bottom: 8px;
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  background: var(--panel-3);
-}
-
-.segmented {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 6px;
-}
-
-.segmented button,
 .primary-button,
 .secondary-button,
 .danger-button,
@@ -304,32 +289,6 @@ button:disabled {
   color: var(--text);
   background: var(--panel-2);
   cursor: pointer;
-}
-
-.segmented button:disabled {
-  cursor: default;
-}
-
-.segmented button.is-selected[data-recovery="green"] {
-  border-color: var(--green);
-  background: rgba(34, 197, 94, 0.18);
-}
-
-.segmented button.is-selected[data-recovery="orange"] {
-  border-color: var(--amber);
-  background: rgba(245, 158, 11, 0.18);
-}
-
-.segmented button.is-selected[data-recovery="red"] {
-  border-color: var(--red);
-  background: rgba(239, 68, 68, 0.18);
-}
-
-.recovery-message {
-  margin: 6px 0 0;
-  color: var(--muted);
-  font-size: 12px;
-  line-height: 1.3;
 }
 
 .exercise-list,
@@ -617,6 +576,34 @@ summary {
 .phase-card,
 .stat-card {
   padding: 10px;
+}
+
+.phase-meta {
+  margin-top: 8px;
+}
+
+.phase-details {
+  margin-top: 10px;
+}
+
+.phase-detail-block {
+  padding: 8px 0;
+  border-top: 1px solid rgba(51, 65, 85, 0.55);
+}
+
+.phase-detail-block:first-child {
+  border-top: 0;
+}
+
+.phase-detail-block h4 {
+  margin: 0 0 5px;
+  color: var(--text);
+  font-size: 13px;
+  line-height: 1.25;
+}
+
+.phase-detail-block p {
+  margin: 0;
 }
 
 .phase-card h3,

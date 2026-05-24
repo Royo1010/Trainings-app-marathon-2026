@@ -74,7 +74,6 @@
     return {
       strength: Array.isArray(raw?.strength) ? raw.strength : [],
       cardio: Array.isArray(raw?.cardio) ? raw.cardio : [],
-      recovery: Array.isArray(raw?.recovery) ? raw.recovery : [],
     };
   }
 
@@ -94,15 +93,6 @@
 
   function saveCompleted(items) {
     safeWrite(STORAGE.completed, Array.isArray(items) ? items : []);
-  }
-
-  function getPreferences() {
-    const raw = safeRead(STORAGE.preferences, {});
-    return raw && typeof raw === "object" ? raw : {};
-  }
-
-  function savePreferences(preferences) {
-    safeWrite(STORAGE.preferences, preferences);
   }
 
   function currentWeekIndex(date = today()) {
@@ -216,11 +206,6 @@
     return [...logs.cardio].reverse().find((entry) => entry.sessionKey === key) || null;
   }
 
-  function recoveryChoice(key) {
-    const prefs = getPreferences();
-    return prefs.recovery?.[key] || "green";
-  }
-
   function score(entry) {
     if (Number(entry.selectedWeight) > 0 && Number(entry.selectedReps) > 0) {
       return Number(entry.selectedWeight) * (1 + Number(entry.selectedReps) / 30);
@@ -249,15 +234,6 @@
   function formatNumber(value) {
     const number = Number(value);
     return Number.isInteger(number) ? String(number) : String(number).replace(".", ",");
-  }
-
-  function shortRecoveryText(recovery, choice) {
-    const map = {
-      green: "Volledige training.",
-      orange: "Lichter/korter.",
-      red: "Herstelvariant.",
-    };
-    return map[choice] || recovery?.[choice] || "";
   }
 
   function isRunFirstSession(session) {
@@ -372,8 +348,6 @@
   function renderSessionScreen(week, active, mode) {
     const phase = getPhase(week.phaseId);
     const key = sessionKey(week, active);
-    const recovery = mode === "today" ? recoveryChoice(key) : "green";
-    const recoveryText = shortRecoveryText(active.recovery, recovery);
     const isPreview = mode === "preview";
     return `
       ${isPreview ? `<button class="secondary-button back-button" type="button" data-back-week>Terug naar weekoverzicht</button>` : ""}
@@ -388,15 +362,6 @@
         </div>
       </section>
 
-      <section class="recovery-box">
-        <div class="segmented" aria-label="Herstelkeuze">
-          <button type="button" ${isPreview ? "disabled" : 'data-recovery="green"'} class="${recovery === "green" ? "is-selected" : ""}">Groen</button>
-          <button type="button" ${isPreview ? "disabled" : 'data-recovery="orange"'} class="${recovery === "orange" ? "is-selected" : ""}">Oranje</button>
-          <button type="button" ${isPreview ? "disabled" : 'data-recovery="red"'} class="${recovery === "red" ? "is-selected" : ""}">Rood</button>
-        </div>
-        <p class="recovery-message">${recoveryText}</p>
-      </section>
-
       ${renderSessionBlocks(active, key, week, mode)}
       ${renderInfoBlocks(active.infoBlocks)}
 
@@ -407,7 +372,6 @@
           <p><strong>Warming-up:</strong> ${active.warmup || "Volgens schema."}</p>
           ${active.notes ? `<p><strong>Notitie:</strong> ${active.notes}</p>` : ""}
           <p><strong>Faseregel:</strong> ${phase.rules}</p>
-          ${renderRecoveryDetails(active.recovery)}
         </div>
       </details>
     `;
@@ -426,21 +390,6 @@
         </details>`
       )
       .join("");
-  }
-
-  function renderRecoveryDetails(recovery) {
-    if (!recovery) return "";
-    const subRules = Array.isArray(recovery.subRules) ? recovery.subRules : [];
-    return `
-      <p><strong>Groen:</strong> ${recovery.green}</p>
-      <p><strong>Oranje:</strong> ${recovery.orange}</p>
-      <p><strong>Rood:</strong> ${recovery.red}</p>
-      ${
-        subRules.length
-          ? `<p><strong>Subregels:</strong></p><ul class="compact-list">${subRules.map((rule) => `<li>${rule}</li>`).join("")}</ul>`
-          : ""
-      }
-    `;
   }
 
   function renderExercise(exercise, key, week, active, mode = "today") {
@@ -569,19 +518,47 @@
           <article class="phase-card">
             <h3>${phase.phaseName}</h3>
             <p class="status-line">${phase.weekRange} · ${formatDate(phase.startDate)} - ${formatDate(phase.endDate)}</p>
-            <p class="goal">${phase.goal}</p>
-            <details>
-              <summary>Structuur en regels</summary>
+            <div class="compact-meta phase-meta">
+              <span class="chip">Runs: ${phase.phaseDetails?.runsPerWeek || "-"}</span>
+              <span class="chip">Gym: ${phase.phaseDetails?.gymPerWeek || "-"}</span>
+            </div>
+            <p class="goal"><strong>Doel:</strong> ${phase.phaseDetails?.primaryGoal || phase.goal}</p>
+            <details class="phase-details">
+              <summary>Lees faseplan</summary>
               <div class="details-body">
-                <p><strong>Structuur:</strong> ${phase.structure}</p>
-                <p><strong>Regels:</strong> ${phase.rules}</p>
-                ${renderRecoveryDetails(phase.recovery)}
+                ${renderPhaseDetails(phase)}
               </div>
             </details>
           </article>`
           )
           .join("")}
       </section>
+    `;
+  }
+
+  function renderPhaseDetails(phase) {
+    const details = phase.phaseDetails || {};
+    const stats = Array.isArray(details.stats) ? details.stats : [];
+    const sections = Array.isArray(details.sections) ? details.sections : [];
+    return `
+      <div class="phase-detail-block">
+        <h4>Structuur</h4>
+        <p>${phase.structure}</p>
+        ${stats.length ? `<ul class="compact-list">${stats.map((item) => `<li>${item}</li>`).join("")}</ul>` : ""}
+      </div>
+      ${sections
+        .map(
+          (section) => `
+          <div class="phase-detail-block">
+            <h4>${section.title}</h4>
+            <p>${section.text}</p>
+          </div>`
+        )
+        .join("")}
+      <div class="phase-detail-block">
+        <h4>Belangrijkste aandachtspunt</h4>
+        <p>${phase.rules}</p>
+      </div>
     `;
   }
 
@@ -741,18 +718,6 @@
     saveLogs(logs);
   }
 
-  function setRecovery(value) {
-    const week = getWeekByIndex(currentWeekIndex());
-    const active = activeSessionForWeek(week);
-    if (!active) return;
-    const key = sessionKey(week, active);
-    const prefs = getPreferences();
-    prefs.recovery = prefs.recovery || {};
-    prefs.recovery[key] = value;
-    savePreferences(prefs);
-    render();
-  }
-
   function openMenu() {
     if (!menuOverlay) return;
     menuOverlay.hidden = false;
@@ -812,11 +777,6 @@
     if (target.closest("[data-back-week]")) {
       state.view = "week";
       render();
-      return;
-    }
-    const recoveryButton = target.closest("[data-recovery]");
-    if (recoveryButton) {
-      setRecovery(recoveryButton.dataset.recovery);
       return;
     }
     const feeling = target.closest("[data-feeling]");
