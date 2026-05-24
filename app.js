@@ -10,6 +10,7 @@
 
   const app = document.getElementById("app");
   const todayPill = document.getElementById("today-pill");
+  const brandHome = document.getElementById("brand-home");
   const menuToggle = document.getElementById("menu-toggle");
   const menuClose = document.getElementById("menu-close");
   const menuOverlay = document.getElementById("menu-overlay");
@@ -27,6 +28,8 @@
     preview: null,
     selectedDateIso: null,
     selectedSessionKey: null,
+    selectedExerciseId: null,
+    selectedExerciseName: "",
     runBuildTab: "overview",
   };
 
@@ -277,12 +280,26 @@
     state.selectedDateIso = toIsoDate(today());
   }
 
+  function goHomeToday() {
+    state.view = "today";
+    state.preview = null;
+    state.selectedExerciseId = null;
+    state.selectedExerciseName = "";
+    state.viewedWeekIndex = currentWeekIndex();
+    resetTodaySelection();
+    closeMenu();
+    closeCountdown();
+    render();
+  }
+
   function selectedDateLabel(dateIso) {
     const realTodayIso = toIsoDate(today());
     const diff = dayDiff(realTodayIso, dateIso);
     if (diff === 0) return "Vandaag";
     if (diff === 1) return "Morgen";
+    if (diff === 2) return "Overmorgen";
     if (diff === -1) return "Gisteren";
+    if (diff === -2) return "Eergisteren";
     return capitalize(formatShortDate(dateIso));
   }
 
@@ -409,6 +426,91 @@
     if (text.includes("strides")) return "Easy · strides";
     if (text.includes("marathonpace") || text.includes("11,8") || text.includes("12,0")) return "Blokken rond 11,8–12,0 km/u";
     return instruction;
+  }
+
+  function sessionSummary(session) {
+    const strengthCount = session.exercises.length;
+    const runCount = session.cardio ? 1 : 0;
+    const parts = [];
+    if (strengthCount) parts.push(`${strengthCount} ${strengthCount === 1 ? "krachtoefening" : "krachtoefeningen"}`);
+    if (runCount) parts.push("1 run");
+    if (!parts.length) parts.push(`${Math.max(1, strengthCount + runCount)} onderdeel`);
+    return `${parts.join(" + ")} · geschatte tijd ${estimatedSessionDuration(session)}`;
+  }
+
+  function estimatedSessionDuration(session) {
+    if (session.estimatedDuration) return session.estimatedDuration;
+    const text = `${session.title} ${session.cardio?.title || ""} ${session.cardio?.instruction || ""}`.toLowerCase();
+    const exerciseCount = session.exercises.length;
+    const hasRun = Boolean(session.cardio);
+
+    if (session.type === "marathon") return "3:30–3:45 uur";
+    if (session.type === "long-run" && session.cardio) return estimateLongRunDuration(session.cardio);
+    if (hasRun && !exerciseCount) return estimateRunOnlyDuration(session);
+    if (!hasRun) return estimateStrengthDuration(session);
+
+    if (text.includes("easy run + mini strength")) return "55–65 min";
+    if (text.includes("marathonpace") || text.includes("3:30") || text.includes("tempo")) return "70–80 min";
+    if (text.includes("easy")) return "70–75 min";
+    return "65–80 min";
+  }
+
+  function estimateStrengthDuration(session) {
+    const count = session.exercises.length;
+    const text = session.title.toLowerCase();
+    if (text.includes("activatie")) return "15–25 min";
+    if (text.includes("light") || text.includes("maintenance")) return count >= 6 ? "45–60 min" : "30–45 min";
+    if (count >= 7) return "60–70 min";
+    if (count >= 5) return "50–60 min";
+    return "30–45 min";
+  }
+
+  function estimateRunOnlyDuration(session) {
+    const text = `${session.title} ${session.cardio?.title || ""} ${session.cardio?.instruction || ""}`.toLowerCase();
+    const minutes = minuteRangeFromText(session.cardio?.instruction || "");
+    if (text.includes("shake-out")) return minutes || "15–20 min";
+    if (text.includes("strides") && minutes) return minutes;
+    if (text.includes("marathonpace") || text.includes("3:30") || text.includes("interval") || text.includes("tempo")) return "45–60 min";
+    return minutes || "35–50 min";
+  }
+
+  function estimateLongRunDuration(cardioBlock) {
+    const source = `${cardioBlock.title} ${cardioBlock.instruction}`;
+    const km = source.match(/(?:^|[^\d,])(\d+(?:[–-]\d+)?)\s*km(?!\/u)/i);
+    if (!km) return minuteRangeFromText(source) || "90–120 min";
+    const [minKm, maxKm] = parseRange(km[1]);
+    const minMinutes = Math.round((minKm / 12) * 60);
+    const maxMinutes = Math.round((maxKm / 10) * 60);
+    return formatDurationRange(minMinutes, maxMinutes);
+  }
+
+  function minuteRangeFromText(value) {
+    const text = String(value || "");
+    const range = text.match(/(\d+)\s*[–-]\s*(\d+)\s*min/i);
+    if (range) return `${range[1]}–${range[2]} min`;
+    const exact = text.match(/(\d+)\s*min/i);
+    if (!exact) return "";
+    const min = Number(exact[1]);
+    const max = min <= 30 ? min : min + 5;
+    return `${min}${max === min ? "" : `–${max}`} min`;
+  }
+
+  function parseRange(value) {
+    const normalized = String(value).replace("–", "-");
+    const [first, second] = normalized.split("-").map(Number);
+    return [first, Number.isFinite(second) ? second : first];
+  }
+
+  function formatDurationRange(minMinutes, maxMinutes) {
+    const roundedMin = Math.max(5, Math.round(minMinutes / 5) * 5);
+    const roundedMax = Math.max(roundedMin, Math.round(maxMinutes / 5) * 5);
+    if (roundedMax < 100) return `${roundedMin}–${roundedMax} min`;
+    const toHour = (minutes) => {
+      const hours = Math.floor(minutes / 60);
+      const mins = minutes % 60;
+      return `${hours}:${String(mins).padStart(2, "0")}`;
+    };
+    return `${toHour(roundedMin)}–${toHour(roundedMax)} uur`;
   }
 
   function runKind(session, cardioBlock) {
@@ -635,7 +737,7 @@
       <section class="hero-card">
         <p class="status-line">${phase.phaseName} · Week ${week.calendarWeek} · Sessie ${active.sessionNumber}/${week.sessions.length}</p>
         <h2 class="training-title">${active.title}</h2>
-        ${active.goal ? `<p class="goal">${active.goal}</p>` : ""}
+        <p class="session-summary">${sessionSummary(active)}</p>
         <div class="compact-meta">
           <span class="chip active">${week.label}</span>
           <span class="chip">${formatDate(week.startDate)} - ${formatDate(week.endDate)}</span>
@@ -666,11 +768,10 @@
       <section class="today-jump" aria-label="Vandaag navigatie">
         <div class="today-jump-row">
           <button type="button" data-today-prev aria-label="Vorige geplande training">‹</button>
-          <button type="button" data-today-reset class="today-center">${selectedDateLabel(dateIso)}</button>
+          <button type="button" data-today-reset class="today-center" aria-label="Terug naar vandaag">${selectedDateLabel(dateIso)}</button>
           <button type="button" data-today-next aria-label="Volgende geplande training">›</button>
         </div>
-        <p class="status-line">${week.label} · ${phaseLabel} · ${sessionNavLabel(week, session)}</p>
-        <p class="muted small">${marathonCountdownText(dateIso)}</p>
+        <p class="today-meta">${week.label} · ${phaseLabel} · ${sessionNavLabel(week, session)}</p>
       </section>
     `;
   }
@@ -804,6 +905,7 @@
             <p><strong>Regel:</strong> ${exercise.warning}</p>
             ${alternatives.length ? `<p><strong>Alternatieven:</strong> ${alternatives.join(", ")}</p>` : ""}
             <p>${exercise.info}</p>
+            <button class="inline-link-button" type="button" data-open-exercise-stats="${escapeAttr(exercise.id)}" data-exercise-name="${escapeAttr(exercise.name)}">Bekijk statistieken →</button>
           </div>
         </details>
       </article>
@@ -1371,6 +1473,11 @@
       byExercise.get(entry.exerciseId).push(entry);
     });
 
+    if (state.selectedExerciseId) {
+      renderExerciseStatsDetail(state.selectedExerciseId, byExercise, state.selectedExerciseName);
+      return;
+    }
+
     app.innerHTML = `
       <section class="stat-grid">
         <div class="metric"><strong>${completed.length}</strong><span class="muted">Afgeronde trainingen</span></div>
@@ -1409,8 +1516,72 @@
             ? `<canvas class="sparkline" width="320" height="42" data-sparkline="${index}" data-exercise-id="${exerciseId}"></canvas>`
             : `<p class="muted small">Nog te weinig data voor grafiek.</p>`
         }
+        <button class="inline-link-button" type="button" data-open-exercise-stats="${escapeAttr(exerciseId)}" data-exercise-name="${escapeAttr(last.exerciseName)}">Details bekijken →</button>
       </article>
     `;
+  }
+
+  function renderExerciseStatsDetail(exerciseId, byExercise, fallbackName = "") {
+    const entries = (byExercise.get(exerciseId) || []).slice().sort((a, b) => (a.date || "").localeCompare(b.date || ""));
+    const definition = findExerciseDefinition(exerciseId);
+    const name = fallbackName || entries[entries.length - 1]?.exerciseName || definition?.name || exerciseId;
+    if (!entries.length) {
+      app.innerHTML = `
+        <button class="secondary-button back-button" type="button" data-stats-overview>Terug naar statistieken</button>
+        <section class="stat-card exercise-detail">
+          <h3>${name}</h3>
+          <p class="muted">Nog geen data voor deze oefening.</p>
+          ${definition ? `<p class="muted small">${definition.planned ? `Gepland in schema: ${plannedLabel(definition)}` : ""}</p>` : ""}
+        </section>
+      `;
+      return;
+    }
+
+    const best = entries.reduce((bestEntry, entry) => (score(entry) > score(bestEntry) ? entry : bestEntry), entries[0]);
+    const last = entries[entries.length - 1];
+    const previous = entries[entries.length - 2];
+    const diff = previous ? score(last) - score(previous) : 0;
+    const trend = entries.length < 2 ? "gelijk" : diff > 0.2 ? "omhoog" : diff < -0.2 ? "omlaag" : "gelijk";
+    const detailMap = new Map([[exerciseId, entries]]);
+    app.innerHTML = `
+      <button class="secondary-button back-button" type="button" data-stats-overview>Terug naar statistieken</button>
+      <section class="stat-card exercise-detail">
+        <h3>${name}</h3>
+        <p class="status-line">Beste: ${resultText(best)} · Laatste: ${resultText(last)} · Trend: ${trend}</p>
+        ${
+          entries.length >= 2
+            ? `<canvas class="sparkline" width="320" height="52" data-sparkline="detail" data-exercise-id="${exerciseId}"></canvas>`
+            : `<p class="muted small">Nog te weinig data voor grafiek.</p>`
+        }
+      </section>
+      <section class="stat-card exercise-detail">
+        <h3>Historie</h3>
+        <div class="history-list">
+          ${entries
+            .slice()
+            .reverse()
+            .map(
+              (entry) => `
+              <div class="history-row">
+                <span>${formatDate(entry.date || toIsoDate(today()))} · Week ${entry.week}</span>
+                <strong>${resultText(entry)}</strong>
+              </div>`
+            )
+            .join("")}
+        </div>
+      </section>
+    `;
+    window.requestAnimationFrame(() => drawSparklines(detailMap));
+  }
+
+  function findExerciseDefinition(exerciseId) {
+    for (const week of weeks) {
+      for (const session of week.sessions) {
+        const found = session.exercises.find((exercise) => exercise.id === exerciseId);
+        if (found) return found;
+      }
+    }
+    return null;
   }
 
   function drawSparklines(byExercise) {
@@ -1560,6 +1731,11 @@
   document.addEventListener("click", (event) => {
     const target = event.target;
 
+    if (target.closest("#brand-home")) {
+      goHomeToday();
+      return;
+    }
+
     if (target.closest("#menu-toggle")) {
       openMenu();
       return;
@@ -1584,6 +1760,8 @@
     if (navButton) {
       state.view = navButton.dataset.view;
       state.preview = null;
+      state.selectedExerciseId = null;
+      state.selectedExerciseName = "";
       if (state.view === "today") resetTodaySelection();
       if (state.view === "week") state.viewedWeekIndex = currentWeekIndex();
       closeMenu();
@@ -1609,6 +1787,23 @@
     if (target.closest("[data-today-reset]")) {
       resetTodaySelection();
       renderToday();
+      return;
+    }
+    const exerciseStatsButton = target.closest("[data-open-exercise-stats]");
+    if (exerciseStatsButton) {
+      state.view = "stats";
+      state.preview = null;
+      state.selectedExerciseId = exerciseStatsButton.dataset.openExerciseStats;
+      state.selectedExerciseName = exerciseStatsButton.dataset.exerciseName || "";
+      closeMenu();
+      closeCountdown();
+      render();
+      return;
+    }
+    if (target.closest("[data-stats-overview]")) {
+      state.selectedExerciseId = null;
+      state.selectedExerciseName = "";
+      renderStats();
       return;
     }
     const previewButton = target.closest("[data-preview-session]");
@@ -1680,10 +1875,32 @@
     }
   });
 
+  function installDoubleTapGuard() {
+    const appRoot = document.querySelector(".app-shell") || app;
+    if (!appRoot) return;
+    let lastTouchEnd = 0;
+    appRoot.addEventListener(
+      "touchend",
+      (event) => {
+        if (event.target.closest("input, select, textarea")) return;
+        const interactive = event.target.closest("button, a, label, summary, .exercise-card, .session-card, .info-card, .phase-card, .stat-card, .cardio-card, .chip, .menu-panel, .today-jump");
+        if (!interactive) {
+          lastTouchEnd = 0;
+          return;
+        }
+        const now = Date.now();
+        if (now - lastTouchEnd <= 300) event.preventDefault();
+        lastTouchEnd = now;
+      },
+      { passive: false }
+    );
+  }
+
   function boot() {
     autoCompleteStaleSessions();
     state.viewedWeekIndex = currentWeekIndex();
     state.selectedDateIso = toIsoDate(today());
+    installDoubleTapGuard();
     render();
     if ("serviceWorker" in navigator) {
       navigator.serviceWorker.register("./service-worker.js").catch(() => {});

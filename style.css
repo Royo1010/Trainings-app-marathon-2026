@@ -28,6 +28,7 @@ body {
   margin: 0;
   background: var(--bg);
   color: var(--text);
+  touch-action: manipulation;
 }
 
 body {
@@ -41,6 +42,58 @@ select {
 }
 
 button {
+  -webkit-tap-highlight-color: transparent;
+}
+
+input,
+select,
+textarea {
+  font-size: 16px;
+}
+
+button,
+a,
+label,
+input,
+select,
+textarea,
+summary,
+.exercise-card,
+.workout-card,
+.session-card,
+.info-card,
+.phase-card,
+.stat-card,
+.cardio-card,
+.chip,
+.badge,
+.info-toggle,
+.nav-button,
+.tab-button,
+.build-tabs button,
+.menu-item,
+.today-jump button {
+  touch-action: manipulation;
+}
+
+button,
+label,
+.chip,
+.badge,
+.info-toggle,
+.nav-button,
+.tab-button,
+.build-tabs button,
+.menu-item,
+.exercise-card,
+.workout-card,
+.session-card,
+.info-card,
+.phase-card,
+.stat-card,
+.cardio-card {
+  -webkit-user-select: none;
+  user-select: none;
   -webkit-tap-highlight-color: transparent;
 }
 
@@ -61,29 +114,56 @@ button:disabled {
   position: sticky;
   top: 0;
   z-index: 30;
-  display: flex;
+  display: grid;
+  grid-template-columns: 44px minmax(0, 1fr) minmax(70px, auto);
   align-items: center;
-  justify-content: space-between;
   gap: 9px;
+  min-height: 52px;
   padding: calc(7px + env(safe-area-inset-top)) 10px 7px;
   background: rgba(15, 20, 26, 0.94);
   border-bottom: 1px solid rgba(51, 65, 85, 0.8);
   backdrop-filter: blur(16px);
 }
 
-.brand {
-  min-width: 0;
-  flex: 1;
+#menu-toggle {
+  grid-column: 1;
 }
 
-.topbar h1 {
+.brand {
+  position: absolute;
+  left: 50%;
+  top: calc(7px + env(safe-area-inset-top));
+  bottom: 7px;
+  transform: translateX(-50%);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  min-width: 0;
+  width: min(152px, calc(100% - 178px));
+  padding: 0 4px;
+  border: 0;
+  border-radius: var(--radius);
+  color: var(--text);
+  background: transparent;
+  text-align: center;
+  cursor: pointer;
+}
+
+.brand:active {
+  background: rgba(59, 130, 246, 0.1);
+}
+
+.brand-title {
+  display: block;
   margin: 0;
   font-size: 18px;
+  font-weight: 800;
   line-height: 1.05;
   letter-spacing: 0;
 }
 
 .eyebrow {
+  display: block;
   margin: 0 0 1px;
   color: var(--muted);
   font-size: 9px;
@@ -91,7 +171,8 @@ button:disabled {
 }
 
 .date-pill {
-  flex: 0 0 auto;
+  grid-column: 3;
+  justify-self: end;
   padding: 5px 7px;
   border: 1px solid var(--border);
   border-radius: 999px;
@@ -267,8 +348,8 @@ button:disabled {
 }
 
 .today-jump {
-  padding: 8px;
-  margin-bottom: 8px;
+  padding: 7px;
+  margin-bottom: 7px;
   border: 1px solid var(--border);
   border-radius: var(--radius);
   background: var(--panel-3);
@@ -279,7 +360,7 @@ button:disabled {
   grid-template-columns: 40px 1fr 40px;
   gap: 7px;
   align-items: center;
-  margin-bottom: 6px;
+  margin-bottom: 4px;
 }
 
 .today-jump button {
@@ -297,6 +378,14 @@ button:disabled {
 
 .today-center {
   font-weight: 800;
+  cursor: pointer;
+}
+
+.today-meta {
+  margin: 0;
+  color: var(--muted-2);
+  font-size: 10px;
+  line-height: 1.2;
 }
 
 .status-line {
@@ -320,11 +409,12 @@ button:disabled {
   line-height: 1.3;
 }
 
-.hero-card .goal {
-  display: -webkit-box;
-  overflow: hidden;
-  -webkit-line-clamp: 1;
-  -webkit-box-orient: vertical;
+.session-summary {
+  margin: 5px 0 0;
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 650;
+  line-height: 1.35;
 }
 
 .compact-meta {
@@ -533,10 +623,10 @@ summary {
 .philosophy-details summary {
   min-height: 23px;
   padding: 3px 8px;
-  border: 1px solid rgba(245, 158, 11, 0.65);
+  border: 1px solid rgba(59, 130, 246, 0.75);
   border-radius: 999px;
-  color: #fde68a;
-  background: rgba(245, 158, 11, 0.12);
+  color: var(--text);
+  background: rgba(59, 130, 246, 0.18);
   font-size: 11px;
   line-height: 1;
 }
@@ -550,7 +640,7 @@ summary {
   flex-basis: 100%;
   padding: 8px;
   margin-top: 3px;
-  border: 1px solid rgba(245, 158, 11, 0.38);
+  border: 1px solid rgba(59, 130, 246, 0.42);
   border-radius: var(--radius);
   background: rgba(17, 24, 39, 0.9);
 }
@@ -589,6 +679,20 @@ summary {
 
 .compact-list li {
   margin: 4px 0;
+}
+
+.inline-link-button {
+  display: inline-flex;
+  align-items: center;
+  min-height: 32px;
+  margin-top: 6px;
+  padding: 0;
+  border: 0;
+  color: #bfdbfe;
+  background: transparent;
+  font-size: 13px;
+  font-weight: 750;
+  text-align: left;
 }
 
 .cardio-card {
@@ -843,6 +947,36 @@ summary {
   background: #111923;
 }
 
+.exercise-detail {
+  margin-bottom: 8px;
+}
+
+.history-list {
+  display: grid;
+  gap: 6px;
+  margin-top: 8px;
+}
+
+.history-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 7px 0;
+  border-top: 1px solid rgba(51, 65, 85, 0.55);
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.history-row:first-child {
+  border-top: 0;
+}
+
+.history-row strong {
+  color: var(--text);
+  white-space: nowrap;
+}
+
 @media (min-width: 560px) {
   .content {
     padding-right: 16px;
@@ -850,6 +984,6 @@ summary {
   }
 
   .training-title {
-    font-size: 32px;
+    font-size: 26px;
   }
 }

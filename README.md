@@ -61,11 +61,17 @@ Het Week-scherm is interactief: tik op een sessie om een preview te openen. In p
 
 Het Vandaag-scherm heeft een compacte `[‹] Vandaag [›]` navigatie om vorige/volgende geplande sessies te bekijken. Dit verschuift het schema niet en maakt geen backlog; logging blijft gekoppeld aan de getoonde sessie en datum. De datumknop rechtsboven opent een compacte countdown tot de marathon.
 
+De header `MARATHON SCHEMA / Training` is een gecentreerde home-knop: tikken brengt je vanuit elk scherm terug naar Vandaag en reset alleen de geselecteerde kijkdatum. De bovenste Vandaag-navigatie is compact gehouden; countdown-informatie staat alleen achter de datumknop.
+
 Bij elke sessie staat een compacte `Filosofie`-badge met uitleg over het doel, de plek in de week, de fase, trainingsprincipes en verstandige aanpassingen. Hardloopblokken hebben ook een eigen `Run-info`-uitklapblok met doel, tempo, incline, techniek en alternatieven bij vermoeidheid.
+
+Elke Vandaag-sessie toont een praktische omvangsregel, bijvoorbeeld `7 krachtoefeningen + 1 run · geschatte tijd 70–75 min`. In oefening-info staat `Bekijk statistieken →`, met een directe interne link naar de statistieken van precies die oefening.
 
 Het tabblad `Fases` is bedoeld als brede fase-uitleg: doel, waarom, trainingsfilosofie, hardlopen, krachttraining, marathontempo, long run, aandachtspunten en mentale focus. Het tabblad `Hardloopopbouw` is de praktische routekaart met subtabs voor overzicht, week per week, long runs, marathontempo, sleutelweken en tempo's.
 
 De oude groen/oranje/rood herstelknoppen zijn verwijderd. De app blijft een eenvoudige schema-lezer/logger en geen coachingsflow.
+
+Voor iPhone-gebruik zijn `touch-action: manipulation`, 16px form controls en een voorzichtige double-tap guard binnen de app-shell toegevoegd om ongewenst inzoomen bij snelle dubbele taps zoveel mogelijk te voorkomen zonder de viewport agressief te blokkeren.
 
 ## Offline
 
