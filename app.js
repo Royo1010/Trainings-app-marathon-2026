@@ -31,6 +31,7 @@
     selectedExerciseId: null,
     selectedExerciseName: "",
     runBuildTab: "overview",
+    statsTab: "overview",
   };
 
   function parseLocalDate(iso) {
@@ -601,7 +602,7 @@
     const info = runInfo(session, cardioBlock, week);
     return `
       <details class="run-info">
-        <summary>Run-info</summary>
+        <summary>Run-info bekijken</summary>
         <div class="details-body run-info-body">
           <p><strong>Doel:</strong> ${info.goal}</p>
           <p><strong>Tempo:</strong> ${info.tempo}</p>
@@ -631,12 +632,17 @@
   function renderSessionBlocks(session, key, week, mode, dateIso) {
     const strength = session.exercises.length
       ? `
-        <div class="section-title">
-          <h2>Oefeningen</h2>
+        <section class="training-section strength-section">
+        <div class="section-title section-title-strong">
+          <div>
+            <h2>Krachttraining</h2>
+            <p>${session.exercises.length} ${session.exercises.length === 1 ? "oefening" : "oefeningen"}</p>
+          </div>
           <span class="small muted">${mode === "today" ? "1 werkset loggen" : "preview"}</span>
         </div>
         <section class="exercise-list">
           ${session.exercises.map((item) => renderExercise(item, key, week, session, mode, dateIso)).join("")}
+        </section>
         </section>
       `
       : "";
@@ -739,25 +745,17 @@
         <h2 class="training-title">${active.title}</h2>
         <p class="session-summary">${sessionSummary(active)}</p>
         <div class="compact-meta">
-          <span class="chip active">${week.label}</span>
+          <span class="chip">${week.label}</span>
           <span class="chip">${formatDate(week.startDate)} - ${formatDate(week.endDate)}</span>
           <span class="chip">${active.type}</span>
-          ${!isPreview ? renderSessionPhilosophy(active, week) : ""}
         </div>
+        ${!isPreview ? renderSessionPhilosophy(active, week) : ""}
       </section>
 
       ${renderSessionBlocks(active, key, week, mode, dateIso)}
-      ${renderInfoBlocks(active.infoBlocks)}
+      ${isPreview ? renderInfoBlocks(active.infoBlocks) : ""}
 
       ${isPreview ? "" : `<button class="primary-button" type="button" data-complete-session>Training afgerond</button>`}
-      <details>
-        <summary>Extra schema-info</summary>
-        <div class="details-body">
-          <p><strong>Warming-up:</strong> ${active.warmup || "Volgens schema."}</p>
-          ${active.notes ? `<p><strong>Notitie:</strong> ${active.notes}</p>` : ""}
-          <p><strong>Faseregel:</strong> ${phase.rules}</p>
-        </div>
-      </details>
     `;
   }
 
@@ -850,15 +848,21 @@
 
   function renderSessionPhilosophy(session, week) {
     const info = sessionPhilosophy(session, week);
+    const phase = getPhase(week.phaseId);
+    const infoBlocks = Array.isArray(session.infoBlocks) ? session.infoBlocks : [];
     return `
       <details class="philosophy-details">
-        <summary>Filosofie</summary>
+        <summary>Trainingsfilosofie</summary>
         <div class="details-body philosophy-body">
-          <h4>Filosofie van deze sessie</h4>
+          <h4>Trainingsfilosofie van deze sessie</h4>
           <p><strong>Doel van vandaag:</strong> ${info.goal}</p>
           <p><strong>Waarom deze sessie hier staat:</strong> ${info.why}</p>
           <p><strong>Hoe dit past binnen de fase:</strong> ${info.phase.phaseName}: ${info.phase.phaseDetails?.primaryGoal || info.phase.goal}</p>
           <p><strong>Trainingsprincipes:</strong> ${info.principles}</p>
+          <p><strong>Schema-info:</strong> Warming-up: ${session.warmup || "Volgens schema."}</p>
+          ${session.notes ? `<p><strong>Notitie:</strong> ${session.notes}</p>` : ""}
+          <p><strong>Faseregel:</strong> ${phase.rules}</p>
+          ${infoBlocks.map((block) => `<p><strong>${block.title}:</strong> ${block.text}</p>`).join("")}
           <p><strong>Als je je goed voelt:</strong> ${info.good}</p>
           <p><strong>Als je je minder goed voelt:</strong> ${info.tired}</p>
           <p><strong>Belangrijkste focus:</strong> ${info.focus}</p>
@@ -898,7 +902,7 @@
         </div>
         ${isPreview ? "" : exerciseControls(exercise, log)}
         <details>
-          <summary>Info</summary>
+          <summary>Info bekijken</summary>
           <div class="details-body">
             ${isPreview ? "" : `<p><strong>Beste resultaat:</strong> ${best ? resultText(best) : "nog geen data"}</p>`}
             <p><strong>Tips:</strong> ${exercise.tips}</p>
@@ -924,8 +928,12 @@
       ? ""
       : `data-cardio-key="${key}" data-log-date="${dateIso}" data-week="${week.calendarWeek}" data-phase="${week.phaseId}" data-session="${active.sessionNumber}"`;
     return `
-      <div class="section-title">
-        <h2>Hardlopen</h2>
+      <section class="training-section running-section">
+      <div class="section-title section-title-strong">
+        <div>
+          <h2>Hardlopen</h2>
+          <p>1 run · ${compactRunLabel(cardioBlock)}</p>
+        </div>
       </div>
       <section class="cardio-card" ${trackingAttrs}>
         <div class="cardio-title">
@@ -951,6 +959,7 @@
                 ${feelings.map(([value, label]) => `<button type="button" data-feeling="${value}" class="${log.cardioFeeling === value ? "is-selected" : ""}">${label}</button>`).join("")}
               </div>`
         }
+      </section>
       </section>
     `;
   }
@@ -1459,45 +1468,327 @@
   function renderStats() {
     const logs = getLogs();
     const completed = getCompleted();
-    const cardioDone = logs.cardio.filter((entry) => entry.cardioDone).length;
-    const feelings = logs.cardio.reduce(
-      (acc, entry) => {
-        if (entry.cardioFeeling) acc[entry.cardioFeeling] += 1;
-        return acc;
-      },
-      { easy: 0, normal: 0, heavy: 0 }
-    );
+    const analytics = statsAnalytics(logs, completed);
+
+    if (state.selectedExerciseId) {
+      renderExerciseStatsDetail(state.selectedExerciseId, analytics.byExercise, state.selectedExerciseName);
+      return;
+    }
+
+    const tabs = [
+      ["overview", "Overzicht"],
+      ["running", "Hardlopen"],
+      ["strength", "Krachttraining"],
+      ["exercises", "Oefeningen"],
+      ["marathon", "Marathon"],
+    ];
+    const renderTab = {
+      overview: renderStatsOverview,
+      running: renderStatsRunning,
+      strength: renderStatsStrength,
+      exercises: renderStatsExercises,
+      marathon: renderStatsMarathon,
+    }[state.statsTab] || renderStatsOverview;
+
+    app.innerHTML = `
+      <section class="build-page stats-page">
+        <div class="section-title build-title">
+          <h2>Statistieken</h2>
+        </div>
+        <div class="build-tabs" role="tablist" aria-label="Statistieken onderdelen">
+          ${tabs.map(([id, label]) => `<button type="button" data-stats-tab="${id}" class="${state.statsTab === id ? "is-active" : ""}">${label}</button>`).join("")}
+        </div>
+        ${renderTab(analytics)}
+        <details class="info-block data-manage">
+          <summary>Data beheren</summary>
+          <div class="details-body">
+            <p>Alle trainingsdata staat alleen lokaal op dit apparaat.</p>
+            <button class="danger-button" type="button" data-reset>Wis lokale trainingsdata</button>
+          </div>
+        </details>
+      </section>
+    `;
+    window.requestAnimationFrame(() => drawStatsCharts(analytics));
+  }
+
+  function statsAnalytics(logs, completed) {
     const byExercise = new Map();
     logs.strength.forEach((entry) => {
       if (!byExercise.has(entry.exerciseId)) byExercise.set(entry.exerciseId, []);
       byExercise.get(entry.exerciseId).push(entry);
     });
 
-    if (state.selectedExerciseId) {
-      renderExerciseStatsDetail(state.selectedExerciseId, byExercise, state.selectedExerciseName);
-      return;
-    }
+    const runEntries = logs.cardio
+      .filter((entry) => entry.cardioDone)
+      .map((entry) => {
+        const found = findSessionByKey(entry.sessionKey);
+        if (!found?.session?.cardio) return null;
+        const kind = runKind(found.session, found.session.cardio);
+        const km = inferRunKm(found.session);
+        const minutes = inferRunMinutes(found.session);
+        return {
+          ...entry,
+          week: Number(entry.week || found.week.calendarWeek),
+          date: entry.date || plannedDateForSession(found.week, found.session),
+          session: found.session,
+          kind,
+          km,
+          minutes,
+          mpMinutes: inferMpMinutes(found.session, kind, minutes),
+        };
+      })
+      .filter(Boolean);
 
-    app.innerHTML = `
+    const strengthSessionKeys = new Set(logs.strength.map((entry) => entry.sessionKey));
+    completed.forEach((item) => {
+      const found = findSessionByKey(item.sessionKey);
+      if (found?.session?.exercises?.length) strengthSessionKeys.add(item.sessionKey);
+    });
+
+    const byWeek = new Map();
+    runEntries.forEach((entry) => {
+      const row = byWeek.get(entry.week) || { week: entry.week, km: 0, runs: 0, longRun: 0, mpMinutes: 0 };
+      row.km += entry.km;
+      row.runs += 1;
+      row.longRun = Math.max(row.longRun, entry.km);
+      row.mpMinutes += entry.mpMinutes;
+      byWeek.set(entry.week, row);
+    });
+
+    const strengthEntries = logs.strength;
+    const exerciseCounts = [...byExercise.entries()].map(([id, entries]) => ({ id, name: entries[entries.length - 1]?.exerciseName || findExerciseDefinition(id)?.name || id, count: entries.length }));
+    const mostLogged = exerciseCounts.sort((a, b) => b.count - a.count)[0] || null;
+    const lastStrength = strengthEntries.slice().sort((a, b) => (b.date || "").localeCompare(a.date || ""))[0] || null;
+    const lastTraining = completed.slice().sort((a, b) => (b.date || "").localeCompare(a.date || ""))[0] || null;
+    const current = todayViewContext();
+    const phase = getPhase(current.week.phaseId);
+    const totalKm = runEntries.reduce((sum, entry) => sum + entry.km, 0);
+    const longRuns = runEntries.filter((entry) => entry.kind === "long").length;
+    const mpRuns = runEntries.filter((entry) => entry.kind === "mp" || entry.mpMinutes > 0).length;
+    const intervalRuns = runEntries.filter((entry) => entry.kind === "tempo").length;
+    const easyRuns = runEntries.filter((entry) => entry.kind === "easy" || entry.kind === "strides").length;
+    const shakeouts = runEntries.filter((entry) => entry.kind === "shakeout").length;
+
+    return {
+      logs,
+      completed,
+      byExercise,
+      runEntries,
+      weeklyRuns: [...byWeek.values()].sort((a, b) => a.week - b.week),
+      totalKm,
+      totalMinutes: runEntries.reduce((sum, entry) => sum + entry.minutes, 0),
+      runCount: runEntries.length,
+      longRuns,
+      mpRuns,
+      intervalRuns,
+      easyRuns,
+      shakeouts,
+      longestRun: runEntries.reduce((max, entry) => Math.max(max, entry.km), 0),
+      currentWeekKm: byWeek.get(current.week.calendarWeek)?.km || 0,
+      maxWeekKm: Math.max(0, ...[...byWeek.values()].map((week) => week.km)),
+      strengthTrainingCount: strengthSessionKeys.size,
+      strengthSetCount: strengthEntries.length,
+      uniqueExercises: byExercise.size,
+      mostLogged,
+      lastStrength,
+      lastTraining,
+      currentWeek: current.week,
+      phase,
+    };
+  }
+
+  function inferRunKm(session) {
+    const source = `${session.cardio?.title || ""} ${session.cardio?.instruction || ""}`;
+    const km = source.match(/(?:^|[^\d,])(\d+(?:[–-]\d+)?)\s*km(?!\/u)/i);
+    if (km) {
+      const [min, max] = parseRange(km[1]);
+      return (min + max) / 2;
+    }
+    const minutes = inferRunMinutes(session);
+    const speed = source.match(/(\d{1,2},\d)(?:[–-](\d{1,2},\d))?\s*km\/u/i);
+    if (speed) {
+      const minSpeed = Number(speed[1].replace(",", "."));
+      const maxSpeed = speed[2] ? Number(speed[2].replace(",", ".")) : minSpeed;
+      return (minutes / 60) * ((minSpeed + maxSpeed) / 2);
+    }
+    return 0;
+  }
+
+  function inferRunMinutes(session) {
+    const source = `${session.cardio?.title || ""} ${session.cardio?.instruction || ""}`;
+    const km = source.match(/(?:^|[^\d,])(\d+(?:[–-]\d+)?)\s*km(?!\/u)/i);
+    if (km) {
+      const [minKm, maxKm] = parseRange(km[1]);
+      return ((minKm + maxKm) / 2 / 10) * 60;
+    }
+    const ranges = [...source.matchAll(/(\d+)(?:[–-](\d+))?\s*min/i)];
+    if (!ranges.length) return 0;
+    return ranges.reduce((sum, match) => {
+      const min = Number(match[1]);
+      const max = match[2] ? Number(match[2]) : min;
+      return sum + (min + max) / 2;
+    }, 0);
+  }
+
+  function inferMpMinutes(session, kind, minutes) {
+    const source = `${session.cardio?.title || ""} ${session.cardio?.instruction || ""}`.toLowerCase();
+    if (!/(11,8|12,0|12,1|marathontempo|marathonpace|mp)/.test(source)) return 0;
+    const repeated = [...source.matchAll(/(\d+)\s*[×x]\s*(\d+)(?:[–-](\d+))?\s*min/g)].reduce((sum, match) => {
+      const reps = Number(match[1]);
+      const min = Number(match[2]);
+      const max = match[3] ? Number(match[3]) : min;
+      return sum + reps * ((min + max) / 2);
+    }, 0);
+    if (repeated) return repeated;
+    if (session.type === "long-run") return Math.round(minutes * 0.25);
+    return kind === "mp" ? Math.round(minutes * 0.45) : 0;
+  }
+
+  function formatKm(value) {
+    return `${formatNumber(Math.round(value * 10) / 10)} km`;
+  }
+
+  function formatMinutes(value) {
+    const minutes = Math.round(value);
+    if (minutes < 60) return `${minutes} min`;
+    const hours = Math.floor(minutes / 60);
+    const rest = minutes % 60;
+    return `${hours}u${String(rest).padStart(2, "0")}`;
+  }
+
+  function metricCard(label, value, sub = "") {
+    return `<div class="metric"><strong>${value}</strong><span class="muted">${label}</span>${sub ? `<small>${sub}</small>` : ""}</div>`;
+  }
+
+  function renderStatsTabsHeader(title, subtitle) {
+    return `
+      <div class="section-title section-title-strong">
+        <div>
+          <h2>${title}</h2>
+          ${subtitle ? `<p>${subtitle}</p>` : ""}
+        </div>
+      </div>
+    `;
+  }
+
+  function renderStatsOverview(analytics) {
+    return `
+      ${renderStatsTabsHeader("Trainingsoverzicht", `${analytics.phase.phaseName} · Week ${analytics.currentWeek.calendarWeek}`)}
       <section class="stat-grid">
-        <div class="metric"><strong>${completed.length}</strong><span class="muted">Afgeronde trainingen</span></div>
-        <div class="metric"><strong>${cardioDone}</strong><span class="muted">Afgeronde runs</span></div>
+        ${metricCard("Totaal gelopen", formatKm(analytics.totalKm))}
+        ${metricCard("Voltooide runs", analytics.runCount)}
+        ${metricCard("Krachttrainingen", analytics.strengthTrainingCount)}
+        ${metricCard("Gelogde oefeningen", analytics.strengthSetCount)}
       </section>
       <section class="stat-card">
-        <h3>Cardio-gevoel</h3>
-        <p class="goal">Makkelijk: ${feelings.easy} · Normaal: ${feelings.normal} · Zwaar: ${feelings.heavy}</p>
+        <h3>Huidige fase</h3>
+        <p class="status-line">${analytics.phase.phaseName} · ${marathonCountdownText(toIsoDate(today()))}</p>
+        <p>${phaseFocus(analytics.phase.phaseId)}</p>
       </section>
-      <div class="section-title"><h2>Oefeningen</h2></div>
+      <section class="stat-card">
+        <h3>Laatste training</h3>
+        <p>${analytics.lastTraining ? `${analytics.lastTraining.title} · ${formatDate(analytics.lastTraining.date)}` : "Nog geen afgeronde training."}</p>
+      </section>
+    `;
+  }
+
+  function renderStatsRunning(analytics) {
+    return `
+      ${renderStatsTabsHeader("Hardloopstatistieken", "Uitgevoerde runs op basis van lokale logs")}
+      <section class="stat-grid">
+        ${metricCard("Totaal km", formatKm(analytics.totalKm))}
+        ${metricCard("Runs", analytics.runCount)}
+        ${metricCard("Long runs", analytics.longRuns)}
+        ${metricCard("MP-runs", analytics.mpRuns)}
+        ${metricCard("Intervalruns", analytics.intervalRuns)}
+        ${metricCard("Langste run", formatKm(analytics.longestRun))}
+        ${metricCard("Weekvolume", formatKm(analytics.currentWeekKm))}
+        ${metricCard("Meeste km/week", formatKm(analytics.maxWeekKm))}
+      </section>
+      ${renderChartCard("Kilometers per week", "Week", "Kilometers", "weekly-km", analytics.weeklyRuns.length >= 2)}
+      ${renderChartCard("Long run opbouw", "Week", "Kilometers", "long-run", analytics.weeklyRuns.filter((row) => row.longRun > 0).length >= 2)}
+      ${renderChartCard("Marathontempo-training", "Week", "Minuten MP", "mp-minutes", analytics.weeklyRuns.filter((row) => row.mpMinutes > 0).length >= 2)}
+      <section class="stat-card">
+        <h3>Runtypes</h3>
+        <p class="status-line">Easy: ${analytics.easyRuns} · Long run: ${analytics.longRuns} · MP: ${analytics.mpRuns} · Interval: ${analytics.intervalRuns} · Shake-out/taper: ${analytics.shakeouts}</p>
+      </section>
+    `;
+  }
+
+  function renderStatsStrength(analytics) {
+    return `
+      ${renderStatsTabsHeader("Krachttrainingsstatistieken", "Beste werksets en gelogde krachttraining")}
+      <section class="stat-grid">
+        ${metricCard("Krachttrainingen", analytics.strengthTrainingCount)}
+        ${metricCard("Gelogde sets", analytics.strengthSetCount)}
+        ${metricCard("Unieke oefeningen", analytics.uniqueExercises)}
+        ${metricCard("Meest gelogd", analytics.mostLogged ? analytics.mostLogged.name : "-")}
+      </section>
+      <section class="stat-card">
+        <h3>Laatste krachttraining</h3>
+        <p>${analytics.lastStrength ? `${analytics.lastStrength.exerciseName} · ${resultText(analytics.lastStrength)} · ${formatDate(analytics.lastStrength.date)}` : "Nog geen krachtdata."}</p>
+      </section>
+      ${renderChartCard("Gelogde krachtsets per week", "Week", "Sets", "strength-sets", analytics.logs.strength.length >= 2)}
+    `;
+  }
+
+  function renderStatsExercises(analytics) {
+    return `
+      ${renderStatsTabsHeader("Oefeningen", "Tik door naar een specifieke oefening")}
       <section class="stats-list">
         ${
-          byExercise.size
-            ? [...byExercise.entries()].map(([exerciseId, entries], index) => renderExerciseStats(exerciseId, entries, index)).join("")
+          analytics.byExercise.size
+            ? [...analytics.byExercise.entries()].map(([exerciseId, entries], index) => renderExerciseStats(exerciseId, entries, index)).join("")
             : `<div class="empty-state"><h2>Nog geen krachtdata</h2><p class="muted">Log een oefening op Vandaag en kom hier terug.</p></div>`
         }
       </section>
-      <button class="danger-button" type="button" data-reset>Wis lokale trainingsdata</button>
     `;
-    window.requestAnimationFrame(() => drawSparklines(byExercise));
+  }
+
+  function renderStatsMarathon(analytics) {
+    const scoreData = marathonReadiness(analytics);
+    return `
+      ${renderStatsTabsHeader("Marathonvoorbereiding", "Indicatie, geen voorspelling")}
+      <section class="stat-card readiness-card">
+        <h3>Op schema-indicatie</h3>
+        <p class="readiness-score">${scoreData.score}%</p>
+        <p class="status-line">${scoreData.label}</p>
+        <p>Deze score is geen garantie voor je marathontijd. Het is een praktische indicatie op basis van consistentie, long runs, marathontempo en voltooide trainingsweken.</p>
+      </section>
+      <section class="stat-grid">
+        ${metricCard("Consistentie", `${analytics.runCount} runs`, "op basis van afgevinkte runs")}
+        ${metricCard("Long runs", analytics.longRuns)}
+        ${metricCard("Langste run", formatKm(analytics.longestRun))}
+        ${metricCard("MP-training", formatMinutes(analytics.runEntries.reduce((sum, entry) => sum + entry.mpMinutes, 0)))}
+      </section>
+      <section class="stat-card">
+        <h3>Piektrainingen</h3>
+        <p class="status-line">${[39, 41, 42, 43].map((weekNo) => `Week ${weekNo}: ${peakWeekDone(analytics, weekNo) ? "gedaan" : "nog niet gedaan"}`).join(" · ")}</p>
+      </section>
+    `;
+  }
+
+  function marathonReadiness(analytics) {
+    const consistency = Math.min(35, analytics.runCount * 2);
+    const longRun = Math.min(25, analytics.longestRun * 0.8);
+    const mp = Math.min(20, analytics.runEntries.reduce((sum, entry) => sum + entry.mpMinutes, 0) / 4);
+    const peak = [39, 41, 42, 43].filter((weekNo) => peakWeekDone(analytics, weekNo)).length * 5;
+    const score = Math.min(100, Math.round(consistency + longRun + mp + peak));
+    const label = score < 20 ? "Nog weinig data" : score < 45 ? "Goed begonnen" : score < 70 ? "Op schema in opbouw" : score < 85 ? "Sterk op schema" : "Zeer sterk op schema";
+    return { score, label };
+  }
+
+  function peakWeekDone(analytics, weekNo) {
+    return analytics.runEntries.some((entry) => Number(entry.week) === weekNo && (entry.kind === "long" || entry.mpMinutes > 0));
+  }
+
+  function renderChartCard(title, xLabel, yLabel, chartId, hasData) {
+    return `
+      <section class="stat-card chart-card">
+        <h3>${title}</h3>
+        ${hasData ? `<canvas class="line-chart" width="320" height="160" data-chart="${chartId}" aria-label="${title}"></canvas><p class="chart-axis-label">${xLabel} · ${yLabel}</p>` : `<p class="muted small">Nog niet genoeg data om deze grafiek te tonen.</p>`}
+      </section>
+    `;
   }
 
   function renderExerciseStats(exerciseId, entries, index) {
@@ -1550,7 +1841,7 @@
         <p class="status-line">Beste: ${resultText(best)} · Laatste: ${resultText(last)} · Trend: ${trend}</p>
         ${
           entries.length >= 2
-            ? `<canvas class="sparkline" width="320" height="52" data-sparkline="detail" data-exercise-id="${exerciseId}"></canvas>`
+            ? `<canvas class="line-chart" width="320" height="160" data-strength-detail="${exerciseId}"></canvas><p class="chart-axis-label">Datum · Prestatie-score</p>`
             : `<p class="muted small">Nog te weinig data voor grafiek.</p>`
         }
       </section>
@@ -1571,7 +1862,10 @@
         </div>
       </section>
     `;
-    window.requestAnimationFrame(() => drawSparklines(detailMap));
+    window.requestAnimationFrame(() => {
+      drawSparklines(detailMap);
+      drawStrengthDetailChart(detailMap);
+    });
   }
 
   function findExerciseDefinition(exerciseId) {
@@ -1611,6 +1905,102 @@
         else ctx.lineTo(x, y);
       });
       ctx.stroke();
+    });
+  }
+
+  function drawStatsCharts(analytics) {
+    drawSparklines(analytics.byExercise);
+    const weekly = analytics.weeklyRuns;
+    drawChartById("weekly-km", weekly.map((row) => ({ label: `W${row.week}`, value: row.km })), "#3B82F6");
+    drawChartById("long-run", weekly.map((row) => ({ label: `W${row.week}`, value: row.longRun })), "#5B7DA8");
+    drawChartById("mp-minutes", weekly.map((row) => ({ label: `W${row.week}`, value: row.mpMinutes })), "#3B82F6");
+
+    const strengthByWeek = new Map();
+    analytics.logs.strength.forEach((entry) => {
+      const week = Number(entry.week || 0);
+      if (!week) return;
+      strengthByWeek.set(week, (strengthByWeek.get(week) || 0) + 1);
+    });
+    drawChartById(
+      "strength-sets",
+      [...strengthByWeek.entries()].sort((a, b) => a[0] - b[0]).map(([week, value]) => ({ label: `W${week}`, value })),
+      "#3B82F6"
+    );
+  }
+
+  function drawStrengthDetailChart(byExercise) {
+    document.querySelectorAll("canvas[data-strength-detail]").forEach((canvas) => {
+      const id = canvas.dataset.strengthDetail;
+      const entries = (byExercise.get(id) || []).slice().sort((a, b) => (a.date || "").localeCompare(b.date || ""));
+      drawLineChart(
+        canvas,
+        entries.map((entry) => ({ label: formatDate(entry.date || toIsoDate(today())), value: score(entry) })),
+        "#3B82F6"
+      );
+    });
+  }
+
+  function drawChartById(id, points, color) {
+    const canvas = document.querySelector(`canvas[data-chart="${id}"]`);
+    if (!canvas) return;
+    drawLineChart(canvas, points.filter((point) => point.value > 0), color);
+  }
+
+  function drawLineChart(canvas, points, color) {
+    if (!canvas || points.length < 2) return;
+    const dpr = window.devicePixelRatio || 1;
+    const width = canvas.clientWidth || 320;
+    const height = canvas.clientHeight || 160;
+    canvas.width = width * dpr;
+    canvas.height = height * dpr;
+    const ctx = canvas.getContext("2d");
+    ctx.scale(dpr, dpr);
+    ctx.clearRect(0, 0, width, height);
+
+    const pad = { top: 14, right: 12, bottom: 28, left: 38 };
+    const chartW = width - pad.left - pad.right;
+    const chartH = height - pad.top - pad.bottom;
+    const values = points.map((point) => point.value);
+    const min = Math.min(0, ...values);
+    const max = Math.max(...values);
+    const spread = max - min || 1;
+    const y = (value) => pad.top + chartH - ((value - min) / spread) * chartH;
+    const x = (index) => pad.left + (points.length === 1 ? chartW / 2 : (index / (points.length - 1)) * chartW);
+
+    ctx.strokeStyle = "rgba(167, 176, 190, 0.35)";
+    ctx.lineWidth = 1;
+    ctx.beginPath();
+    ctx.moveTo(pad.left, pad.top);
+    ctx.lineTo(pad.left, pad.top + chartH);
+    ctx.lineTo(pad.left + chartW, pad.top + chartH);
+    ctx.stroke();
+
+    ctx.fillStyle = "#A7B0BE";
+    ctx.font = "11px system-ui, -apple-system, sans-serif";
+    ctx.textAlign = "right";
+    ctx.fillText(formatNumber(Math.round(max * 10) / 10), pad.left - 6, y(max) + 4);
+    ctx.fillText(formatNumber(Math.round(min * 10) / 10), pad.left - 6, y(min) + 4);
+    ctx.textAlign = "left";
+    ctx.fillText(points[0].label, pad.left, height - 8);
+    ctx.textAlign = "right";
+    ctx.fillText(points[points.length - 1].label, pad.left + chartW, height - 8);
+
+    ctx.strokeStyle = color;
+    ctx.lineWidth = 2.5;
+    ctx.beginPath();
+    points.forEach((point, index) => {
+      const px = x(index);
+      const py = y(point.value);
+      if (index === 0) ctx.moveTo(px, py);
+      else ctx.lineTo(px, py);
+    });
+    ctx.stroke();
+
+    ctx.fillStyle = color;
+    points.forEach((point, index) => {
+      ctx.beginPath();
+      ctx.arc(x(index), y(point.value), 3, 0, Math.PI * 2);
+      ctx.fill();
     });
   }
 
@@ -1741,7 +2131,7 @@
       return;
     }
 
-    if (target.closest("#menu-close") || target === menuOverlay) {
+    if (target.closest("#menu-close") || target.closest("[data-menu-close]") || target === menuOverlay) {
       closeMenu();
       return;
     }
@@ -1774,6 +2164,14 @@
       renderRunBuild();
       return;
     }
+    const statsTab = target.closest("[data-stats-tab]");
+    if (statsTab) {
+      state.statsTab = statsTab.dataset.statsTab;
+      state.selectedExerciseId = null;
+      state.selectedExerciseName = "";
+      renderStats();
+      return;
+    }
     if (target.closest("[data-today-prev]")) {
       moveTodaySelection(-1);
       renderToday();
@@ -1793,6 +2191,7 @@
     if (exerciseStatsButton) {
       state.view = "stats";
       state.preview = null;
+      state.statsTab = "exercises";
       state.selectedExerciseId = exerciseStatsButton.dataset.openExerciseStats;
       state.selectedExerciseName = exerciseStatsButton.dataset.exerciseName || "";
       closeMenu();
@@ -1803,6 +2202,7 @@
     if (target.closest("[data-stats-overview]")) {
       state.selectedExerciseId = null;
       state.selectedExerciseName = "";
+      state.statsTab = "exercises";
       renderStats();
       return;
     }
@@ -1846,7 +2246,9 @@
       return;
     }
     if (target.closest("[data-reset]")) {
-      if (window.confirm("Weet je zeker dat je alle lokale trainingsdata wilt wissen?")) {
+      const first = window.confirm("Trainingsdata wissen?\n\nDit verwijdert alle lokaal opgeslagen trainingslogs, gewichten, reps, voltooide trainingen en statistieken van dit apparaat. Dit kan niet automatisch worden hersteld.");
+      const second = first && window.confirm("Laatste bevestiging: wil je echt alle lokale trainingsdata verwijderen?");
+      if (second) {
         localStorage.removeItem(STORAGE.logs);
         localStorage.removeItem(STORAGE.completed);
         localStorage.removeItem(STORAGE.preferences);

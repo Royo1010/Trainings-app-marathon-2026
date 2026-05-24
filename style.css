@@ -1,14 +1,17 @@
 :root {
   color-scheme: dark;
   --bg: #0f141a;
+  --bg-header: #0b1118;
   --panel: #1a2230;
   --panel-2: #263241;
   --panel-3: #111827;
+  --panel-strong: #1d2735;
   --text: #f3f4f6;
   --muted: #a7b0be;
   --muted-2: #7b8798;
   --border: #334155;
   --blue: #3b82f6;
+  --blue-soft: rgba(59, 130, 246, 0.18);
   --green: #22c55e;
   --amber: #f59e0b;
   --red: #ef4444;
@@ -120,7 +123,7 @@ button:disabled {
   gap: 9px;
   min-height: 52px;
   padding: calc(7px + env(safe-area-inset-top)) 10px 7px;
-  background: rgba(15, 20, 26, 0.94);
+  background: rgba(11, 17, 24, 0.96);
   border-bottom: 1px solid rgba(51, 65, 85, 0.8);
   backdrop-filter: blur(16px);
 }
@@ -302,6 +305,25 @@ button:disabled {
   border-bottom: 1px solid var(--border);
 }
 
+.menu-title-button {
+  min-height: 34px;
+  padding: 0 8px;
+  border: 1px solid transparent;
+  border-radius: var(--radius);
+  color: var(--muted);
+  background: transparent;
+  font-size: 12px;
+  font-weight: 800;
+  text-transform: uppercase;
+  text-align: left;
+}
+
+.menu-title-button:active {
+  border-color: rgba(59, 130, 246, 0.55);
+  color: var(--text);
+  background: var(--blue-soft);
+}
+
 .close-button {
   width: 34px;
   min-height: 34px;
@@ -323,10 +345,11 @@ button:disabled {
   color: var(--text);
   background: transparent;
   text-align: left;
+  font-weight: 700;
 }
 
 .menu-item.is-active {
-  background: rgba(59, 130, 246, 0.18);
+  background: var(--blue-soft);
 }
 
 .hero-card,
@@ -343,16 +366,19 @@ button:disabled {
 }
 
 .hero-card {
-  padding: 10px;
-  margin-bottom: 8px;
+  padding: 12px;
+  margin-bottom: 12px;
+  border-color: rgba(59, 130, 246, 0.45);
+  background: linear-gradient(180deg, #1d2735, #182232);
+  box-shadow: 0 16px 34px rgba(0, 0, 0, 0.38);
 }
 
 .today-jump {
   padding: 7px;
-  margin-bottom: 7px;
+  margin: 4px 0 9px;
   border: 1px solid var(--border);
   border-radius: var(--radius);
-  background: var(--panel-3);
+  background: #111923;
 }
 
 .today-jump-row {
@@ -448,13 +474,25 @@ button:disabled {
   align-items: center;
   justify-content: space-between;
   gap: 10px;
-  margin: 10px 2px 6px;
+  margin: 14px 2px 8px;
 }
 
 .section-title h2 {
   margin: 0;
   font-size: 16px;
   line-height: 1.2;
+}
+
+.section-title p {
+  margin: 2px 0 0;
+  color: var(--muted-2);
+  font-size: 11px;
+  line-height: 1.2;
+}
+
+.section-title-strong {
+  padding-top: 6px;
+  border-top: 1px solid rgba(51, 65, 85, 0.55);
 }
 
 .muted {
@@ -483,12 +521,20 @@ button:disabled {
 .stats-list,
 .info-list {
   display: grid;
-  gap: 8px;
+  gap: 10px;
+}
+
+.training-section {
+  margin-top: 12px;
+}
+
+.running-section {
+  margin-top: 18px;
 }
 
 .build-page {
   display: grid;
-  gap: 9px;
+  gap: 12px;
 }
 
 .build-title {
@@ -516,16 +562,18 @@ button:disabled {
   color: var(--text);
   background: var(--panel-2);
   font-size: 12px;
+  font-weight: 700;
 }
 
 .build-tabs button.is-active {
   border-color: rgba(59, 130, 246, 0.8);
-  background: rgba(59, 130, 246, 0.2);
+  background: var(--blue-soft);
 }
 
 .exercise-card {
-  padding: 10px;
-  background: #17202c;
+  padding: 11px;
+  border-color: rgba(71, 85, 105, 0.92);
+  background: #17202b;
 }
 
 .exercise-top {
@@ -585,7 +633,7 @@ select {
 
 details {
   margin-top: 8px;
-  border-top: 1px solid rgba(51, 65, 85, 0.72);
+  border-top: 1px solid rgba(51, 65, 85, 0.5);
   color: var(--muted);
 }
 
@@ -597,11 +645,34 @@ details {
 }
 
 summary {
-  min-height: 36px;
-  display: flex;
+  width: fit-content;
+  min-height: 34px;
+  display: inline-flex;
   align-items: center;
+  gap: 6px;
+  padding: 0 10px;
+  margin-top: 8px;
+  border: 1px solid rgba(59, 130, 246, 0.42);
+  border-radius: 999px;
   color: var(--text);
+  background: rgba(59, 130, 246, 0.11);
+  font-size: 12px;
+  font-weight: 750;
   cursor: pointer;
+}
+
+summary::after {
+  content: "▾";
+  color: #bfdbfe;
+  font-size: 11px;
+}
+
+details[open] > summary::after {
+  content: "▴";
+}
+
+summary::-webkit-details-marker {
+  display: none;
 }
 
 .details-body {
@@ -615,31 +686,25 @@ summary {
 }
 
 .philosophy-details {
-  flex: 0 0 auto;
-  margin: 0;
+  margin-top: 8px;
   border: 0;
 }
 
 .philosophy-details summary {
-  min-height: 23px;
-  padding: 3px 8px;
+  min-height: 34px;
+  padding: 0 11px;
   border: 1px solid rgba(59, 130, 246, 0.75);
   border-radius: 999px;
   color: var(--text);
   background: rgba(59, 130, 246, 0.18);
-  font-size: 11px;
+  font-size: 12px;
+  font-weight: 800;
   line-height: 1;
 }
 
-.philosophy-details summary::-webkit-details-marker,
-.run-info summary::-webkit-details-marker {
-  display: none;
-}
-
 .philosophy-details[open] {
-  flex-basis: 100%;
   padding: 8px;
-  margin-top: 3px;
+  margin-top: 9px;
   border: 1px solid rgba(59, 130, 246, 0.42);
   border-radius: var(--radius);
   background: rgba(17, 24, 39, 0.9);
@@ -657,12 +722,12 @@ summary {
 }
 
 .run-info {
-  margin-top: 8px;
+  margin-top: 10px;
   border-top: 1px solid rgba(91, 125, 168, 0.45);
 }
 
 .run-info summary {
-  min-height: 32px;
+  min-height: 36px;
   color: #dbeafe;
   font-size: 12px;
   font-weight: 700;
@@ -696,9 +761,10 @@ summary {
 }
 
 .cardio-card {
-  padding: 10px;
+  padding: 12px;
   border: 1px solid var(--border);
   border-radius: var(--radius);
+  border-left: 3px solid rgba(59, 130, 246, 0.85);
   background: #132033;
 }
 
@@ -874,7 +940,8 @@ summary {
 .phase-card,
 .stat-card,
 .info-card {
-  padding: 10px;
+  padding: 12px;
+  border-color: rgba(71, 85, 105, 0.84);
 }
 
 .phase-meta {
@@ -930,13 +997,22 @@ summary {
   padding: 12px;
   border: 1px solid var(--border);
   border-radius: var(--radius);
-  background: var(--panel);
+  background: var(--panel-strong);
 }
 
 .metric strong {
   display: block;
   margin-bottom: 4px;
-  font-size: 24px;
+  font-size: 22px;
+  line-height: 1.05;
+}
+
+.metric small {
+  display: block;
+  margin-top: 4px;
+  color: var(--muted-2);
+  font-size: 11px;
+  line-height: 1.25;
 }
 
 .sparkline {
@@ -945,6 +1021,32 @@ summary {
   margin-top: 8px;
   border-radius: 6px;
   background: #111923;
+}
+
+.line-chart {
+  width: 100%;
+  height: 160px;
+  margin-top: 8px;
+  border-radius: 6px;
+  background: #0f1722;
+}
+
+.chart-axis-label {
+  margin: 6px 0 0;
+  color: var(--muted-2);
+  font-size: 11px;
+}
+
+.readiness-score {
+  margin: 4px 0;
+  color: var(--text);
+  font-size: 34px;
+  font-weight: 850;
+  line-height: 1;
+}
+
+.data-manage {
+  margin-top: 4px;
 }
 
 .exercise-detail {
