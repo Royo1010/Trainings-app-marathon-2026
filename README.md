@@ -44,6 +44,12 @@ Fasedoelen, blessureregels, alternatieven en herstelvarianten zijn samengevat in
 
 De app bevat manifest- en iOS-meta-tags voor gebruik via "Zet op beginscherm". Er is een eenvoudige SVG-icon meegeleverd. Voor een extra strakke iOS-icon kun je later PNG-iconen toevoegen, maar dit is niet nodig om de app te gebruiken.
 
+## UX-regels
+
+Het Vandaag-scherm is compact gemaakt voor iPhone-gebruik: geen vaste ondernavigatie, een klein hamburgermenu bovenin en direct zicht op de oefeningen. In hybride upper/lower/gym + run-sessies toont de app kracht eerst en hardlopen daarna. Echte run-first sessies, zoals long runs, shake-outs, marathon en easy run + mini strength, tonen hardlopen eerst.
+
+Het Week-scherm is interactief: tik op een sessie om een preview te openen. In preview-modus kun je vooruitkijken zonder loggingvelden of afrondknop, zodat toekomstige sessies niet per ongeluk worden gelogd.
+
 ## Offline
 
 `service-worker.js` cachet de basisbestanden zodat de app na een eerste bezoek ook offline kan openen. Bij wijzigingen op GitHub Pages kan een refresh nodig zijn voordat de nieuwste cache actief is.

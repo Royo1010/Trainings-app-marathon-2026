@@ -9,45 +9,44 @@
     <meta name="apple-mobile-web-app-title" content="Marathon" />
     <meta name="mobile-web-app-capable" content="yes" />
     <meta name="format-detection" content="telephone=no" />
-    <link rel="manifest" href="./manifest.json?v=20260524-2" />
+    <link rel="manifest" href="./manifest.json?v=20260524-5" />
     <link rel="icon" href="./icon.svg" type="image/svg+xml" />
     <link rel="apple-touch-icon" href="./icon.svg" />
-    <link rel="stylesheet" href="./style.css?v=20260524-2" />
+    <link rel="stylesheet" href="./style.css?v=20260524-5" />
     <title>Marathon Training</title>
   </head>
   <body>
     <div class="app-shell">
       <header class="topbar">
-        <div>
+        <button id="menu-toggle" class="icon-button" type="button" aria-label="Menu openen" aria-expanded="false">
+          <span></span>
+          <span></span>
+          <span></span>
+        </button>
+        <div class="brand">
           <p class="eyebrow">Marathon schema</p>
           <h1>Training</h1>
         </div>
         <div id="today-pill" class="date-pill"></div>
       </header>
 
-      <main id="app" class="content" aria-live="polite"></main>
+      <div id="menu-overlay" class="menu-overlay" hidden>
+        <nav class="menu-panel" aria-label="Hoofdnavigatie">
+          <div class="menu-head">
+            <span>Menu</span>
+            <button id="menu-close" class="close-button" type="button" aria-label="Menu sluiten">×</button>
+          </div>
+          <button class="menu-item is-active" type="button" data-view="today">Vandaag</button>
+          <button class="menu-item" type="button" data-view="week">Week</button>
+          <button class="menu-item" type="button" data-view="phases">Fases</button>
+          <button class="menu-item" type="button" data-view="stats">Statistieken</button>
+        </nav>
+      </div>
 
-      <nav class="tabbar" aria-label="Hoofdnavigatie">
-        <button class="tab is-active" type="button" data-view="today">
-          <span class="tab-icon">●</span>
-          Vandaag
-        </button>
-        <button class="tab" type="button" data-view="week">
-          <span class="tab-icon">▦</span>
-          Week
-        </button>
-        <button class="tab" type="button" data-view="phases">
-          <span class="tab-icon">≡</span>
-          Fases
-        </button>
-        <button class="tab" type="button" data-view="stats">
-          <span class="tab-icon">↗</span>
-          Statistieken
-        </button>
-      </nav>
+      <main id="app" class="content" aria-live="polite"></main>
     </div>
 
-    <script src="./training-data.js?v=20260524-2"></script>
-    <script src="./app.js?v=20260524-2"></script>
+    <script src="./training-data.js?v=20260524-5"></script>
+    <script src="./app.js?v=20260524-5"></script>
   </body>
 </html>

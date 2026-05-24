@@ -10,7 +10,10 @@
 
   const app = document.getElementById("app");
   const todayPill = document.getElementById("today-pill");
-  const tabs = Array.from(document.querySelectorAll(".tab"));
+  const menuToggle = document.getElementById("menu-toggle");
+  const menuClose = document.getElementById("menu-close");
+  const menuOverlay = document.getElementById("menu-overlay");
+  const navButtons = Array.from(document.querySelectorAll("[data-view]"));
   const weeks = window.TRAINING_WEEKS || [];
   const phases = window.TRAINING_PLAN || [];
   const config = window.APP_CONFIG || {};
@@ -18,6 +21,7 @@
   const state = {
     view: "today",
     viewedWeekIndex: 0,
+    preview: null,
   };
 
   function parseLocalDate(iso) {
@@ -247,6 +251,46 @@
     return Number.isInteger(number) ? String(number) : String(number).replace(".", ",");
   }
 
+  function shortRecoveryText(recovery, choice) {
+    const map = {
+      green: "Volledige training.",
+      orange: "Lichter/korter.",
+      red: "Herstelvariant.",
+    };
+    return map[choice] || recovery?.[choice] || "";
+  }
+
+  function isRunFirstSession(session) {
+    const title = session.title.toLowerCase();
+    if (!session.cardio) return false;
+    if (!session.exercises.length) return true;
+    if (title.includes("easy run + mini strength")) return true;
+    if (title.includes("upper") || title.includes("lower") || title.includes("gym")) return false;
+    if (title.startsWith("run")) return true;
+    if (title.includes("long run") || title.includes("shake-out")) return true;
+    if (title.includes("marathon") && !title.includes("marathonpace")) return true;
+    if (title.includes("wandelen") || session.type === "herstel") return true;
+    return session.type === "run" || session.type === "long-run" || session.type === "marathon";
+  }
+
+  function renderSessionBlocks(session, key, week, mode) {
+    const strength = session.exercises.length
+      ? `
+        <div class="section-title">
+          <h2>Oefeningen</h2>
+          <span class="small muted">${mode === "today" ? "1 werkset loggen" : "preview"}</span>
+        </div>
+        <section class="exercise-list">
+          ${session.exercises.map((item) => renderExercise(item, key, week, session, mode)).join("")}
+        </section>
+      `
+      : "";
+    const cardioBlock = session.cardio ? renderCardio(session.cardio, key, week, session, mode) : "";
+    if (!strength) return cardioBlock;
+    if (!cardioBlock) return strength;
+    return isRunFirstSession(session) ? `${cardioBlock}${strength}` : `${strength}${cardioBlock}`;
+  }
+
   function bestResult(exerciseId) {
     const entries = getLogs().strength.filter((entry) => entry.exerciseId === exerciseId);
     if (!entries.length) return null;
@@ -303,7 +347,6 @@
   function renderToday() {
     const week = getWeekByIndex(currentWeekIndex());
     state.viewedWeekIndex = currentWeekIndex();
-    const phase = getPhase(week.phaseId);
     const active = activeSessionForWeek(week);
 
     if (!active) {
@@ -317,10 +360,23 @@
       return;
     }
 
+    app.innerHTML = renderSessionScreen(week, active, "today");
+  }
+
+  function renderSessionPreview() {
+    const week = getWeekByIndex(state.preview?.weekIndex ?? state.viewedWeekIndex);
+    const session = week.sessions.find((item) => item.sessionNumber === state.preview?.sessionNumber) || week.sessions[0];
+    app.innerHTML = renderSessionScreen(week, session, "preview");
+  }
+
+  function renderSessionScreen(week, active, mode) {
+    const phase = getPhase(week.phaseId);
     const key = sessionKey(week, active);
-    const recovery = recoveryChoice(key);
-    const recoveryText = active.recovery?.[recovery] || "";
-    app.innerHTML = `
+    const recovery = mode === "today" ? recoveryChoice(key) : "green";
+    const recoveryText = shortRecoveryText(active.recovery, recovery);
+    const isPreview = mode === "preview";
+    return `
+      ${isPreview ? `<button class="secondary-button back-button" type="button" data-back-week>Terug naar weekoverzicht</button>` : ""}
       <section class="hero-card">
         <p class="status-line">${phase.phaseName} · Week ${week.calendarWeek} · Sessie ${active.sessionNumber}/${week.sessions.length}</p>
         <h2 class="training-title">${active.title}</h2>
@@ -334,26 +390,17 @@
 
       <section class="recovery-box">
         <div class="segmented" aria-label="Herstelkeuze">
-          <button type="button" data-recovery="green" class="${recovery === "green" ? "is-selected" : ""}">Groen</button>
-          <button type="button" data-recovery="orange" class="${recovery === "orange" ? "is-selected" : ""}">Oranje</button>
-          <button type="button" data-recovery="red" class="${recovery === "red" ? "is-selected" : ""}">Rood</button>
+          <button type="button" ${isPreview ? "disabled" : 'data-recovery="green"'} class="${recovery === "green" ? "is-selected" : ""}">Groen</button>
+          <button type="button" ${isPreview ? "disabled" : 'data-recovery="orange"'} class="${recovery === "orange" ? "is-selected" : ""}">Oranje</button>
+          <button type="button" ${isPreview ? "disabled" : 'data-recovery="red"'} class="${recovery === "red" ? "is-selected" : ""}">Rood</button>
         </div>
         <p class="recovery-message">${recoveryText}</p>
       </section>
 
-      ${active.cardio ? renderCardio(active.cardio, key, week, active) : ""}
-      ${active.exercises.length ? `
-        <div class="section-title">
-          <h2>Oefeningen</h2>
-          <span class="small muted">1 werkset loggen</span>
-        </div>
-        <section class="exercise-list">
-          ${active.exercises.map((item) => renderExercise(item, key, week, active)).join("")}
-        </section>
-      ` : ""}
+      ${renderSessionBlocks(active, key, week, mode)}
       ${renderInfoBlocks(active.infoBlocks)}
 
-      <button class="primary-button" type="button" data-complete-session>Training afgerond</button>
+      ${isPreview ? "" : `<button class="primary-button" type="button" data-complete-session>Training afgerond</button>`}
       <details>
         <summary>Extra schema-info</summary>
         <div class="details-body">
@@ -396,23 +443,28 @@
     `;
   }
 
-  function renderExercise(exercise, key, week, active) {
-    const log = latestStrengthLog(key, exercise.id);
-    const best = bestResult(exercise.id);
+  function renderExercise(exercise, key, week, active, mode = "today") {
+    const isPreview = mode === "preview";
+    const log = isPreview ? null : latestStrengthLog(key, exercise.id);
+    const best = isPreview ? null : bestResult(exercise.id);
+    const alternatives = Array.isArray(exercise.alternatives) ? exercise.alternatives : [];
+    const trackingAttrs = isPreview
+      ? ""
+      : `data-exercise-row data-session-key="${key}" data-week="${week.calendarWeek}" data-phase="${week.phaseId}" data-session="${active.sessionNumber}" data-exercise-id="${exercise.id}" data-exercise-name="${escapeAttr(exercise.name)}" data-planned="${escapeAttr(exercise.planned)}"`;
     return `
-      <article class="exercise-card" data-exercise-row data-session-key="${key}" data-week="${week.calendarWeek}" data-phase="${week.phaseId}" data-session="${active.sessionNumber}" data-exercise-id="${exercise.id}" data-exercise-name="${escapeAttr(exercise.name)}" data-planned="${escapeAttr(exercise.planned)}">
+      <article class="exercise-card" ${trackingAttrs}>
         <div class="exercise-top">
           <button class="exercise-name" type="button" data-toggle-details>${exercise.name}</button>
           <div class="planned">${exercise.planned}</div>
         </div>
-        ${exerciseControls(exercise, log)}
+        ${isPreview ? "" : exerciseControls(exercise, log)}
         <details>
           <summary>Info</summary>
           <div class="details-body">
-            <p><strong>Beste resultaat:</strong> ${best ? resultText(best) : "nog geen data"}</p>
+            ${isPreview ? "" : `<p><strong>Beste resultaat:</strong> ${best ? resultText(best) : "nog geen data"}</p>`}
             <p><strong>Tips:</strong> ${exercise.tips}</p>
             <p><strong>Regel:</strong> ${exercise.warning}</p>
-            ${exercise.alternatives.length ? `<p><strong>Alternatieven:</strong> ${exercise.alternatives.join(", ")}</p>` : ""}
+            ${alternatives.length ? `<p><strong>Alternatieven:</strong> ${alternatives.join(", ")}</p>` : ""}
             <p>${exercise.info}</p>
           </div>
         </details>
@@ -420,31 +472,43 @@
     `;
   }
 
-  function renderCardio(cardioBlock, key, week, active) {
-    const log = cardioLog(key) || {};
+  function renderCardio(cardioBlock, key, week, active, mode = "today") {
+    const isPreview = mode === "preview";
+    const log = isPreview ? {} : cardioLog(key) || {};
     const feelings = [
       ["easy", "Makkelijk"],
       ["normal", "Normaal"],
       ["heavy", "Zwaar"],
     ];
+    const trackingAttrs = isPreview
+      ? ""
+      : `data-cardio-key="${key}" data-week="${week.calendarWeek}" data-phase="${week.phaseId}" data-session="${active.sessionNumber}"`;
     return `
       <div class="section-title">
         <h2>Hardlopen</h2>
       </div>
-      <section class="cardio-card" data-cardio-key="${key}" data-week="${week.calendarWeek}" data-phase="${week.phaseId}" data-session="${active.sessionNumber}">
+      <section class="cardio-card" ${trackingAttrs}>
         <div class="cardio-title">
           <h3>${cardioBlock.title}</h3>
-          <label class="done-toggle">
-            <input type="checkbox" data-cardio-done ${log.cardioDone ? "checked" : ""} />
-            Gedaan
-          </label>
+          ${
+            isPreview
+              ? `<span class="preview-pill">Preview</span>`
+              : `<label class="done-toggle">
+                  <input type="checkbox" data-cardio-done ${log.cardioDone ? "checked" : ""} />
+                  Gedaan
+                </label>`
+          }
         </div>
         <p class="goal">${cardioBlock.instruction}</p>
         ${cardioBlock.outdoor ? `<p class="muted small">Buiten: ${cardioBlock.outdoor}</p>` : ""}
         ${cardioBlock.notes ? `<p class="muted small">${cardioBlock.notes}</p>` : ""}
-        <div class="feeling-row">
-          ${feelings.map(([value, label]) => `<button type="button" data-feeling="${value}" class="${log.cardioFeeling === value ? "is-selected" : ""}">${label}</button>`).join("")}
-        </div>
+        ${
+          isPreview
+            ? ""
+            : `<div class="feeling-row">
+                ${feelings.map(([value, label]) => `<button type="button" data-feeling="${value}" class="${log.cardioFeeling === value ? "is-selected" : ""}">${label}</button>`).join("")}
+              </div>`
+        }
       </section>
     `;
   }
@@ -466,6 +530,7 @@
         <span class="chip">${formatDate(week.startDate)} - ${formatDate(week.endDate)}</span>
         <span class="chip">${week.sessions.length} sessies</span>
       </div>
+      <p class="muted small week-hint">Tik op een sessie voor details.</p>
       ${renderWeekSessions(week, active)}
     `;
   }
@@ -474,21 +539,21 @@
     const done = getCompletedSet();
     const activeKey = active ? sessionKey(week, active) : null;
     return `
-      <section class="session-list" style="margin-top: 12px;">
+      <section class="session-list">
         ${week.sessions
           .map((item) => {
             const key = sessionKey(week, item);
             const status = done.has(key) ? "afgerond" : key === activeKey ? "actief" : "nog te doen";
             const statusClass = status === "afgerond" ? "status-done" : status === "actief" ? "status-active" : "status-next";
             return `
-              <article class="session-card">
+              <button class="session-card session-button" type="button" data-preview-week-index="${weeks.indexOf(week)}" data-preview-session="${item.sessionNumber}" aria-label="Bekijk sessie ${item.sessionNumber}: ${escapeAttr(item.title)}">
                 <div>
                   <h3>${item.sessionNumber}. ${item.title}</h3>
                   <p class="status-line">${item.type}${item.cardio ? ` · ${item.cardio.title}` : ""}</p>
                   ${item.goal ? `<p class="muted small">${item.goal}</p>` : ""}
                 </div>
                 <span class="status-badge ${statusClass}">${status}</span>
-              </article>`;
+              </button>`;
           })
           .join("")}
       </section>
@@ -688,22 +753,64 @@
     render();
   }
 
+  function openMenu() {
+    if (!menuOverlay) return;
+    menuOverlay.hidden = false;
+    menuToggle?.setAttribute("aria-expanded", "true");
+  }
+
+  function closeMenu() {
+    if (!menuOverlay) return;
+    menuOverlay.hidden = true;
+    menuToggle?.setAttribute("aria-expanded", "false");
+  }
+
   function render() {
-    tabs.forEach((tab) => tab.classList.toggle("is-active", tab.dataset.view === state.view));
+    const activeView = state.view === "sessionPreview" ? "week" : state.view;
+    navButtons.forEach((button) => button.classList.toggle("is-active", button.dataset.view === activeView));
     const date = today();
     todayPill.textContent = date.toLocaleDateString("nl-NL", { weekday: "short", day: "numeric", month: "short" });
     if (state.view === "today") renderToday();
     if (state.view === "week") renderWeek();
+    if (state.view === "sessionPreview") renderSessionPreview();
     if (state.view === "phases") renderPhases();
     if (state.view === "stats") renderStats();
   }
 
   document.addEventListener("click", (event) => {
     const target = event.target;
-    const tab = target.closest("[data-view]");
-    if (tab) {
-      state.view = tab.dataset.view;
+
+    if (target.closest("#menu-toggle")) {
+      openMenu();
+      return;
+    }
+
+    if (target.closest("#menu-close") || target === menuOverlay) {
+      closeMenu();
+      return;
+    }
+
+    const navButton = target.closest("[data-view]");
+    if (navButton) {
+      state.view = navButton.dataset.view;
+      state.preview = null;
       if (state.view === "week") state.viewedWeekIndex = currentWeekIndex();
+      closeMenu();
+      render();
+      return;
+    }
+    const previewButton = target.closest("[data-preview-session]");
+    if (previewButton) {
+      state.preview = {
+        weekIndex: Number(previewButton.dataset.previewWeekIndex),
+        sessionNumber: Number(previewButton.dataset.previewSession),
+      };
+      state.view = "sessionPreview";
+      render();
+      return;
+    }
+    if (target.closest("[data-back-week]")) {
+      state.view = "week";
       render();
       return;
     }

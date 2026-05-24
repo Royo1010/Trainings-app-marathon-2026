@@ -5,7 +5,7 @@
     sourceFile: "trainingsschema_marathon_codex.md",
     startDate: "2026-05-25",
     startCalendarWeek: 22,
-    version: "2026.05.24.2",
+    version: "2026.05.24.5",
   };
 
   const RECOVERY = {
