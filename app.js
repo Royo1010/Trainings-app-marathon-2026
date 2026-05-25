@@ -563,7 +563,7 @@
     if (strengthCount) parts.push(`${strengthCount} ${strengthCount === 1 ? "krachtoefening" : "krachtoefeningen"}`);
     if (runCount) parts.push("1 run");
     if (!parts.length) parts.push(`${Math.max(1, strengthCount + runCount)} onderdeel`);
-    return `${parts.join(" + ")} · geschatte tijd ${estimatedSessionDuration(session)}`;
+    return `${parts.join(" + ")} · ${estimatedSessionDuration(session)}`;
   }
 
   function estimatedSessionDuration(session) {
@@ -1177,8 +1177,10 @@
           <button type="button" data-week-prev aria-label="Vorige week">‹</button>
           <div class="week-title">
             <h2>Week ${week.calendarWeek}</h2>
-            <p class="status-line">${phase.phaseName} · ${week.label}</p>
-            <p class="muted small">${formatDate(week.startDate)} - ${formatDate(week.endDate)} · ${week.sessions.length} sessies · ${marathonCountdownText(week.startDate)}</p>
+            <p class="week-phase-line">${phase.phaseName}</p>
+            <div class="week-title-tags"><span class="chip">${week.label}</span></div>
+            <p class="muted small">${formatDate(week.startDate)} - ${formatDate(week.endDate)} · ${week.sessions.length} sessies</p>
+            <p class="muted small week-countdown-line">${marathonCountdownText(week.startDate)}</p>
           </div>
           <button type="button" data-week-next aria-label="Volgende week">›</button>
         </div>
@@ -1215,7 +1217,7 @@
             const key = sessionKey(week, item);
             const status = done.has(key) ? "afgerond" : key === activeKey ? "actief" : "nog te doen";
             const statusClass = status === "afgerond" ? "status-done" : status === "actief" ? "status-active" : "status-next";
-            const summary = sessionSummary(item).replace("geschatte tijd ", "±");
+            const summary = sessionSummary(item);
             const runSummary = item.cardio ? runCardSummary(item, item.cardio) : "geen";
             const focus = sessionWeekFocus(item);
             return `
@@ -1594,43 +1596,187 @@
 
   function renderBuildOverview() {
     return `
-      <article class="info-card">
+      <article class="info-card build-hero-card">
         <h3>Hardloopopbouw richting 3:30 marathon</h3>
-        <p>Dit hardloopschema bereidt mij voor op een marathon rond 3:30 uur op zondag 22 november 2026. Daarvoor moet ik uiteindelijk ongeveer 12,0-12,1 km/u gemiddeld kunnen lopen. De hardloopopbouw gaat stap voor stap: eerst rustige loopgewenning, daarna drie runs per week, daarna long runs en wekelijkse marathonpace, daarna een piekfase met marathontempo op vermoeide benen, en tot slot een taper.</p>
+        <p>Dit schema bereidt mij voor op een marathon rond 3:30 uur op zondag 22 november 2026. Daarvoor moet ik ongeveer 12,06 km/u gemiddeld lopen. Praktisch train ik daarom met marathontempo rond 11,8–12,1 km/u. De opbouw gaat stap voor stap: eerst rustige loopgewenning, daarna meer loopfrequentie, vervolgens long runs en wekelijks marathontempo, daarna een piekfase met marathontempo op vermoeide benen, en tot slot een taper om fris aan de start te staan.</p>
+      </article>
+      <section class="stat-grid build-metric-grid">
+        ${metricCard("Doel", "3:30", "marathon rond 3:30")}
+        ${metricCard("Benodigd tempo", "±12,06", "km/u gemiddeld")}
+        ${metricCard("Praktisch MP", "11,8–12,1", "km/u")}
+        ${metricCard("Start", "25 mei", "maandag 2026")}
+        ${metricCard("Marathon", "22 nov", "zondag 2026")}
+        ${metricCard("Voorbereiding", "±26", "weken")}
+        ${metricCard("Opbouw", "2 → 3 → 4", "runs per week")}
+        ${metricCard("Langste long run", "30–32 km")}
+        ${metricCard("Belangrijkste test", "28 km", "met 10–12 km MP")}
+      </section>
+      <article class="info-card">
+        <h3>In één oogopslag</h3>
         <ul class="compact-list">
-          <li>Start schema: maandag 25 mei 2026</li>
-          <li>Eerste trainingsweek: week 22</li>
-          <li>Marathon: zondag 22 november 2026</li>
-          <li>Laatste trainingsweek: week 47</li>
-          <li>Totale voorbereiding: ongeveer 26 weken</li>
-          <li>A-doel: marathon rond 3:30</li>
-          <li>Praktisch marathontempo: 11,8-12,1 km/u</li>
-          <li>Exacte richting 3:30: ongeveer 12,06 km/u</li>
+          <li>Fase 1: 2 runs per week, rustige loopgewenning en korte tempo-intro.</li>
+          <li>Fase 2: 3 runs per week, hardlopen wordt structureler.</li>
+          <li>Fase 3: 3 runs per week met vaste long run en wekelijkse marathonpace-run.</li>
+          <li>Fase 4: 4 runs per week met marathonspecifieke long runs.</li>
+          <li>Fase 5: volume omlaag, korte prikkels blijven, fris worden.</li>
+          <li>Long runs bouwen op van 60 min naar 30–32 km.</li>
+          <li>Marathontempo begint met korte stukken van 2–3 min en groeit naar 10–12 km MP binnen een long run.</li>
+          <li>Niet elke long run is hard; de zwaarste weken zitten in Fase 4.</li>
         </ul>
+      </article>
+      <article class="info-card">
+        <h3>De logica van de opbouw</h3>
+        <div class="phase-detail-block"><h4>1. Belastbaarheid</h4><p>Eerst wennen aan regelmatig lopen zonder krachttraining en herstel te slopen.</p></div>
+        <div class="phase-detail-block"><h4>2. Frequentie</h4><p>Daarna van 2 naar 3 runs per week, zodat hardlopen een vaste pijler wordt.</p></div>
+        <div class="phase-detail-block"><h4>3. Duurvermogen</h4><p>Vervolgens long runs opbouwen, zodat het lichaam gewend raakt aan langer op de benen zijn.</p></div>
+        <div class="phase-detail-block"><h4>4. Marathontempo</h4><p>Daarna 11,8–12,1 km/u steeds vaker trainen: eerst kort, later langer.</p></div>
+        <div class="phase-detail-block"><h4>5. Specificiteit</h4><p>In Fase 4 komt marathontempo binnen lange duurlopen, zodat 12 km/u ook met vermoeide benen bekend wordt.</p></div>
+        <div class="phase-detail-block"><h4>6. Taper</h4><p>In de laatste weken gaat het volume omlaag, zodat vermoeidheid zakt en fitheid zichtbaar wordt.</p></div>
+        <p>Het doel is niet om in training een volledige marathon op tempo te bewijzen, maar om voldoende duurvermogen, tempovertrouwen, long-run-ervaring en herstel op te bouwen om op marathondag gecontroleerd richting 3:30 te lopen.</p>
       </article>
       <section class="info-list">
         ${runningBuildPhases().map(renderBuildOverviewPhase).join("")}
       </section>
       <article class="info-card">
-        <h3>Kern van de opbouw</h3>
-        <p>Eerst belastbaarheid, dan frequentie, dan duurvermogen, dan marathonspecifiek tempo, dan taper.</p>
+        <h3>Hoe vaak loop ik per week?</h3>
+        <div class="phase-detail-block"><h4>Fase 1 · 2 runs</h4><p>1 easy run en 1 korte tempo-intro.</p></div>
+        <div class="phase-detail-block"><h4>Fase 2 · 3 runs</h4><p>Easy run, marathonpace-intro en easy run + mini strength.</p></div>
+        <div class="phase-detail-block"><h4>Fase 3 · 3 runs</h4><p>Easy run, marathonpace-run en long run.</p></div>
+        <div class="phase-detail-block"><h4>Fase 4 · 4 runs</h4><p>Easy run, marathonpace/tempo-run, techniek/interval/easy en long run.</p></div>
+        <div class="phase-detail-block"><h4>Fase 5 · dalend</h4><p>Korte easy runs, korte MP-prikkels, shake-out en marathon.</p></div>
+        <p>De frequentie stijgt niet in één keer naar 4 runs. Eerst wordt het lichaam belastbaar gemaakt, daarna wordt de loopfrequentie verhoogd, en pas in de piekfase wordt hardlopen echt leidend.</p>
       </article>
+      <details class="info-block">
+        <summary>Marathontempo-opbouw</summary>
+        <div class="details-body">
+          <p>Marathontempo betekent in dit schema ongeveer 11,8–12,1 km/u. Exact 3:30 vraagt ongeveer 12,06 km/u gemiddeld. Daarom is 12 km/u de praktische trainingsreferentie.</p>
+          <div class="phase-detail-block"><h4>Fase 1</h4><p>3 × 2 min op 11,5 km/u, 4 × 2 min op 11,8 km/u, 4 × 2 min op 12,0 km/u en 3–4 × 3 min op 12,0 km/u. Doel: 12 km/u kort herkennen.</p></div>
+          <div class="phase-detail-block"><h4>Fase 2</h4><p>4 × 3 min en 3 × 5 min rond 11,8–12,0 km/u. Doel: iets langer op MP lopen.</p></div>
+          <div class="phase-detail-block"><h4>Fase 3</h4><p>Wekelijkse MP-runs: 3 × 4 min, 3 × 5 min, 2 × 8 min, 3 × 6 min, 2 × 10 min, 15 min + 8 min en 20 min + 8 min.</p></div>
+          <div class="phase-detail-block"><h4>Fase 4</h4><p>MP binnen long runs: week 39 met 2 × 3 km MP, week 41 met 6–8 km MP aan het einde, week 42 met 10–12 km MP binnen 28 km en week 44 optioneel 6 km MP.</p></div>
+          <div class="phase-detail-block"><h4>Fase 5</h4><p>Korte MP-prikkels om ritme te behouden zonder vermoeidheid op te bouwen.</p></div>
+          <p>De opbouw gaat van kort aanraken naar langere stukken naar marathontempo in een lange duurloop. Dat is precies de specificiteit die nodig is voor een 3:30-doel.</p>
+        </div>
+      </details>
+      <details class="info-block">
+        <summary>Long-run-opbouw</summary>
+        <div class="details-body">
+          <p>Fase 1 en 2 hebben nog geen echte long runs. In Fase 3 groeit de long run van 60 min naar 115–120 min. In Fase 4 groeien long runs richting 30–32 km en krijgen sommige trainingen marathontempo. In Fase 5 worden ze korter richting marathondag.</p>
+          <ul class="compact-list">
+            <li>Week 35: 115–120 min rustig</li>
+            <li>Week 39: 24 km met 2 × 3 km MP</li>
+            <li>Week 41: 26 km met 6–8 km MP aan het einde</li>
+            <li>Week 42: 28 km met 10–12 km MP</li>
+            <li>Week 43: 30–32 km rustig</li>
+            <li>Week 47: marathon</li>
+          </ul>
+          <p>De long run bouwt niet alleen conditie op, maar ook pezen, spieren, gewrichten, mentale rust, voeding/hydratatie en vertrouwen in langere afstanden.</p>
+        </div>
+      </details>
+      <details class="info-block">
+        <summary>Waarom dit richting 3:30 werkt</summary>
+        <div class="details-body">
+          <p>Een marathon van 3:30 vraagt niet alleen snelheid, maar vooral het vermogen om een stevig tempo lang economisch vol te houden. Daarom combineert dit schema easy runs, long runs, marathonpace-runs, interval/tempo, krachttraining en taper.</p>
+          <p>De kern is dat 12 km/u eerst kort wordt geoefend, daarna langer, en uiteindelijk in lange duurlopen op vermoeide benen. Daardoor wordt 12 km/u niet alleen een tempo dat ik kort kan halen, maar een tempo dat ik steeds beter kan controleren.</p>
+          <p><strong>Let op:</strong> dit schema garandeert geen 3:30, maar het bevat wel de belangrijkste bouwstenen: consistentie, duurvermogen, marathontempo, lange duurlopen, specifieke piektrainingen en taper.</p>
+        </div>
+      </details>
+      <details class="info-block">
+        <summary>Belangrijkste controlepunten</summary>
+        <div class="details-body">
+          <ul class="compact-list">
+            <li>Week 27: kan ik drie runs per week aan?</li>
+            <li>Week 35: kan ik 115–120 min rustig lopen?</li>
+            <li>Week 39: eerste long run met marathontempo.</li>
+            <li>Week 41: marathontempo aan het einde van 26 km.</li>
+            <li>Week 42: belangrijkste generale repetitie, 28 km met 10–12 km MP.</li>
+            <li>Week 43: langste duurloop, 30–32 km rustig.</li>
+            <li>Week 45: start taper.</li>
+            <li>Week 47: marathonweek.</li>
+          </ul>
+          <p>Deze weken laten zien of de opbouw werkt. Vooral week 39, 41, 42 en 43 zijn belangrijk voor vertrouwen richting 3:30.</p>
+        </div>
+      </details>
     `;
   }
 
   function renderBuildOverviewPhase(phase) {
-    const detail = phase.phaseDetails || {};
+    const detail = buildOverviewPhaseData(phase);
     return `
       <article class="info-card">
         <h3>${phase.phaseName}</h3>
-        <p class="status-line">${phase.weekRange} · Duur: ${phaseDuration(phase)} weken</p>
+        <p class="status-line">${phase.weekRange} · ${formatDate(phase.startDate)} - ${formatDate(phase.endDate)}</p>
         <div class="compact-meta">
-          <span class="chip">Hardlopen: ${detail.runsPerWeek || "-"}</span>
-          <span class="chip">${phaseWeeksToMarathonText(phase)}</span>
+          <span class="chip">Duur: ${phaseDuration(phase)} weken</span>
+          <span class="chip">${detail.weeksToMarathon}</span>
+          <span class="chip">Runs: ${detail.runs}</span>
+          <span class="chip">Gym: ${detail.gym}</span>
         </div>
-        <p class="goal"><strong>Hoofddoel:</strong> ${detail.primaryGoal || phase.goal}</p>
+        <p class="goal"><strong>Long run:</strong> ${detail.longRun}</p>
+        <p class="goal"><strong>Marathontempo:</strong> ${detail.marathonPace}</p>
+        <p class="goal"><strong>Doel:</strong> ${detail.goal}</p>
+        <p class="goal"><strong>Opleveren:</strong> ${detail.outcome}</p>
       </article>
     `;
+  }
+
+  function buildOverviewPhaseData(phase) {
+    const data = {
+      "fase-1": {
+        weeksToMarathon: "Nog ±26 tot 22 weken",
+        runs: "2 per week",
+        gym: "4 per week",
+        longRun: "nog geen echte long run",
+        marathonPace: "korte introducties van 2–3 minuten",
+        goal: "hardlopen rustig toevoegen terwijl krachttraining dominant blijft",
+        outcome: "loopgewenning, eerste tempoherkenning en blessurevrij starten",
+      },
+      "fase-2": {
+        weeksToMarathon: "Nog ±21 tot 20 weken",
+        runs: "3 per week",
+        gym: "3 + mini-strength",
+        longRun: "nog beperkt; frequentie staat centraal",
+        marathonPace: "4 × 3 min en 3 × 5 min rond 11,8–12,0 km/u",
+        goal: "de derde run toevoegen",
+        outcome: "hardlopen wordt een vaste pijler in de week",
+      },
+      "fase-3": {
+        weeksToMarathon: "Nog ±19 tot 12 weken",
+        runs: "3 per week",
+        gym: "3 per week",
+        longRun: "van 60 min naar 115–120 min",
+        marathonPace: "wekelijks, van 3 × 4 min naar 20 min + 8 min",
+        goal: "de marathonmotor bouwen",
+        outcome: "duurvermogen, ritme en eerste serieuze MP-gewenning",
+      },
+      "fase-4": {
+        weeksToMarathon: "Nog ±11 tot 4 weken",
+        runs: "4 per week",
+        gym: "2–3 ondersteunend",
+        longRun: "20 km naar 30–32 km",
+        marathonPace: "binnen lange duurlopen",
+        goal: "racespecifiek vertrouwen bouwen",
+        outcome: "12 km/u leren lopen op vermoeide benen",
+      },
+      "fase-5": {
+        weeksToMarathon: "Nog ±3 tot 0 weken",
+        runs: "dalend / korter",
+        gym: "onderhoud",
+        longRun: "korter, geen zware test meer",
+        marathonPace: "korte prikkels",
+        goal: "fris worden",
+        outcome: "uitgerust en scherp aan de start verschijnen",
+      },
+    };
+    return data[phase.phaseId] || {
+      weeksToMarathon: phaseWeeksToMarathonText(phase) || "Na marathon",
+      runs: phase.phaseDetails?.runsPerWeek || "-",
+      gym: phase.phaseDetails?.gymPerWeek || "-",
+      longRun: "herstel en terugkeer",
+      marathonPace: "geen marathontempo",
+      goal: phase.phaseDetails?.primaryGoal || phase.goal,
+      outcome: "rustig herstellen en opnieuw opbouwen",
+    };
   }
 
   function renderBuildPhases() {
@@ -1712,33 +1858,228 @@
   }
 
   function renderBuildLongRuns() {
-    const rows = [];
+    const longRunRows = [];
     for (let weekNo = 29; weekNo <= 45; weekNo += 1) {
       const week = weeks.find((item) => item.calendarWeek === weekNo);
       const longRun = week?.sessions.find((session) => session.type === "long-run");
-      if (week && longRun) rows.push({ week, title: longRun.cardio.title, text: longRun.cardio.instruction, note: longRun.cardio.outdoor || longRun.cardio.notes || "" });
+      if (week && longRun) longRunRows.push({ week, session: longRun });
     }
-    rows.push({ week: weeks.find((item) => item.calendarWeek === 46), title: "Geen echte lange duurloop meer", text: "Taperweek: korte easy run en korte marathonpace-prikkel.", note: "Frisheid opbouwen." });
-    rows.push({ week: weeks.find((item) => item.calendarWeek === 47), title: "Marathon", text: "Zondag 22 november 2026.", note: "Uitvoeren wat is voorbereid." });
+    const week46 = weeks.find((item) => item.calendarWeek === 46);
+    const week47 = weeks.find((item) => item.calendarWeek === 47);
+    const marathon = week47?.sessions.find((session) => session.type === "marathon");
     return `
-      <article class="info-card">
+      <article class="info-card build-hero-card">
         <h3>Long-run-opbouw</h3>
-        <p>De long runs bouwen eerst vooral duurvermogen op. In Fase 3 zijn ze grotendeels rustig. In Fase 4 worden sommige long runs marathonspecifiek doordat er blokken rond 11,8–12,0 km/u in komen. Niet elke lange duurloop is hard: week 43 blijft bewust rustig omdat 30–32 km op zichzelf al een grote belasting is.</p>
+        <p>Vanaf Fase 3 komt er meestal één long run per week in het schema. Die long run is de belangrijkste duurprikkel van de week. In Fase 3 zijn de long runs vooral rustig en bedoeld om duurvermogen, pezen, gewrichten, energiehuishouding en mentale gewenning op te bouwen.</p>
+        <p>In Fase 4 worden sommige long runs marathonspecifieker. Dan komen er stukken rond 11,8–12,0 km/u in de lange duurloop, zodat ik leer om marathontempo te lopen met vermoeide benen. Niet elke lange duurloop is hard: sommige weken blijven bewust rustig, juist omdat de afstand zelf al een grote belasting is.</p>
+      </article>
+      <article class="info-card">
+        <h3>Long-run-regel</h3>
+        <ul class="compact-list">
+          <li>Fase 1: nog geen echte long runs.</li>
+          <li>Fase 2: nog geen echte long runs.</li>
+          <li>Fase 3: 1 long run per week, vooral rustig.</li>
+          <li>Fase 4: 1 long run per week, soms met marathontempo.</li>
+          <li>Fase 5: long run wordt korter richting marathonweek.</li>
+          <li>Marathonweek: geen normale long run meer, maar de marathon zelf.</li>
+        </ul>
       </article>
       <section class="info-list">
-        ${rows
-          .map(
-            ({ week, title, text, note }) => `
-            <article class="info-card">
-              <h3>Week ${week?.calendarWeek || ""}: ${title}</h3>
-              ${week ? `<p class="status-line">${formatDate(week.startDate)} - ${formatDate(week.endDate)}</p>` : ""}
-              <p>${text}</p>
-              ${note ? `<p class="muted small">${note}</p>` : ""}
-            </article>`
-          )
-          .join("")}
+        ${longRunRows.map((row) => renderLongRunBuildCard(row)).join("")}
+        ${week46 ? renderNoLongRunBuildCard(week46) : ""}
+        ${week47 && marathon ? renderLongRunBuildCard({ week: week47, session: marathon }) : ""}
       </section>
     `;
+  }
+
+  function renderLongRunBuildCard({ week, session }) {
+    const phase = getPhase(week.phaseId);
+    const cardio = session.cardio;
+    const weekNo = week.calendarWeek;
+    const isMarathon = session.type === "marathon";
+    const keyClass = [39, 41, 42, 43, 44].includes(weekNo) ? " is-key-long-run" : "";
+    return `
+      <article class="info-card long-run-build-card${keyClass}">
+        <h3>Week ${weekNo} — ${isMarathon ? "Marathon" : "Long Run"}</h3>
+        <p class="status-line">${formatDate(week.startDate)} - ${formatDate(week.endDate)}</p>
+        <p class="muted small">${phase.phaseName}</p>
+        <p class="muted small">${isMarathon ? "Marathonweek" : `Nog ${weeksUntilMarathon(week.startDate)} weken tot marathon`}</p>
+        <div class="compact-meta">
+          <span class="chip">${isMarathon ? "Marathon deze week" : "1 long run deze week"}</span>
+          <span class="chip">${runSessions(week).length} runs totaal</span>
+          <span class="chip">${longRunTypeLabel(weekNo)}</span>
+          <span class="chip">Marathontempo: ${longRunMarathonPaceLabel(weekNo, session)}</span>
+        </div>
+        <p class="goal"><strong>${isMarathon ? "Run" : "Long run"}:</strong> ${runCardSummary(session, cardio)}</p>
+        <div class="long-run-plan">${renderRunDetails(session, cardio)}</div>
+        <p class="goal"><strong>Doel:</strong> ${longRunGoalText(weekNo)}</p>
+        <details>
+          <summary>Meer uitleg</summary>
+          <div class="details-body">
+            <p><strong>Waarom deze week?</strong> ${longRunWhyText(weekNo)}</p>
+            <p><strong>Wat oefen ik?</strong> ${longRunPracticeText(weekNo)}</p>
+            <p><strong>Als ik me goed voel:</strong> ${longRunGoodText(weekNo)}</p>
+            <p><strong>Als ik moe ben:</strong> ${longRunTiredText(weekNo)}</p>
+            <p><strong>Belangrijkste focus:</strong> ${longRunFocusText(weekNo)}</p>
+          </div>
+        </details>
+      </article>
+    `;
+  }
+
+  function renderNoLongRunBuildCard(week) {
+    const phase = getPhase(week.phaseId);
+    return `
+      <article class="info-card long-run-build-card">
+        <h3>Week ${week.calendarWeek} — Geen echte long run meer</h3>
+        <p class="status-line">${formatDate(week.startDate)} - ${formatDate(week.endDate)}</p>
+        <p class="muted small">${phase.phaseName}</p>
+        <p class="muted small">Nog ${weeksUntilMarathon(week.startDate)} weken tot marathon</p>
+        <div class="compact-meta">
+          <span class="chip">0 long runs deze week</span>
+          <span class="chip">${runSessions(week).length} runs totaal</span>
+          <span class="chip">${longRunTypeLabel(week.calendarWeek)}</span>
+          <span class="chip">Marathontempo: korte prikkel</span>
+        </div>
+        <p class="goal"><strong>Long run:</strong> geen normale lange duurloop meer; korte taper-runs houden het ritme wakker.</p>
+        <p class="goal"><strong>Doel:</strong> vermoeidheid laten zakken terwijl je loopgevoel behouden blijft.</p>
+        <details>
+          <summary>Meer uitleg</summary>
+          <div class="details-body">
+            <p><strong>Waarom deze week?</strong> De marathon is dichtbij. Extra lange belasting levert nu minder op dan frisheid.</p>
+            <p><strong>Wat oefen ik?</strong> Ritme, ontspanning en vertrouwen zonder vermoeidheid te stapelen.</p>
+            <p><strong>Als ik me goed voel:</strong> Houd het kort en netjes. Meer doen is hier niet automatisch beter.</p>
+            <p><strong>Als ik moe ben:</strong> Korter lopen of een prikkel overslaan is logisch. Frisheid is de prioriteit.</p>
+            <p><strong>Belangrijkste focus:</strong> Fit worden, niet fitheid bewijzen.</p>
+          </div>
+        </details>
+      </article>
+    `;
+  }
+
+  function longRunTypeLabel(weekNo) {
+    const labels = {
+      29: "Rustige basis-long-run",
+      30: "Rustige opbouw-long-run",
+      31: "Langere rustige duurloop",
+      32: "Duurvermogen uitbreiden",
+      33: "Eerste langere duurprikkel",
+      34: "Stevige rustige long run",
+      35: "Langste long run van Fase 3",
+      36: "Lichtere brugweek",
+      37: "Start piekfase-long-run",
+      38: "Long run met optionele steady finish",
+      39: "Eerste marathonpace-long-run",
+      40: "Cutback-long-run",
+      41: "Progressieve marathonpace-long-run",
+      42: "Belangrijkste generale repetitie",
+      43: "Langste duurloop",
+      44: "Laatste specifieke long run / optioneel MP",
+      45: "Taper-long-run",
+      46: "Geen echte long run meer",
+      47: "Marathon",
+    };
+    return labels[weekNo] || "Long run";
+  }
+
+  function longRunMarathonPaceLabel(weekNo, session) {
+    const labels = {
+      39: "ja — 2 × 3 km op 11,8–12,0 km/u",
+      41: "ja — 6–8 km aan het einde",
+      42: "ja — 10–12 km binnen 28 km",
+      43: "nee — bewust rustig ondanks langste afstand",
+      44: "optioneel — 6 km als herstel goed is",
+      47: "wedstrijddag",
+    };
+    if (labels[weekNo]) return labels[weekNo];
+    const text = `${session?.cardio?.instruction || ""} ${session?.cardio?.notes || ""}`.toLowerCase();
+    if (text.includes("mp") || text.includes("marathontempo") || text.includes("11,8") || text.includes("12,0")) return "ja";
+    return "nee";
+  }
+
+  function longRunGoalText(weekNo) {
+    const goals = {
+      29: "Dit is de eerste echte long run van de marathonopbouw. Het doel is rustig duurvermogen opbouwen zonder de week te zwaar te maken.",
+      35: "Dit is de langste duurloop van Fase 3. Het doel is om een stevige aerobe basis te bouwen voordat de piekfase begint.",
+      39: "Dit is de eerste long run waarin marathontempo echt binnen een langere duurloop komt. Het doel is leren om 12 km/u gecontroleerd te lopen terwijl je al kilometers in de benen hebt.",
+      41: "Deze long run maakt marathontempo progressiever: het tempo komt later in de training, wanneer je benen al vermoeider zijn.",
+      42: "Dit is de belangrijkste vertrouwenstraining van de marathonvoorbereiding. Je leert om marathontempo te lopen nadat je al langere tijd onderweg bent.",
+      43: "Dit is de langste duurloop van de voorbereiding. Het doel is afstandsvertrouwen, voeding, hydratatie, mentale hardheid en belastbaarheid.",
+      44: "Deze week is de laatste specifieke long-run-prikkel. Marathontempo is alleen zinvol als herstel en benen goed voelen.",
+      47: "De marathon is de uitvoering van de voorbereiding: gecontroleerd starten, ritme vasthouden en voeding/hydratatie gebruiken zoals geoefend.",
+    };
+    if (goals[weekNo]) return goals[weekNo];
+    if (weekNo >= 30 && weekNo <= 34) return "Deze long run vergroot rustig het duurvermogen en laat je lichaam wennen aan langer op de benen zijn.";
+    if (weekNo === 36) return "Deze long run is bewust lichter, zodat de lange opbouw uit Fase 3 kan landen voor de piekfase start.";
+    if (weekNo === 37 || weekNo === 38) return "Deze long run brengt je de piekfase in: langer lopen blijft belangrijk, maar de belasting wordt nog gecontroleerd gehouden.";
+    if (weekNo === 40) return "Dit is een cutback-long-run: genoeg duurprikkel om ritme te houden, maar lichter om de specifieke week 39 te verwerken.";
+    if (weekNo === 45) return "Deze taper-long-run houdt duurgevoel vast, maar verlaagt de totale belasting richting marathondag.";
+    return "Deze long run ondersteunt de stapsgewijze marathonopbouw.";
+  }
+
+  function longRunWhyText(weekNo) {
+    const texts = {
+      29: "Vanaf Fase 3 wordt de long run een vast onderdeel van de week. Deze eerste long run is nog relatief kort, zodat je lichaam kan wennen aan langere loopbelasting.",
+      35: "Na meerdere weken opbouw is je lichaam klaar voor een langere duurprikkel. Daarna volgt een lichtere brugweek, zodat je deze belasting kunt verwerken.",
+      39: "De weken ervoor bouw je volume en basis op. Deze week wordt de long run specifieker, maar nog niet extreem zwaar. Daarom blijven de midweekse prikkels bewust lichter.",
+      42: "Deze week ligt ver genoeg van de marathon om nog goed te herstellen, maar dichtbij genoeg om zeer specifiek te zijn. Dit is geen gewone long run, maar een gerichte voorbereiding op marathondag.",
+      43: "De week ervoor bevat al een zware marathonpace-long-run. Daarom blijft deze langste duurloop bewust rustig. De afstand zelf is al zwaar genoeg.",
+      44: "Na de generale repetitie en de langste duurloop is dit een laatste controleprikkel. Alleen doen wat herstel toelaat.",
+      47: "Alle eerdere long runs, marathontempo-stukken en de taper komen samen in de wedstrijd.",
+    };
+    if (texts[weekNo]) return texts[weekNo];
+    if (weekNo >= 30 && weekNo <= 34) return "De long run groeit stap voor stap, zodat duurvermogen stijgt zonder dat elke week een test wordt.";
+    if (weekNo === 36) return "Deze week werkt als brug: niet lui, wel genoeg ruimte om fris richting Fase 4 te gaan.";
+    if (weekNo === 40) return "Na een eerste marathonpace-long-run is een lichtere week nodig om de belasting te verwerken.";
+    if (weekNo === 41) return "Na de cutback kan de long run weer specifieker worden, met marathontempo later in de training.";
+    if (weekNo === 45) return "De taper is gestart. Je houdt het long-run-ritme vast, maar het volume gaat duidelijk omlaag.";
+    return "Deze week past in de rustige, progressieve opbouw richting langere en specifiekere duurlopen.";
+  }
+
+  function longRunPracticeText(weekNo) {
+    if ([39, 41, 42, 44].includes(weekNo)) return "Je oefent pacing, schakelen tussen rustig tempo en marathontempo, herstel na sneller lopen en mentaal rustig blijven tijdens een langere training.";
+    if (weekNo === 43) return "Je oefent lang op de benen zijn, rustig blijven, niet te snel starten, voeding nemen en mentaal kalm blijven over een lange afstand.";
+    if (weekNo === 47) return "Je oefent niets nieuws meer; je voert pacing, voeding, hydratatie en mentale controle uit zoals voorbereid.";
+    return "Je oefent ontspannen lopen, rustig tempo houden, ademhaling controleren, voeding/hydratatie opbouwen en langere tijd op de benen zijn.";
+  }
+
+  function longRunGoodText(weekNo) {
+    const texts = {
+      29: "Blijf alsnog rustig. Maak er geen tempo-run van. Eventueel mag je de laatste paar minuten iets actiever lopen, maar alleen als het heel ontspannen blijft.",
+      35: "Blijf beheerst. Deze run hoeft niet hard. De winst zit in de duur, niet in snelheid.",
+      39: "Voer de twee stukken van 3 km op marathontempo strak en constant uit. Ga niet harder dan gepland.",
+      42: "Kies eventueel de agressievere variant, maar alleen als de eerdere weken goed verteerd zijn. Houd marathontempo gecontroleerd; niet sneller lopen om jezelf te bewijzen.",
+      43: "Blijf alsnog rustig. Geen verplichte fast finish en geen marathontempo. De prestatie is de afstand beheerst voltooien.",
+      44: "Doe het optionele marathontempo alleen als je echt goed hersteld bent. Controle is belangrijker dan extra bewijsdrang.",
+      47: "Blijf geduldig. Start gecontroleerd en denk pas later in de race aan vasthouden of voorzichtig versnellen.",
+    };
+    return texts[weekNo] || "Volg het schema. Als alles soepel voelt, maak de uitvoering netter, niet automatisch zwaarder.";
+  }
+
+  function longRunTiredText(weekNo) {
+    const texts = {
+      29: "Houd 9,5 km/u aan of verkort de run iets. Het belangrijkste is dat je de long-run-gewoonte opbouwt.",
+      35: "Blijf volledig easy of verkort naar 100–110 minuten. Liever goed herstellen dan deze run forceren.",
+      39: "Maak er een rustige 22–24 km duurloop van zonder marathontempo, of doe slechts 1 × 3 km op marathontempo.",
+      42: "Kies de standaardvariant of verkort het marathontempo-deel. Als je benen zwaar of gevoelig zijn, maak er een rustige long run van.",
+      43: "Kies 28–30 km rustig of loop op tijd in plaats van afstand. Forceer geen 32 km als herstel of pijntjes niet goed voelen.",
+      44: "Laat het optionele marathontempo weg en houd de long run korter of rustiger.",
+      47: "Niet panikeren. Zoek ritme, voeding en kleine stukken. Controle terugvinden is belangrijker dan forceren.",
+    };
+    return texts[weekNo] || "Houd de hele run rustig of verkort hem iets. Laat optionele versnellingen weg bij zware benen of pijntjes.";
+  }
+
+  function longRunFocusText(weekNo) {
+    const texts = {
+      29: "Rustig lang leren lopen zonder bewijsdrang.",
+      35: "Duurvermogen bouwen en klaar worden voor Fase 4.",
+      39: "Eerste vertrouwen opbouwen in marathontempo tijdens een lange run.",
+      42: "Bewijzen aan je lichaam dat marathontempo ook later in een lange run gecontroleerd kan voelen.",
+      43: "Langste afstand beheerst voltooien zonder jezelf kapot te lopen.",
+      44: "Specifiek blijven zonder de taper alvast te saboteren.",
+      47: "Uitvoeren wat je hebt opgebouwd.",
+    };
+    return texts[weekNo] || "Zuinig lopen, rustig starten en de long-run-opbouw consistent houden.";
   }
 
   function renderBuildMarathonPace() {
