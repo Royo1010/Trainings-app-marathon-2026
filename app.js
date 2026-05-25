@@ -28,9 +28,18 @@
   const phases = window.TRAINING_PLAN || [];
   const config = window.APP_CONFIG || {};
   const MARATHON_DATE = "2026-11-22";
+  const VIEWS = {
+    TODAY: "today",
+    WEEK: "week",
+    PHASES: "phases",
+    RUN_BUILD: "runBuild",
+    NUTRITION: "nutrition",
+    STATS: "stats",
+    SESSION_PREVIEW: "sessionPreview",
+  };
 
   const state = {
-    view: "today",
+    view: VIEWS.TODAY,
     viewedWeekIndex: 0,
     preview: null,
     selectedDateIso: null,
@@ -123,16 +132,40 @@
     }
   }
 
+  function normalizeViewKey(view) {
+    const aliases = {
+      statistics: VIEWS.STATS,
+      statistieken: VIEWS.STATS,
+      stats: VIEWS.STATS,
+      running: VIEWS.RUN_BUILD,
+      runBuild: VIEWS.RUN_BUILD,
+      hardloopopbouw: VIEWS.RUN_BUILD,
+      phases: VIEWS.PHASES,
+      fases: VIEWS.PHASES,
+      voeding: VIEWS.NUTRITION,
+      nutrition: VIEWS.NUTRITION,
+      week: VIEWS.WEEK,
+      today: VIEWS.TODAY,
+      vandaag: VIEWS.TODAY,
+    };
+    return aliases[view] || view || VIEWS.TODAY;
+  }
+
   function normalizeLogs(raw) {
     return {
-      strength: Array.isArray(raw?.strength) ? raw.strength : [],
-      cardio: Array.isArray(raw?.cardio) ? raw.cardio : [],
+      strength: Array.isArray(raw?.strength) ? raw.strength.filter(isPlainObject) : [],
+      cardio: Array.isArray(raw?.cardio) ? raw.cardio.filter(isPlainObject) : [],
     };
   }
 
   function normalizeCompleted(raw) {
-    if (isPlainObject(raw)) return Object.values(raw).filter(Boolean);
-    return Array.isArray(raw) ? raw : [];
+    const items = Array.isArray(raw) ? raw : isPlainObject(raw) ? Object.values(raw) : [];
+    return items
+      .map((item) => {
+        if (typeof item === "string") return { sessionKey: item };
+        return isPlainObject(item) ? item : null;
+      })
+      .filter(Boolean);
   }
 
   function isPlainObject(value) {
@@ -502,7 +535,7 @@
   }
 
   function goHomeToday() {
-    state.view = "today";
+    state.view = VIEWS.TODAY;
     state.preview = null;
     state.selectedExerciseId = null;
     state.selectedExerciseName = "";
@@ -514,11 +547,35 @@
   }
 
   function openStatistics(options = {}) {
-    state.view = "stats";
+    state.view = VIEWS.STATS;
     state.preview = null;
     state.statsTab = options.tab || "overview";
     state.selectedExerciseId = options.exerciseId || null;
     state.selectedExerciseName = options.exerciseName || "";
+    closeMenu();
+    closeCountdown();
+    closeMilestone();
+    render();
+  }
+
+  function openExerciseStats(exerciseId, exerciseName = "") {
+    const definition = exerciseId ? findExerciseDefinition(exerciseId) : null;
+    const resolvedName = exerciseName || definition?.name || "";
+    openStatistics({ tab: "exercises", exerciseId: exerciseId || "", exerciseName: resolvedName });
+  }
+
+  function navigateToView(view) {
+    const nextView = normalizeViewKey(view);
+    if (nextView === VIEWS.STATS) {
+      openStatistics({ tab: "overview" });
+      return;
+    }
+    state.view = nextView;
+    state.preview = null;
+    state.selectedExerciseId = null;
+    state.selectedExerciseName = "";
+    if (state.view === VIEWS.TODAY) resetTodaySelection();
+    if (state.view === VIEWS.WEEK) state.viewedWeekIndex = currentWeekIndex();
     closeMenu();
     closeCountdown();
     closeMilestone();
@@ -2861,7 +2918,14 @@
   function renderStats() {
     const logs = getLogs();
     const completed = getCompleted();
-    const analytics = statsAnalytics(logs, completed);
+    let analytics;
+    try {
+      analytics = statsAnalytics(logs, completed);
+    } catch (error) {
+      console.error("Statistieken konden niet worden opgebouwd:", error);
+      app.innerHTML = renderStatsFallback();
+      return;
+    }
 
     if (state.selectedExerciseId) {
       renderExerciseStatsDetail(state.selectedExerciseId, analytics.byExercise, state.selectedExerciseName);
@@ -2916,15 +2980,38 @@
     window.requestAnimationFrame(() => drawStatsCharts(analytics));
   }
 
+  function renderStatsFallback() {
+    return `
+      <section class="build-page stats-page">
+        <div class="section-title build-title">
+          <h2>Statistieken</h2>
+          <p>De pagina is geopend, maar sommige lokale data kon niet worden gelezen.</p>
+        </div>
+        <div class="build-tabs" role="tablist" aria-label="Statistieken onderdelen">
+          ${[
+            ["overview", "Overzicht"],
+            ["running", "Hardlopen"],
+            ["strength", "Krachttraining"],
+            ["exercises", "Oefeningen"],
+            ["marathon", "Marathon"],
+            ["insights", "Inzichten"],
+          ].map(([id, label]) => `<button type="button" data-stats-tab="${id}" class="${state.statsTab === id ? "is-active" : ""}">${label}</button>`).join("")}
+        </div>
+        ${renderStatsEmptyState("Nog geen leesbare statistiekdata", "Je bestaande opslag is niet gewist. Exporteer je data onder Data beheren als backup en log daarna opnieuw of importeer een geldige backup.")}
+      </section>
+    `;
+  }
+
   function statsAnalytics(logs, completed) {
     const byExercise = new Map();
     logs.strength.forEach((entry) => {
+      if (!entry?.exerciseId) return;
       if (!byExercise.has(entry.exerciseId)) byExercise.set(entry.exerciseId, []);
       byExercise.get(entry.exerciseId).push(entry);
     });
 
     const runEntries = logs.cardio
-      .filter((entry) => entry.cardioDone)
+      .filter((entry) => entry?.cardioDone)
       .map((entry) => {
         const found = findSessionByKey(entry.sessionKey);
         if (!found?.session?.cardio) return null;
@@ -2944,8 +3031,9 @@
       })
       .filter(Boolean);
 
-    const strengthSessionKeys = new Set(logs.strength.map((entry) => entry.sessionKey));
+    const strengthSessionKeys = new Set(logs.strength.map((entry) => entry.sessionKey).filter(Boolean));
     completed.forEach((item) => {
+      if (!item?.sessionKey) return;
       const found = findSessionByKey(item.sessionKey);
       if (found?.session?.exercises?.length) strengthSessionKeys.add(item.sessionKey);
     });
@@ -3379,9 +3467,10 @@
         <button class="secondary-button back-button" type="button" data-stats-overview>Terug naar statistieken</button>
         <section class="stat-card exercise-detail">
           <h3>${name}</h3>
-          <p class="muted">Nog geen data voor deze oefening.</p>
+          <p class="muted">Nog geen of nog te weinig data voor deze oefening.</p>
           <div class="chart-placeholder small-placeholder"><span></span><span></span><span></span><span></span></div>
           <p class="muted small">Log gewicht, reps of seconden tijdens je training om hier progressie te zien.</p>
+          <p class="muted small"><strong>Trend:</strong> nog te weinig data voor trend. Minimaal 3 logs nodig.</p>
           ${definition ? `<p class="muted small">${definition.planned ? `Gepland in schema: ${plannedLabel(definition)}` : ""}</p>` : ""}
         </section>
         </section>
@@ -3829,7 +3918,7 @@
 
   function syncMilestonePopup() {
     if (!milestoneOverlay || !milestoneContent) return;
-    if (state.view !== "today") {
+    if (normalizeViewKey(state.view) !== VIEWS.TODAY) {
       state.milestoneActiveKey = "";
       state.milestoneDismissedKey = "";
       closeMilestone();
@@ -3864,37 +3953,37 @@
     const week = weeks.find((item) => item.calendarWeek === Number(milestoneWeek)) || todayViewContext().week;
     closeMilestone();
     if (action === "week") {
-      state.view = "week";
+      state.view = VIEWS.WEEK;
       state.preview = null;
       state.viewedWeekIndex = weeks.indexOf(week);
     }
     if (action === "phase") {
-      state.view = "phases";
+      state.view = VIEWS.PHASES;
       state.preview = null;
       state.targetPhaseId = phaseId || week.phaseId;
     }
     if (action === "nutritionPhase") {
-      state.view = "nutrition";
+      state.view = VIEWS.NUTRITION;
       state.preview = null;
       state.nutritionTab = "phases";
     }
     if (action === "nutritionLongRuns") {
-      state.view = "nutrition";
+      state.view = VIEWS.NUTRITION;
       state.preview = null;
       state.nutritionTab = "longRuns";
     }
     if (action === "nutritionMarathon" || action === "marathonWeek") {
-      state.view = "nutrition";
+      state.view = VIEWS.NUTRITION;
       state.preview = null;
       state.nutritionTab = "marathonWeek";
     }
     if (action === "longRuns") {
-      state.view = "runBuild";
+      state.view = VIEWS.RUN_BUILD;
       state.preview = null;
       state.runBuildTab = "longRuns";
     }
     if (action === "marathonPace") {
-      state.view = "runBuild";
+      state.view = VIEWS.RUN_BUILD;
       state.preview = null;
       state.runBuildTab = "marathonPace";
     }
@@ -3904,17 +3993,21 @@
   }
 
   function render() {
-    const activeView = state.view === "sessionPreview" ? "week" : state.view;
-    navButtons.forEach((button) => button.classList.toggle("is-active", button.dataset.view === activeView));
+    state.view = normalizeViewKey(state.view);
+    const activeView = state.view === VIEWS.SESSION_PREVIEW ? VIEWS.WEEK : state.view;
+    navButtons.forEach((button) => button.classList.toggle("is-active", normalizeViewKey(button.dataset.view) === activeView));
     const dateIso = state.selectedDateIso || toIsoDate(today());
     todayPill.textContent = parseLocalDate(dateIso).toLocaleDateString("nl-NL", { weekday: "short", day: "numeric", month: "short" });
-    if (state.view === "today") renderToday();
-    if (state.view === "week") renderWeek();
-    if (state.view === "sessionPreview") renderSessionPreview();
-    if (state.view === "phases") renderPhases();
-    if (state.view === "runBuild") renderRunBuild();
-    if (state.view === "nutrition") renderNutrition();
-    if (state.view === "stats") renderStats();
+    const renderers = {
+      [VIEWS.TODAY]: renderToday,
+      [VIEWS.WEEK]: renderWeek,
+      [VIEWS.SESSION_PREVIEW]: renderSessionPreview,
+      [VIEWS.PHASES]: renderPhases,
+      [VIEWS.RUN_BUILD]: renderRunBuild,
+      [VIEWS.NUTRITION]: renderNutrition,
+      [VIEWS.STATS]: renderStats,
+    };
+    (renderers[state.view] || renderToday)();
     syncMilestonePopup();
   }
 
@@ -3927,7 +4020,7 @@
     }
 
     if (target.closest("#header-day-prev")) {
-      state.view = "today";
+      state.view = VIEWS.TODAY;
       state.preview = null;
       moveTodaySelection(-1);
       closeMenu();
@@ -3938,7 +4031,7 @@
     }
 
     if (target.closest("#header-day-next")) {
-      state.view = "today";
+      state.view = VIEWS.TODAY;
       state.preview = null;
       moveTodaySelection(1);
       closeMenu();
@@ -3981,18 +4074,7 @@
 
     const navButton = target.closest("[data-view]");
     if (navButton) {
-      if (navButton.dataset.view === "stats") {
-        openStatistics({ tab: "overview" });
-        return;
-      }
-      state.view = navButton.dataset.view;
-      state.preview = null;
-      state.selectedExerciseId = null;
-      state.selectedExerciseName = "";
-      if (state.view === "today") resetTodaySelection();
-      if (state.view === "week") state.viewedWeekIndex = currentWeekIndex();
-      closeMenu();
-      render();
+      navigateToView(navButton.dataset.view);
       return;
     }
     const runTab = target.closest("[data-run-tab]");
@@ -4015,18 +4097,15 @@
       renderStats();
       return;
     }
-    const exerciseStatsButton = target.closest("[data-open-exercise-stats]");
+    const exerciseStatsButton = target.closest("[data-open-exercise-stats], [data-action='open-exercise-stats']");
     if (exerciseStatsButton) {
-      openStatistics({
-        tab: "exercises",
-        exerciseId: exerciseStatsButton.dataset.openExerciseStats,
-        exerciseName: exerciseStatsButton.dataset.exerciseName || "",
-      });
+      const exerciseId = exerciseStatsButton.dataset.openExerciseStats || exerciseStatsButton.dataset.exerciseId || exerciseStatsButton.dataset.exerciseStatsId || "";
+      openExerciseStats(exerciseId, exerciseStatsButton.dataset.exerciseName || "");
       return;
     }
     if (target.closest("[data-open-week-current]")) {
       const context = todayViewContext();
-      state.view = "week";
+      state.view = VIEWS.WEEK;
       state.preview = null;
       state.selectedExerciseId = null;
       state.selectedExerciseName = "";
@@ -4046,7 +4125,7 @@
       const week = getWeekByIndex(Number(viewSessionToday.dataset.weekIndex));
       const session = week.sessions.find((item) => item.sessionNumber === Number(viewSessionToday.dataset.sessionNumber));
       if (session) {
-        state.view = "today";
+        state.view = VIEWS.TODAY;
         state.preview = null;
         state.selectedSessionKey = sessionKey(week, session);
         state.selectedDateIso = plannedDateForSession(week, session);
@@ -4064,12 +4143,12 @@
         weekIndex: Number(previewButton.dataset.previewWeekIndex),
         sessionNumber: Number(previewButton.dataset.previewSession),
       };
-      state.view = "sessionPreview";
+      state.view = VIEWS.SESSION_PREVIEW;
       render();
       return;
     }
     if (target.closest("[data-back-week]")) {
-      state.view = "week";
+      state.view = VIEWS.WEEK;
       render();
       return;
     }
@@ -4203,7 +4282,7 @@
     installDoubleTapGuard();
     render();
     if ("serviceWorker" in navigator) {
-      navigator.serviceWorker.register("./service-worker.js").catch(() => {});
+      navigator.serviceWorker.register("./service-worker.js").then((registration) => registration.update()).catch(() => {});
     }
   }
 
