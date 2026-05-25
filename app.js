@@ -3,15 +3,17 @@
 
   const STORAGE = {
     appData: "marathonTrainingAppData",
+    resetMarker: "marathonTrainingAppDataReset20260525",
     logs: "marathonApp.logs",
     completed: "marathonApp.completedSessions",
     preferences: "marathonApp.preferences",
     version: "marathonApp.version",
   };
   const APP_DATA_VERSION = 1;
-  // BELANGRIJK VOOR TOEKOMSTIGE UPDATES: verander storage keys niet zonder migratie,
-  // overschrijf bestaande localStorage-data nooit met lege defaults, voeg nieuwe velden
-  // alleen aanvullend toe en gebruik migrateAppData() bij datastructuurwijzigingen.
+  // BELANGRIJK VOOR TOEKOMSTIGE UPDATES: verander storage keys niet zonder migratie.
+  // Overschrijf bestaande localStorage-data nooit met lege defaults. workoutLogs en
+  // runLogs zijn de bron van waarheid; exerciseStats is afgeleid en mag opnieuw
+  // berekend worden. Bij toekomstige updates bestaande data behouden.
 
   const app = document.getElementById("app");
   const todayPill = document.getElementById("today-pill");
@@ -35,8 +37,26 @@
     RUN_BUILD: "runBuild",
     NUTRITION: "nutrition",
     STATS: "stats",
+    DATA: "data",
     SESSION_PREVIEW: "sessionPreview",
   };
+
+  const APP_STORAGE_KEYS = [
+    STORAGE.appData,
+    STORAGE.logs,
+    STORAGE.completed,
+    STORAGE.preferences,
+    STORAGE.version,
+    "trainingLogs",
+    "workoutLogs",
+    "exerciseLogs",
+    "completedWorkouts",
+    "completedSessions",
+    "marathonTrainingLogs",
+    "runLogs",
+    "appData",
+    "trainingData",
+  ];
 
   const state = {
     view: VIEWS.TODAY,
@@ -137,6 +157,8 @@
       statistics: VIEWS.STATS,
       statistieken: VIEWS.STATS,
       stats: VIEWS.STATS,
+      data: VIEWS.DATA,
+      gegevens: VIEWS.DATA,
       running: VIEWS.RUN_BUILD,
       runBuild: VIEWS.RUN_BUILD,
       hardloopopbouw: VIEWS.RUN_BUILD,
@@ -187,8 +209,83 @@
       completedSessions,
       exerciseStats: isPlainObject(source.exerciseStats) ? source.exerciseStats : {},
       userSettings: isPlainObject(source.userSettings) ? source.userSettings : {},
+      uiState: isPlainObject(source.uiState) ? source.uiState : {},
       dismissedTemporaryUi: isPlainObject(source.dismissedTemporaryUi) ? source.dismissedTemporaryUi : {},
     };
+  }
+
+  function emptyAppData() {
+    const now = new Date().toISOString();
+    return {
+      appDataVersion: APP_DATA_VERSION,
+      createdAt: now,
+      updatedAt: now,
+      workoutLogs: { strength: [], cardio: [] },
+      runLogs: [],
+      completedSessions: [],
+      exerciseStats: {},
+      userSettings: {},
+      uiState: {},
+      dismissedTemporaryUi: {},
+    };
+  }
+
+  function appStorageKeysFound() {
+    const keys = [];
+    try {
+      for (let index = 0; index < localStorage.length; index += 1) {
+        const key = localStorage.key(index);
+        if (key && isAppStorageKey(key)) keys.push(key);
+      }
+    } catch (error) {
+      console.warn("LocalStorage keys konden niet worden gelezen:", error);
+    }
+    return [...new Set(keys.concat(APP_STORAGE_KEYS.filter((key) => rawStorageValue(key) !== null)))].sort();
+  }
+
+  function isAppStorageKey(key) {
+    if (APP_STORAGE_KEYS.includes(key) || key === STORAGE.resetMarker) return true;
+    return /^(marathon|training|workout|exercise|completed|runLogs|appData|trainingData)/i.test(key);
+  }
+
+  function rawStorageValue(key) {
+    try {
+      return localStorage.getItem(key);
+    } catch (error) {
+      return null;
+    }
+  }
+
+  function removeKnownAppStorageKeys() {
+    appStorageKeysFound().forEach((key) => {
+      if (key === STORAGE.resetMarker) return;
+      try {
+        localStorage.removeItem(key);
+      } catch (error) {
+        console.warn("LocalStorage key kon niet worden verwijderd:", key, error);
+      }
+    });
+  }
+
+  function createFreshAppData() {
+    const fresh = emptyAppData();
+    saveAppData(fresh);
+    try {
+      localStorage.setItem(STORAGE.resetMarker, new Date().toISOString());
+    } catch (error) {
+      console.warn("Reset-marker kon niet worden opgeslagen:", error);
+    }
+    return fresh;
+  }
+
+  function ensureFreshStorageStart() {
+    try {
+      if (localStorage.getItem(STORAGE.resetMarker)) return;
+      removeKnownAppStorageKeys();
+      createFreshAppData();
+    } catch (error) {
+      console.warn("Frisse storage-start kon niet worden uitgevoerd:", error);
+    }
   }
 
   function legacyDataSnapshot() {
@@ -225,7 +322,8 @@
         !stored.workoutLogs ||
         !stored.completedSessions ||
         !stored.exerciseStats ||
-        !stored.userSettings;
+        !stored.userSettings ||
+        !stored.uiState;
       if (needsMigration) saveAppData(migrated);
       return migrated;
     }
@@ -235,7 +333,7 @@
   }
 
   function saveAppData(data, options = {}) {
-    const { mirrorLegacy = true } = options;
+    const { mirrorLegacy = false } = options;
     const migrated = migrateAppData(data);
     migrated.updatedAt = new Date().toISOString();
     try {
@@ -258,6 +356,23 @@
 
   function validateImportedAppData(raw) {
     if (!isPlainObject(raw)) throw new Error("Backup is geen geldig JSON-object.");
+    if (raw.exportType === "rawLocalStorage" && isPlainObject(raw.keys)) {
+      const appRaw = raw.keys[STORAGE.appData];
+      if (appRaw) {
+        try {
+          return migrateAppData(JSON.parse(appRaw));
+        } catch (error) {
+          throw new Error("De ruwe backup bevat appData, maar die JSON is niet leesbaar.");
+        }
+      }
+      const legacy = {
+        workoutLogs: parseMaybeJson(raw.keys[STORAGE.logs] || raw.keys.workoutLogs || raw.keys.trainingLogs || raw.keys.marathonTrainingLogs, {}),
+        runLogs: parseMaybeJson(raw.keys.runLogs, []),
+        completedSessions: parseMaybeJson(raw.keys[STORAGE.completed] || raw.keys.completedSessions || raw.keys.completedWorkouts, []),
+        userSettings: parseMaybeJson(raw.keys[STORAGE.preferences], {}),
+      };
+      return migrateAppData(legacy);
+    }
     const hasKnownData =
       raw.appDataVersion ||
       raw.workoutLogs ||
@@ -269,20 +384,84 @@
     return migrateAppData(raw);
   }
 
-  function storageSummary() {
-    const data = loadAppData();
+  function parseMaybeJson(value, fallback) {
+    if (!value) return fallback;
+    if (typeof value !== "string") return value;
+    try {
+      return JSON.parse(value);
+    } catch (error) {
+      return fallback;
+    }
+  }
+
+  function rawLocalStorageBackup() {
+    const keys = {};
+    appStorageKeysFound().forEach((key) => {
+      keys[key] = rawStorageValue(key);
+    });
+    return {
+      exportType: "rawLocalStorage",
+      exportedAt: new Date().toISOString(),
+      origin: window.location.origin,
+      keys,
+    };
+  }
+
+  function storageDiagnostics() {
+    const keys = appStorageKeysFound();
+    const rawMain = rawStorageValue(STORAGE.appData);
+    const parseErrors = [];
+    let parsed = null;
+    if (rawMain) {
+      try {
+        parsed = JSON.parse(rawMain);
+      } catch (error) {
+        parseErrors.push(`${STORAGE.appData}: ${error.message}`);
+      }
+    }
+    const data = parsed ? migrateAppData(parsed) : emptyAppData();
     const logs = normalizeLogs(data.workoutLogs);
     const completed = normalizeCompleted(data.completedSessions);
     const uniqueExercises = new Set(logs.strength.map((entry) => entry.exerciseId).filter(Boolean));
-    const sizeKb = Math.round((JSON.stringify(data).length / 1024) * 10) / 10;
+    const legacyKeys = keys.filter((key) => key !== STORAGE.appData && key !== STORAGE.resetMarker);
+    const totalLogs = logs.strength.length + logs.cardio.length + completed.length;
+    const status = parseErrors.length ? "mogelijk oude/corrupte data" : rawMain ? (totalLogs ? "gezond" : "leeg") : "leeg";
+    const sizeKb = rawMain ? Math.round((rawMain.length / 1024) * 10) / 10 : 0;
+    return {
+      status,
+      keys,
+      legacyKeys,
+      parseErrors,
+      data,
+      logs,
+      completed,
+      uniqueExercises: uniqueExercises.size,
+      workoutLogCount: logs.strength.length + logs.cardio.length,
+      runLogCount: logs.cardio.length,
+      strengthLogCount: logs.strength.length,
+      completedCount: completed.length,
+      storageSizeKb: sizeKb,
+      hasMain: Boolean(rawMain),
+    };
+  }
+
+  function storageSummary() {
+    const diagnostics = storageDiagnostics();
+    const data = diagnostics.data;
     return [
+      `Hoofdkey: ${STORAGE.appData}`,
       `Dataversie: v${data.appDataVersion}`,
+      `Aangemaakt: ${data.createdAt ? new Date(data.createdAt).toLocaleString("nl-NL") : "onbekend"}`,
       `Laatst opgeslagen: ${data.updatedAt ? new Date(data.updatedAt).toLocaleString("nl-NL") : "onbekend"}`,
-      `Voltooide sessies: ${completed.length}`,
-      `Oefeninglogs: ${logs.strength.length}`,
-      `Runlogs: ${logs.cardio.length}`,
-      `Unieke oefeningen: ${uniqueExercises.size}`,
-      `Geschatte opslaggrootte: ${formatNumber(sizeKb)} KB`,
+      `Workout logs: ${diagnostics.workoutLogCount}`,
+      `Runlogs: ${diagnostics.runLogCount}`,
+      `Voltooide sessies: ${diagnostics.completedCount}`,
+      `Oefeninglogs: ${diagnostics.strengthLogCount}`,
+      `Unieke oefeningen: ${diagnostics.uniqueExercises}`,
+      `Legacy keys gevonden: ${diagnostics.legacyKeys.length ? diagnostics.legacyKeys.join(", ") : "geen"}`,
+      `Parse errors: ${diagnostics.parseErrors.length ? diagnostics.parseErrors.join(" | ") : "geen"}`,
+      `Geschatte opslaggrootte: ${formatNumber(diagnostics.storageSizeKb)} KB`,
+      `Status: ${diagnostics.status}`,
     ].join("\n");
   }
 
@@ -313,7 +492,8 @@
       window.alert(error.message || "Deze backup kan niet worden geïmporteerd.");
       return false;
     }
-    const confirmed = window.confirm("Dit vervangt je huidige lokale trainingsdata door de gekozen backup. Maak eventueel eerst een export van je huidige data.\n\nBackup importeren?");
+    const summary = summarizeAppData(migrated);
+    const confirmed = window.confirm(`Dit vervangt je huidige lokale trainingsdata door de gekozen backup. Maak eventueel eerst een export van je huidige data.\n\n${summary}\n\nBackup importeren?`);
     if (!confirmed) return false;
     saveAppData(migrated);
     state.selectedExerciseId = null;
@@ -321,6 +501,43 @@
     render();
     window.alert("Backup geïmporteerd.");
     return true;
+  }
+
+  function summarizeAppData(data) {
+    const logs = normalizeLogs(data.workoutLogs);
+    const completed = normalizeCompleted(data.completedSessions);
+    return [
+      `Dataversie: v${data.appDataVersion || "onbekend"}`,
+      `Workout logs: ${logs.strength.length + logs.cardio.length}`,
+      `Runlogs: ${logs.cardio.length}`,
+      `Voltooide sessies: ${completed.length}`,
+    ].join("\n");
+  }
+
+  function copyTextToClipboard(text, successMessage) {
+    if (navigator.clipboard?.writeText) {
+      navigator.clipboard.writeText(text).then(() => window.alert(successMessage)).catch(() => window.prompt("Kopieer je backup:", text));
+      return;
+    }
+    window.prompt("Kopieer je backup:", text);
+  }
+
+  function repairAppData() {
+    const diagnostics = storageDiagnostics();
+    let source = diagnostics.parseErrors.length ? legacyDataSnapshot() : diagnostics.data;
+    if (!diagnostics.hasMain && diagnostics.legacyKeys.length) source = legacyDataSnapshot();
+    saveAppData(migrateAppData(source));
+    return diagnostics.parseErrors.length || diagnostics.legacyKeys.length || !diagnostics.hasMain;
+  }
+
+  function freshStartStorage() {
+    removeKnownAppStorageKeys();
+    createFreshAppData();
+    state.selectedExerciseId = null;
+    state.selectedExerciseName = "";
+    state.selectedSessionKey = null;
+    state.preview = null;
+    render();
   }
 
   function getLogs() {
@@ -2915,6 +3132,88 @@
     `;
   }
 
+  function renderDataPage() {
+    const diagnostics = storageDiagnostics();
+    app.innerHTML = `
+      <section class="build-page data-page">
+        <div class="section-title build-title">
+          <h2>Data beheren</h2>
+        </div>
+        <article class="info-card build-hero-card">
+          <h3>Lokale trainingsdata</h3>
+          <p>Je trainingsdata wordt lokaal op dit apparaat opgeslagen. App-updates zouden je data normaal niet moeten wissen, maar omdat deze app actief wordt doorontwikkeld, is het verstandig om af en toe een backup te maken.</p>
+        </article>
+        ${renderDataStatusCard(diagnostics)}
+        <article class="info-card">
+          <h3>Backup maken</h3>
+          <div class="data-actions">
+            <button class="secondary-button" type="button" data-export-data>Exporteer trainingsdata</button>
+            <button class="secondary-button" type="button" data-copy-backup>Kopieer backup als tekst</button>
+            <button class="secondary-button" type="button" data-export-raw-data>Exporteer ruwe localStorage-backup</button>
+          </div>
+        </article>
+        <article class="info-card">
+          <h3>Backup terugzetten</h3>
+          <p class="muted small">Dit vervangt je huidige lokale trainingsdata pas na bevestiging. Maak eventueel eerst een export van je huidige data.</p>
+          <div class="data-actions">
+            <button class="secondary-button" type="button" data-import-data>Importeer backupbestand</button>
+          </div>
+          <input class="visually-hidden" type="file" accept="application/json" data-import-file />
+          <label class="backup-label" for="backup-import-text">Plak backup-JSON</label>
+          <textarea id="backup-import-text" class="backup-textarea" data-import-text rows="5" placeholder="Plak hier een backup-JSON."></textarea>
+          <button class="secondary-button" type="button" data-import-pasted>Geplakte backup importeren</button>
+        </article>
+        <article class="info-card">
+          <h3>Data controleren</h3>
+          <p class="muted small">Diagnostiek leest alleen localStorage en wijzigt niets.</p>
+          <button class="secondary-button" type="button" data-check-data>Controleer opgeslagen data</button>
+        </article>
+        <article class="info-card">
+          <h3>Data repareren</h3>
+          <p class="muted small">Vult ontbrekende velden aan en migreert oude bekende app-keys naar ${STORAGE.appData}. Dit verwijdert niets zonder bevestiging.</p>
+          <button class="secondary-button" type="button" data-repair-data>Repareer / migreer data</button>
+        </article>
+        <article class="info-card danger-zone">
+          <h3>Gevaarlijke acties</h3>
+          <p class="muted small">Gebruik dit alleen als je opnieuw wilt beginnen of als oude lokale data problemen veroorzaakt.</p>
+          <div class="data-actions">
+            <button class="danger-button danger-button-soft" type="button" data-fresh-start>Frisse start maken</button>
+            <button class="danger-button danger-button-soft" type="button" data-reset>Wis lokale trainingsdata</button>
+          </div>
+        </article>
+      </section>
+    `;
+  }
+
+  function renderDataStatusCard(diagnostics) {
+    const data = diagnostics.data;
+    const hasAnyData = diagnostics.workoutLogCount || diagnostics.completedCount;
+    return `
+      <article class="stat-card data-status-card">
+        <h3>Opslagstatus</h3>
+        <p class="status-line">Status: ${diagnostics.status}</p>
+        ${!hasAnyData && !diagnostics.parseErrors.length ? `<p class="muted small">Nog geen trainingsdata opgeslagen. Zodra je oefeningen of runs logt, verschijnt hier je opslagstatus.</p>` : ""}
+        <div class="data-status-grid">
+          ${dataMetric("Hoofdkey", STORAGE.appData)}
+          ${dataMetric("Dataversie", data.appDataVersion ? `v${data.appDataVersion}` : "onbekend")}
+          ${dataMetric("Laatst opgeslagen", data.updatedAt ? new Date(data.updatedAt).toLocaleString("nl-NL") : "nog niet opgeslagen")}
+          ${dataMetric("Workout logs", diagnostics.workoutLogCount)}
+          ${dataMetric("Run logs", diagnostics.runLogCount)}
+          ${dataMetric("Voltooide sessies", diagnostics.completedCount)}
+          ${dataMetric("Oefeninglogs", diagnostics.strengthLogCount)}
+          ${dataMetric("Unieke oefeningen", diagnostics.uniqueExercises)}
+          ${dataMetric("Opslaggrootte", `${formatNumber(diagnostics.storageSizeKb)} KB`)}
+        </div>
+        <p class="muted small">Legacy keys: ${diagnostics.legacyKeys.length ? diagnostics.legacyKeys.join(", ") : "geen"}.</p>
+        ${diagnostics.parseErrors.length ? `<p class="muted small">Parse errors: ${diagnostics.parseErrors.join(" | ")}</p>` : ""}
+      </article>
+    `;
+  }
+
+  function dataMetric(label, value) {
+    return `<div class="data-metric"><span>${label}</span><strong>${value}</strong></div>`;
+  }
+
   function renderStats() {
     const logs = getLogs();
     const completed = getCompleted();
@@ -2966,6 +3265,7 @@
               <button class="secondary-button" type="button" data-export-data>Exporteer trainingsdata</button>
               <button class="secondary-button" type="button" data-import-data>Importeer trainingsdata</button>
               <button class="secondary-button" type="button" data-check-data>Controleer opgeslagen data</button>
+              <button class="secondary-button" type="button" data-open-data>Open Data beheren</button>
             </div>
             <input class="visually-hidden" type="file" accept="application/json" data-import-file />
             <label class="backup-label" for="backup-import-text">Backup plakken</label>
@@ -2998,6 +3298,7 @@
           ].map(([id, label]) => `<button type="button" data-stats-tab="${id}" class="${state.statsTab === id ? "is-active" : ""}">${label}</button>`).join("")}
         </div>
         ${renderStatsEmptyState("Nog geen leesbare statistiekdata", "Je bestaande opslag is niet gewist. Exporteer je data onder Data beheren als backup en log daarna opnieuw of importeer een geldige backup.")}
+        <button class="secondary-button" type="button" data-open-data>Open Data beheren</button>
       </section>
     `;
   }
@@ -4006,6 +4307,7 @@
       [VIEWS.RUN_BUILD]: renderRunBuild,
       [VIEWS.NUTRITION]: renderNutrition,
       [VIEWS.STATS]: renderStats,
+      [VIEWS.DATA]: renderDataPage,
     };
     (renderers[state.view] || renderToday)();
     syncMilestonePopup();
@@ -4176,9 +4478,22 @@
       renderWeek();
       return;
     }
+    if (target.closest("[data-open-data]")) {
+      navigateToView(VIEWS.DATA);
+      return;
+    }
     if (target.closest("[data-export-data]")) {
       const filename = `marathon-training-backup-${toIsoDate(today())}.json`;
       downloadJsonFile(filename, exportAppData());
+      return;
+    }
+    if (target.closest("[data-copy-backup]")) {
+      copyTextToClipboard(JSON.stringify(exportAppData(), null, 2), "Backup gekopieerd.");
+      return;
+    }
+    if (target.closest("[data-export-raw-data]")) {
+      const filename = `marathon-training-raw-localstorage-${toIsoDate(today())}.json`;
+      downloadJsonFile(filename, rawLocalStorageBackup());
       return;
     }
     if (target.closest("[data-import-data]")) {
@@ -4198,17 +4513,22 @@
       window.alert(`Opgeslagen data:\n\n${storageSummary()}`);
       return;
     }
+    if (target.closest("[data-repair-data]")) {
+      const changed = repairAppData();
+      window.alert(changed ? "Data gecontroleerd en waar nodig aangevuld." : "Geen reparatie nodig.");
+      render();
+      return;
+    }
+    if (target.closest("[data-fresh-start]")) {
+      const first = window.confirm("Frisse start maken?\n\nGebruik dit alleen als je opnieuw wilt beginnen of als oude lokale data problemen veroorzaakt. Je huidige trainingslogs worden verwijderd.");
+      const second = first && window.confirm("Laatste bevestiging: wil je echt opnieuw beginnen met een lege stabiele appData-structuur?");
+      if (second) freshStartStorage();
+      return;
+    }
     if (target.closest("[data-reset]")) {
       const first = window.confirm("Trainingsdata wissen?\n\nDit verwijdert alle lokaal opgeslagen trainingslogs, gewichten, reps, voltooide trainingen en statistieken van dit apparaat. Dit kan niet automatisch worden hersteld.");
       const second = first && window.confirm("Laatste bevestiging: wil je echt alle lokale trainingsdata verwijderen?");
-      if (second) {
-        localStorage.removeItem(STORAGE.appData);
-        localStorage.removeItem(STORAGE.logs);
-        localStorage.removeItem(STORAGE.completed);
-        localStorage.removeItem(STORAGE.preferences);
-        localStorage.removeItem(STORAGE.version);
-        render();
-      }
+      if (second) freshStartStorage();
       return;
     }
     const nameButton = target.closest("[data-toggle-details]");
@@ -4251,7 +4571,10 @@
 
   window.addEventListener("pagehide", persistVisibleLogs);
   document.addEventListener("visibilitychange", () => {
-    if (document.visibilityState === "hidden") persistVisibleLogs();
+    if (document.visibilityState === "hidden") {
+      persistVisibleLogs();
+      saveAppData(loadAppData());
+    }
   });
 
   function installDoubleTapGuard() {
@@ -4276,6 +4599,7 @@
   }
 
   function boot() {
+    ensureFreshStorageStart();
     autoCompleteStaleSessions();
     state.viewedWeekIndex = currentWeekIndex();
     state.selectedDateIso = toIsoDate(today());

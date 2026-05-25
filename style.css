@@ -1454,6 +1454,40 @@ summary::-webkit-details-marker {
   margin: 8px 0;
 }
 
+.data-status-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 7px;
+  margin-top: 10px;
+}
+
+.data-metric {
+  min-height: 58px;
+  padding: 8px;
+  border: 1px solid rgba(51, 65, 85, 0.72);
+  border-radius: var(--radius);
+  background: rgba(17, 24, 39, 0.55);
+}
+
+.data-metric span {
+  display: block;
+  margin-bottom: 4px;
+  color: var(--muted-2);
+  font-size: 11px;
+}
+
+.data-metric strong {
+  display: block;
+  color: var(--text);
+  font-size: 13px;
+  line-height: 1.25;
+  overflow-wrap: anywhere;
+}
+
+.danger-zone {
+  border-color: rgba(239, 68, 68, 0.28);
+}
+
 .backup-label {
   display: block;
   margin: 10px 0 5px;
