@@ -57,19 +57,19 @@ De app bevat manifest- en iOS-meta-tags voor gebruik via "Zet op beginscherm". E
 
 Het Vandaag-scherm is compact gemaakt voor iPhone-gebruik: geen vaste ondernavigatie, een klein hamburgermenu bovenin en direct zicht op de oefeningen. In hybride upper/lower/gym + run-sessies toont de app kracht eerst en hardlopen daarna. Echte run-first sessies, zoals long runs, shake-outs, marathon en easy run + mini strength, tonen hardlopen eerst.
 
-Het Week-scherm is interactief: tik op een sessie om een preview te openen. In preview-modus kun je vooruitkijken zonder loggingvelden of afrondknop, zodat toekomstige sessies niet per ongeluk worden gelogd.
+Het Week-scherm is een compact weekdashboard: eerst weekheader en korte samenvatting, daarna direct de sessies van die week. Sessiekaarten tonen type, omvang, duur, run-samenvatting, focus en status. Per sessie kun je extra info openklappen, een preview openen of via `Bekijk op Vandaag` naar die sessie springen zonder logging aan te passen.
 
-Het Vandaag-scherm heeft een compacte `[‹] Vandaag [›]` navigatie om vorige/volgende geplande sessies te bekijken. Dit verschuift het schema niet en maakt geen backlog; logging blijft gekoppeld aan de getoonde sessie en datum. De datumknop rechtsboven opent een compacte countdown tot de marathon.
+De vorige/volgende-dagnavigatie zit compact in de header rondom `MARATHON SCHEMA / Training`. De pijlen tonen vorige/volgende geplande sessies, zonder schema te verschuiven of backlog te maken. Logging blijft gekoppeld aan de getoonde sessie en datum. De datumknop rechtsboven toont de geselecteerde datum en opent een compacte countdown tot de marathon.
 
 De header `MARATHON SCHEMA / Training` is een gecentreerde home-knop: tikken brengt je vanuit elk scherm terug naar Vandaag en reset alleen de geselecteerde kijkdatum. De bovenste Vandaag-navigatie is compact gehouden; countdown-informatie staat alleen achter de datumknop.
 
-Bij elke sessie staat een compacte `Trainingsfilosofie`-knop met uitleg over het doel, de plek in de week, de fase, trainingsprincipes en verstandige aanpassingen. Hardloopblokken hebben ook een eigen `Run-info`-uitklapblok met doel, tempo, incline, techniek en alternatieven bij vermoeidheid.
+Bij elke sessie staan compacte knoppen voor `Trainingsfilosofie` en `Week`. Trainingsfilosofie beschrijft bij hybride sessies zowel krachttraining als hardlopen, waarom die combinatie logisch is, de fasecontext, principes en aanpassingen. Hardloopkaarten hebben een korte samenvatting plus gestructureerde regels voor loopband/opbouw, buiten en incline, gevolgd door `Run-info`.
 
 Elke Vandaag-sessie toont een praktische omvangsregel, bijvoorbeeld `7 krachtoefeningen + 1 run · geschatte tijd 70–75 min`. In oefening-info staat `Bekijk statistieken →`, met een directe interne link naar de statistieken van precies die oefening.
 
 Het tabblad `Fases` is bedoeld als brede fase-uitleg: doel, waarom, trainingsfilosofie, hardlopen, krachttraining, marathontempo, long run, aandachtspunten en mentale focus. Het tabblad `Hardloopopbouw` is de praktische routekaart met subtabs voor overzicht, week per week, long runs, marathontempo, sleutelweken en tempo's.
 
-De Statistieken-pagina heeft subtabs voor overzicht, hardlopen, krachttraining, oefeningen en marathonvoorbereiding. De resetactie staat onder `Data beheren` en vraagt dubbele bevestiging voordat lokale data wordt gewist.
+De Statistieken-pagina heeft subtabs voor overzicht, hardlopen, krachttraining, oefeningen, marathonvoorbereiding en inzichten. Er zijn compacte dashboardkaarten, hardloopgrafieken, oefeningdetailgrafieken, een kaart voor meeste vooruitgang en een indicatieve marathonvoorbereiding. De resetactie staat onder `Data beheren` en vraagt dubbele bevestiging voordat lokale data wordt gewist.
 
 De oude groen/oranje/rood herstelknoppen zijn verwijderd. De app blijft een eenvoudige schema-lezer/logger en geen coachingsflow.
 

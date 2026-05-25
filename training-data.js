@@ -5,7 +5,7 @@
     sourceFile: "trainingsschema_marathon_codex.md",
     startDate: "2026-05-25",
     startCalendarWeek: 22,
-    version: "2026.05.24.10",
+    version: "2026.05.24.11",
   };
 
   const PHASES = [

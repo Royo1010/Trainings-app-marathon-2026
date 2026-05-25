@@ -9,10 +9,10 @@
     <meta name="apple-mobile-web-app-title" content="Marathon" />
     <meta name="mobile-web-app-capable" content="yes" />
     <meta name="format-detection" content="telephone=no" />
-    <link rel="manifest" href="./manifest.json?v=20260524-10" />
+    <link rel="manifest" href="./manifest.json?v=20260524-11" />
     <link rel="icon" href="./icon.svg" type="image/svg+xml" />
     <link rel="apple-touch-icon" href="./icon.svg" />
-    <link rel="stylesheet" href="./style.css?v=20260524-10" />
+    <link rel="stylesheet" href="./style.css?v=20260524-11" />
     <title>Marathon Training</title>
   </head>
   <body>
@@ -23,10 +23,14 @@
           <span></span>
           <span></span>
         </button>
-        <button id="brand-home" class="brand home-button" type="button" aria-label="Ga naar vandaag">
-          <span class="eyebrow">Marathon schema</span>
-          <span class="brand-title">Training</span>
-        </button>
+        <div class="header-center-nav" aria-label="Dagnavigatie">
+          <button id="header-day-prev" class="header-day-button" type="button" aria-label="Vorige geplande sessie">‹</button>
+          <button id="brand-home" class="brand home-button" type="button" aria-label="Ga naar vandaag">
+            <span class="eyebrow">Marathon schema</span>
+            <span class="brand-title">Training</span>
+          </button>
+          <button id="header-day-next" class="header-day-button" type="button" aria-label="Volgende geplande sessie">›</button>
+        </div>
         <button id="today-pill" class="date-pill" type="button" aria-label="Countdown tot marathon openen"></button>
       </header>
 
@@ -57,7 +61,7 @@
       <main id="app" class="content" aria-live="polite"></main>
     </div>
 
-    <script src="./training-data.js?v=20260524-10"></script>
-    <script src="./app.js?v=20260524-10"></script>
+    <script src="./training-data.js?v=20260524-11"></script>
+    <script src="./app.js?v=20260524-11"></script>
   </body>
 </html>
