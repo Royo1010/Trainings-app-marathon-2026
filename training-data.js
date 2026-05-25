@@ -1049,6 +1049,26 @@
     }),
   ];
 
+  const preLongSupportA = () => [
+    exercise("Machine Chest Press", "2×8-10"),
+    exercise("Chest-Supported Row Machine", "2×8-10"),
+    exercise("Rear Delt Fly Machine", "2×12-18"),
+    exercise("Face Pull", "2×12-20"),
+    exercise("Pallof Press", "2×10-12/kant"),
+    exercise("Side Plank", "2×30-45 sec/kant"),
+    exercise("Brachialis Isometric Hold", "1-2×20-30 sec/arm"),
+  ];
+
+  const preLongSupportB = () => [
+    exercise("Shoulder Press Machine", "2×8-10"),
+    exercise("Low Row Machine", "2×8-10"),
+    exercise("Pec Deck of Cable Fly", "2×10-15"),
+    exercise("External Rotation — elleboog op knie met dumbbell", "2×12-15/kant", { weightRange: { min: 0, max: 25, step: 0.5 } }),
+    exercise("Dead Bug", "2×8-12/kant"),
+    exercise("Landmine Rotation", "2×8-10/kant"),
+    exercise("Brachialis Rehab — Hammer Curl Isometric Hold", "1-2×20-30 sec/arm"),
+  ];
+
   const peakLowerA = () => [
     exercise("Leg Press", "2-3×8-10"),
     exercise("Hip Thrust Machine", "2-3×8-12"),
@@ -1231,7 +1251,7 @@
         exercise("Dead Bug", "2×8-12/kant"),
       ], null, { phaseId, notes: "Plan lower strength liever niet direct voor de long run." }),
       session(4, "Run 2 — 3:30 Marathonpace Run", "run", [], F3_RUN2[calendarWeek], { phaseId, warmup: "Rustig inlopen volgens blok.", goal: "12 km/u gecontroleerd leren vasthouden." }),
-      session(5, isA ? "Gym 3 — Full Body Maintenance A" : "Gym 3 — Full Body Maintenance B", "kracht", isA ? fullBodyA() : fullBodyB(), null, { phaseId, notes: "Compacte onderhoudsprikkel; houd genoeg over voor de long run." }),
+      session(5, isA ? "Gym 3 — Upper/Core Support A" : "Gym 3 — Upper/Core Support B", "kracht", isA ? preLongSupportA() : preLongSupportB(), null, { phaseId, notes: "Beensparende onderhoudsprikkel; houd genoeg over voor de long run." }),
       session(6, "Run 3 — Long Run", "long-run", [], F3_RUN3[calendarWeek], {
         phaseId,
         warmup: "Rustig starten.",

@@ -771,6 +771,10 @@ summary::-webkit-details-marker {
   margin: 6px 0;
 }
 
+.placement-advice {
+  color: #dbeafe;
+}
+
 .session-actions {
   display: flex;
   flex-wrap: wrap;
@@ -1256,6 +1260,37 @@ summary::-webkit-details-marker {
   margin: 0;
 }
 
+.nutrition-glance {
+  display: grid;
+  gap: 8px;
+}
+
+.nutrition-glance-row {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: 9px;
+  align-items: start;
+  padding: 9px 0;
+  border-top: 1px solid rgba(51, 65, 85, 0.55);
+}
+
+.nutrition-glance-row:first-of-type {
+  border-top: 0;
+}
+
+.nutrition-glance-row h4 {
+  margin: 0 0 3px;
+  color: var(--text);
+  font-size: 13px;
+}
+
+.nutrition-glance-row p {
+  margin: 0;
+  color: var(--muted);
+  font-size: 13px;
+  line-height: 1.35;
+}
+
 .phase-card h3,
 .stat-card h3,
 .info-card h3 {
@@ -1411,6 +1446,49 @@ summary::-webkit-details-marker {
 
 .data-manage {
   margin-top: 4px;
+}
+
+.data-actions {
+  display: grid;
+  gap: 7px;
+  margin: 8px 0;
+}
+
+.backup-label {
+  display: block;
+  margin: 10px 0 5px;
+  color: var(--muted-2);
+  font-size: 11px;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.backup-textarea {
+  width: 100%;
+  min-height: 104px;
+  padding: 9px 10px;
+  border: 1px solid rgba(51, 65, 85, 0.9);
+  border-radius: var(--radius);
+  color: var(--text);
+  background: #101821;
+  resize: vertical;
+}
+
+.danger-button-soft {
+  width: 100%;
+  margin-top: 8px;
+}
+
+.visually-hidden {
+  position: absolute !important;
+  width: 1px !important;
+  height: 1px !important;
+  padding: 0 !important;
+  margin: -1px !important;
+  overflow: hidden !important;
+  clip: rect(0, 0, 0, 0) !important;
+  white-space: nowrap !important;
+  border: 0 !important;
 }
 
 .exercise-detail {

@@ -2,11 +2,16 @@
   "use strict";
 
   const STORAGE = {
+    appData: "marathonTrainingAppData",
     logs: "marathonApp.logs",
     completed: "marathonApp.completedSessions",
     preferences: "marathonApp.preferences",
     version: "marathonApp.version",
   };
+  const APP_DATA_VERSION = 1;
+  // BELANGRIJK VOOR TOEKOMSTIGE UPDATES: verander storage keys niet zonder migratie,
+  // overschrijf bestaande localStorage-data nooit met lege defaults, voeg nieuwe velden
+  // alleen aanvullend toe en gebruik migrateAppData() bij datastructuurwijzigingen.
 
   const app = document.getElementById("app");
   const todayPill = document.getElementById("today-pill");
@@ -125,22 +130,185 @@
     };
   }
 
-  function getLogs() {
-    return normalizeLogs(safeRead(STORAGE.logs, {}));
-  }
-
-  function saveLogs(logs) {
-    safeWrite(STORAGE.logs, normalizeLogs(logs));
-    safeWrite(STORAGE.version, { version: config.version, savedAt: new Date().toISOString() });
-  }
-
-  function getCompleted() {
-    const raw = safeRead(STORAGE.completed, []);
+  function normalizeCompleted(raw) {
+    if (isPlainObject(raw)) return Object.values(raw).filter(Boolean);
     return Array.isArray(raw) ? raw : [];
   }
 
+  function isPlainObject(value) {
+    return Boolean(value) && typeof value === "object" && !Array.isArray(value);
+  }
+
+  function migrateAppData(raw) {
+    const source = isPlainObject(raw) ? { ...raw } : {};
+    const workoutLogs = normalizeLogs(source.workoutLogs || source.logs || {});
+    const completedSessions = normalizeCompleted(source.completedSessions || source.completed);
+    const createdAt = source.createdAt || new Date().toISOString();
+    return {
+      ...source,
+      appDataVersion: APP_DATA_VERSION,
+      createdAt,
+      updatedAt: source.updatedAt || createdAt,
+      workoutLogs,
+      runLogs: Array.isArray(source.runLogs) ? source.runLogs : workoutLogs.cardio.slice(),
+      completedSessions,
+      exerciseStats: isPlainObject(source.exerciseStats) ? source.exerciseStats : {},
+      userSettings: isPlainObject(source.userSettings) ? source.userSettings : {},
+      dismissedTemporaryUi: isPlainObject(source.dismissedTemporaryUi) ? source.dismissedTemporaryUi : {},
+    };
+  }
+
+  function legacyDataSnapshot() {
+    return migrateAppData({
+      appDataVersion: 1,
+      workoutLogs: safeRead(STORAGE.logs, {}),
+      completedSessions: safeRead(STORAGE.completed, []),
+      userSettings: safeRead(STORAGE.preferences, {}),
+      createdAt: new Date().toISOString(),
+    });
+  }
+
+  function loadAppData() {
+    let stored = null;
+    let rawAppData = null;
+    try {
+      rawAppData = localStorage.getItem(STORAGE.appData);
+    } catch (error) {
+      console.warn("App-data kon niet worden gelezen; oude storage-keys worden geprobeerd:", error);
+      return legacyDataSnapshot();
+    }
+    if (rawAppData) {
+      try {
+        stored = JSON.parse(rawAppData);
+      } catch (error) {
+        console.warn("App-data is corrupt; oude storage-keys blijven ongemoeid:", error);
+        return legacyDataSnapshot();
+      }
+    }
+    if (stored) {
+      const migrated = migrateAppData(stored);
+      const needsMigration =
+        stored.appDataVersion !== APP_DATA_VERSION ||
+        !stored.workoutLogs ||
+        !stored.completedSessions ||
+        !stored.exerciseStats ||
+        !stored.userSettings;
+      if (needsMigration) saveAppData(migrated);
+      return migrated;
+    }
+    const legacy = legacyDataSnapshot();
+    saveAppData(legacy);
+    return legacy;
+  }
+
+  function saveAppData(data, options = {}) {
+    const { mirrorLegacy = true } = options;
+    const migrated = migrateAppData(data);
+    migrated.updatedAt = new Date().toISOString();
+    try {
+      localStorage.setItem(STORAGE.appData, JSON.stringify(migrated));
+      if (mirrorLegacy) {
+        safeWrite(STORAGE.logs, migrated.workoutLogs);
+        safeWrite(STORAGE.completed, migrated.completedSessions);
+        safeWrite(STORAGE.preferences, migrated.userSettings);
+        safeWrite(STORAGE.version, { version: config.version, appDataVersion: migrated.appDataVersion, savedAt: migrated.updatedAt });
+      }
+    } catch (error) {
+      console.warn("App-data kon niet worden opgeslagen:", error);
+    }
+    return migrated;
+  }
+
+  function exportAppData() {
+    return loadAppData();
+  }
+
+  function validateImportedAppData(raw) {
+    if (!isPlainObject(raw)) throw new Error("Backup is geen geldig JSON-object.");
+    const hasKnownData =
+      raw.appDataVersion ||
+      raw.workoutLogs ||
+      raw.logs ||
+      raw.completedSessions ||
+      raw.completed ||
+      raw.userSettings;
+    if (!hasKnownData) throw new Error("Dit lijkt geen marathon-training backup te zijn.");
+    return migrateAppData(raw);
+  }
+
+  function storageSummary() {
+    const data = loadAppData();
+    const logs = normalizeLogs(data.workoutLogs);
+    const completed = normalizeCompleted(data.completedSessions);
+    const uniqueExercises = new Set(logs.strength.map((entry) => entry.exerciseId).filter(Boolean));
+    const sizeKb = Math.round((JSON.stringify(data).length / 1024) * 10) / 10;
+    return [
+      `Dataversie: v${data.appDataVersion}`,
+      `Laatst opgeslagen: ${data.updatedAt ? new Date(data.updatedAt).toLocaleString("nl-NL") : "onbekend"}`,
+      `Voltooide sessies: ${completed.length}`,
+      `Oefeninglogs: ${logs.strength.length}`,
+      `Runlogs: ${logs.cardio.length}`,
+      `Unieke oefeningen: ${uniqueExercises.size}`,
+      `Geschatte opslaggrootte: ${formatNumber(sizeKb)} KB`,
+    ].join("\n");
+  }
+
+  function downloadJsonFile(filename, payload) {
+    const blob = new Blob([JSON.stringify(payload, null, 2)], { type: "application/json" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = filename;
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+    window.setTimeout(() => URL.revokeObjectURL(url), 1000);
+  }
+
+  function importAppDataFromText(text) {
+    let parsed;
+    try {
+      parsed = JSON.parse(text);
+    } catch (error) {
+      window.alert("Deze backup bevat geen geldige JSON.");
+      return false;
+    }
+    let migrated;
+    try {
+      migrated = validateImportedAppData(parsed);
+    } catch (error) {
+      window.alert(error.message || "Deze backup kan niet worden geïmporteerd.");
+      return false;
+    }
+    const confirmed = window.confirm("Dit vervangt je huidige lokale trainingsdata door de gekozen backup. Maak eventueel eerst een export van je huidige data.\n\nBackup importeren?");
+    if (!confirmed) return false;
+    saveAppData(migrated);
+    state.selectedExerciseId = null;
+    state.selectedExerciseName = "";
+    render();
+    window.alert("Backup geïmporteerd.");
+    return true;
+  }
+
+  function getLogs() {
+    return normalizeLogs(loadAppData().workoutLogs);
+  }
+
+  function saveLogs(logs) {
+    const data = loadAppData();
+    data.workoutLogs = normalizeLogs(logs);
+    data.runLogs = data.workoutLogs.cardio.slice();
+    saveAppData(data);
+  }
+
+  function getCompleted() {
+    return normalizeCompleted(loadAppData().completedSessions);
+  }
+
   function saveCompleted(items) {
-    safeWrite(STORAGE.completed, Array.isArray(items) ? items : []);
+    const data = loadAppData();
+    data.completedSessions = normalizeCompleted(items);
+    saveAppData(data);
   }
 
   function currentWeekIndex(date = today()) {
@@ -241,21 +409,67 @@
 
   function activeSessionForWeek(week) {
     const done = getCompletedSet();
-    return week.sessions.find((session) => !done.has(sessionKey(week, session))) || null;
+    return orderedWeekSessions(week).find((session) => !done.has(sessionKey(week, session))) || null;
   }
 
   function flatSessions() {
-    return weeks.flatMap((week) => week.sessions.map((session) => ({ week, session, key: sessionKey(week, session) })));
+    return weeks.flatMap((week) => orderedWeekSessions(week).map((session) => ({ week, session, key: sessionKey(week, session) })));
+  }
+
+  function isLongRunSession(session) {
+    const text = `${session?.type || ""} ${session?.title || ""} ${session?.cardio?.title || ""}`.toLowerCase();
+    return session?.type === "long-run" || session?.type === "marathon" || text.includes("long run");
+  }
+
+  function isLowerBodySession(session) {
+    const text = `${session?.title || ""} ${(session?.exercises || []).map((exercise) => exercise.name).join(" ")}`.toLowerCase();
+    return /(lower|runner legs|leg press|hack squat|split squat|walking lunge|lunge|hip thrust|calf|tibialis|romanian deadlift|posterior chain)/.test(text);
+  }
+
+  function isLightPreLongSession(session) {
+    const text = `${session?.type || ""} ${session?.title || ""} ${session?.cardio?.title || ""}`.toLowerCase();
+    if (isLowerBodySession(session)) return false;
+    return /(upper|core|mobility|maintenance|easy|strides|shake-out|shakeout|techniek|light|activatie|activation)/.test(text) || Boolean(session?.cardio);
+  }
+
+  function orderedWeekSessions(week) {
+    const sessions = Array.isArray(week?.sessions) ? week.sessions.slice() : [];
+    if (!sessions.length || Number(week.calendarWeek) < 29 || !sessions.some(isLongRunSession)) return sessions;
+    const longRuns = sessions.filter(isLongRunSession);
+    const others = sessions.filter((session) => !isLongRunSession(session));
+    if (others.length && isLowerBodySession(others[others.length - 1])) {
+      const lightIndex = others.findLastIndex ? others.findLastIndex(isLightPreLongSession) : findLastIndex(others, isLightPreLongSession);
+      if (lightIndex >= 0 && lightIndex !== others.length - 1) {
+        const [lightSession] = others.splice(lightIndex, 1);
+        others.push(lightSession);
+      }
+    }
+    return others.concat(longRuns);
+  }
+
+  function findLastIndex(items, predicate) {
+    for (let index = items.length - 1; index >= 0; index -= 1) {
+      if (predicate(items[index], index, items)) return index;
+    }
+    return -1;
+  }
+
+  function sessionOrderNumber(week, session) {
+    const index = orderedWeekSessions(week).findIndex((item) => item.sessionNumber === session?.sessionNumber);
+    return index >= 0 ? index + 1 : session?.sessionNumber || 1;
   }
 
   function plannedDateForSession(week, session) {
-    const offset = Number.isFinite(session.plannedOffset) ? session.plannedOffset : Math.min(session.sessionNumber - 1, 6);
+    const orderIndex = orderedWeekSessions(week).findIndex((item) => item.sessionNumber === session?.sessionNumber);
+    const fallbackOffset = orderIndex >= 0 ? orderIndex : Math.min(session.sessionNumber - 1, 6);
+    const offset = Number.isFinite(session.plannedOffset) ? session.plannedOffset : Math.min(fallbackOffset, 6);
     return toIsoDate(addDays(parseLocalDate(week.startDate), offset));
   }
 
   function sessionForPlannedDate(week, dateIso) {
-    const offset = Math.max(0, Math.min(dayDiff(week.startDate, dateIso), week.sessions.length - 1));
-    return week.sessions[offset] || week.sessions[0] || null;
+    const ordered = orderedWeekSessions(week);
+    const offset = Math.max(0, Math.min(dayDiff(week.startDate, dateIso), ordered.length - 1));
+    return ordered[offset] || ordered[0] || null;
   }
 
   function todayViewContext() {
@@ -296,6 +510,18 @@
     resetTodaySelection();
     closeMenu();
     closeCountdown();
+    render();
+  }
+
+  function openStatistics(options = {}) {
+    state.view = "stats";
+    state.preview = null;
+    state.statsTab = options.tab || "overview";
+    state.selectedExerciseId = options.exerciseId || null;
+    state.selectedExerciseName = options.exerciseName || "";
+    closeMenu();
+    closeCountdown();
+    closeMilestone();
     render();
   }
 
@@ -345,6 +571,7 @@
       {
         key: "phase-1-start",
         week: 22,
+        triggerDate: "2026-05-25",
         type: "phase-start",
         phaseId: "fase-1",
         label: "Fase-update",
@@ -360,6 +587,7 @@
       {
         key: "phase-2-start",
         week: 27,
+        triggerDate: "2026-06-29",
         type: "phase-start",
         phaseId: "fase-2",
         label: "Fase-update",
@@ -375,6 +603,7 @@
       {
         key: "phase-3-start",
         week: 29,
+        triggerDate: "2026-07-13",
         type: "phase-start",
         phaseId: "fase-3",
         label: "Fase-update",
@@ -391,6 +620,7 @@
       {
         key: "phase-4-start",
         week: 37,
+        triggerDate: "2026-09-07",
         type: "phase-start",
         phaseId: "fase-4",
         label: "Fase-update",
@@ -406,6 +636,7 @@
       {
         key: "first-mp-long-run",
         week: 39,
+        triggerDate: "2026-09-21",
         type: "key-week",
         phaseId: "fase-4",
         label: "Mijlpaal deze week",
@@ -421,6 +652,7 @@
       {
         key: "dress-rehearsal",
         week: 42,
+        triggerDate: "2026-10-12",
         type: "key-week",
         phaseId: "fase-4",
         label: "Mijlpaal deze week",
@@ -436,6 +668,7 @@
       {
         key: "longest-run",
         week: 43,
+        triggerDate: "2026-10-19",
         type: "key-week",
         phaseId: "fase-4",
         label: "Mijlpaal deze week",
@@ -451,6 +684,7 @@
       {
         key: "phase-5-start",
         week: 45,
+        triggerDate: "2026-11-02",
         type: "phase-start",
         phaseId: "fase-5",
         label: "Fase-update",
@@ -466,6 +700,7 @@
       {
         key: "marathon-week",
         week: 47,
+        triggerDate: "2026-11-16",
         type: "key-week",
         phaseId: "fase-5",
         label: "Mijlpaal deze week",
@@ -481,19 +716,19 @@
     ];
   }
 
-  function getMilestoneForWeek(weekNo) {
-    return milestoneDefinitions().find((item) => item.week === weekNo) || null;
+  function getMilestoneForDate(dateIso) {
+    return milestoneDefinitions().find((item) => item.triggerDate === dateIso) || null;
   }
 
   function sessionNavLabel(week, session) {
     if (!session) return "Alle sessies afgerond";
     if (session.cardio) {
-      const runs = week.sessions.filter((item) => item.cardio);
+      const runs = orderedWeekSessions(week).filter((item) => item.cardio);
       const runIndex = runs.findIndex((item) => item.sessionNumber === session.sessionNumber) + 1;
       const title = session.type === "long-run" ? "Long Run" : session.type === "marathon" ? "Marathon" : `Run ${runIndex} van ${runs.length}`;
       return title;
     }
-    return `Sessie ${session.sessionNumber} van ${week.sessions.length}`;
+    return `Sessie ${sessionOrderNumber(week, session)} van ${week.sessions.length}`;
   }
 
   function latestStrengthLog(key, exerciseId) {
@@ -1016,7 +1251,7 @@
     return `
       ${isPreview ? `<button class="secondary-button back-button" type="button" data-back-week>Terug naar weekoverzicht</button>` : ""}
       <section class="hero-card session-hero-card">
-        <p class="status-line">${phase.phaseName} · Week ${week.calendarWeek} · Sessie ${active.sessionNumber}/${week.sessions.length}</p>
+        <p class="status-line">${phase.phaseName} · Week ${week.calendarWeek} · Sessie ${sessionOrderNumber(week, active)}/${week.sessions.length}</p>
         <h2 class="training-title">${active.title}</h2>
         <p class="session-summary">${sessionSummary(active)}</p>
         <div class="compact-meta">
@@ -1216,6 +1451,7 @@
           <p><strong>Trainingsprincipes:</strong> ${info.principles}</p>
           <p><strong>Schema-info:</strong> Warming-up: ${session.warmup || "Volgens schema."}</p>
           ${session.notes ? `<p><strong>Notitie:</strong> ${session.notes}</p>` : ""}
+          ${placementAdvice(session, week) ? `<p class="placement-advice"><strong>Plaatsingsadvies:</strong> ${placementAdvice(session, week)}</p>` : ""}
           <p><strong>Faseregel:</strong> ${phase.rules}</p>
           ${infoBlocks.map((block) => `<p><strong>${block.title}:</strong> ${block.text}</p>`).join("")}
           <p><strong>Als je je goed voelt:</strong> ${info.good}</p>
@@ -1361,21 +1597,23 @@
   function renderWeekSessions(week, active) {
     const done = getCompletedSet();
     const activeKey = active ? sessionKey(week, active) : null;
+    const orderedSessions = orderedWeekSessions(week);
     return `
       <section class="session-list">
-        ${week.sessions
-          .map((item) => {
+        ${orderedSessions
+          .map((item, index) => {
             const key = sessionKey(week, item);
             const status = done.has(key) ? "✓ Voltooid" : key === activeKey ? "Actief" : "Nog te doen";
             const statusClass = done.has(key) ? "status-done" : key === activeKey ? "status-active" : "status-next";
             const summary = sessionSummary(item);
             const runSummary = item.cardio ? runCardSummary(item, item.cardio) : "geen";
             const focus = sessionWeekFocus(item);
+            const placement = placementAdvice(item, week);
             return `
               <article class="session-card week-session-card">
                 <div class="week-session-main">
                   <div>
-                    <h3>${item.sessionNumber}. ${item.title}</h3>
+                    <h3>${index + 1}. ${item.title}</h3>
                     <p class="status-line">${capitalize(item.type)} · ${summary}</p>
                     <p class="muted small"><strong>Run:</strong> ${runSummary}</p>
                     <p class="muted small"><strong>Focus:</strong> ${focus}</p>
@@ -1389,6 +1627,7 @@
                     ${item.exercises.length ? `<p><strong>Kracht:</strong> ${item.exercises.map((exercise) => exercise.name).join(", ")}</p>` : `<p><strong>Kracht:</strong> geen krachtdeel.</p>`}
                     ${item.cardio ? `<div class="week-run-details">${renderRunDetails(item, item.cardio)}</div>` : `<p><strong>Hardlopen:</strong> geen run.</p>`}
                     ${item.notes ? `<p><strong>Aandachtspunt:</strong> ${item.notes}</p>` : ""}
+                    ${placement ? `<p class="placement-advice"><strong>Plaatsingsadvies:</strong> ${placement}</p>` : ""}
                     <div class="week-session-actions">
                       <button class="secondary-button" type="button" data-view-session-today data-week-index="${weeks.indexOf(week)}" data-session-number="${item.sessionNumber}">Bekijk op Vandaag</button>
                       <button class="secondary-button" type="button" data-preview-week-index="${weeks.indexOf(week)}" data-preview-session="${item.sessionNumber}">Preview</button>
@@ -1460,6 +1699,35 @@
     return "kracht onderhouden en herstel bewaken";
   }
 
+  function placementAdvice(session, week) {
+    const kind = session.cardio ? runKind(session, session.cardio) : "strength";
+    const phaseId = week?.phaseId || session.phaseId || "";
+    if (phaseId === "fase-5") {
+      if (isLowerBodySession(session)) return "Geen zware beentraining meer. Onderhoud en frisheid zijn belangrijker dan spierpijn najagen.";
+      if (kind === "long" || session.type === "marathon") return "Kom niet direct uit een zware beentraining. Frisheid is in de taper belangrijker dan extra prikkels.";
+    }
+    if (session.type === "long-run") {
+      const text = `${session.title} ${session.cardio?.instruction || ""}`.toLowerCase();
+      if (/11,8|12,0|12,1|marathontempo|mp|marathonpace/.test(text)) {
+        return "Deze sessie is de hoofdprikkel van de week. Geen zware benen in de 24–48 uur ervoor.";
+      }
+      return "Kom niet direct uit een zware beentraining. Deze run vraagt relatief frisse benen.";
+    }
+    if (isLowerBodySession(session)) {
+      const heavy = /leg press|hack|split squat|walking lunge|romanian deadlift|runner strength|lower strength|posterior chain/i.test(`${session.title} ${(session.exercises || []).map((exercise) => exercise.name).join(" ")}`);
+      return heavy ? "Houd bij voorkeur minimaal 24–48 uur ruimte vóór een long run." : "Doe deze sessie liever niet direct vóór een long run.";
+    }
+    if (phaseId === "fase-4" && session.exercises.length) return "Houd dit ondersteunend, zodat tempo en long run de hoofdprikkels blijven.";
+    return "";
+  }
+
+  function weekOrderLogicText(week) {
+    if (Number(week.calendarWeek) < 29 || !week.sessions.some(isLongRunSession)) return "De sessies blijven op volgorde zonder vaste weekdagen te forceren.";
+    if (Number(week.calendarWeek) >= 39 && Number(week.calendarWeek) <= 44) return "Deze week is zo geplaatst dat de long run de hoofdprikkel blijft. Houd de sessie ervoor licht.";
+    if (week.phaseId === "fase-5") return "In de taper staat frisheid voorop: geen zware lower-body prikkel direct vóór een long run of marathon.";
+    return "Zware lower-body training staat niet direct vóór de long run.";
+  }
+
   function renderWeekProgress(week) {
     const completed = getCompletedSet();
     const sessionDone = week.sessions.filter((session) => completed.has(sessionKey(week, session))).length;
@@ -1510,6 +1778,7 @@
           <p><strong>Marathontempo:</strong> ${summary.marathonPace || "niet als hoofdprikkel deze week."}</p>
           <p><strong>Long run:</strong> ${summary.longRun || "nog geen echte long run in deze week."}</p>
           <p><strong>Geschatte totale duur:</strong> ${summary.totalTime}.</p>
+          <p><strong>Volgordelogica:</strong> ${weekOrderLogicText(week)}</p>
           <p><strong>Aandachtspunt:</strong> ${weekAttentionText(week)}</p>
         </div>
       </details>
@@ -2377,17 +2646,20 @@
       <article class="info-card build-hero-card">
         <h3>Voedingsplan richting 3:30 marathon</h3>
         <p>Dit voedingsplan ondersteunt mijn marathonvoorbereiding richting 3:30. Het doel is niet om elke dag exact hetzelfde te eten, maar om mijn voeding slimmer af te stemmen op de training. In de eerste fases is normaal en eiwitrijk eten voldoende. Vanaf de long runs en piekfase worden koolhydraten, vocht, zout en herstel steeds belangrijker.</p>
-        <p>Voeding is hier geen los dieet, maar onderdeel van de training: brandstof voor zware sessies, herstel na long runs en een getest plan voor marathondag.</p>
+        <p>Voeding is hier geen los dieet, maar onderdeel van de training: brandstof voor zware sessies, herstel na long runs en een getest plan voor marathondag. Het 3:30-doel vraagt ongeveer 12,06 km/u, waardoor brandstof belangrijker wordt naarmate de trainingen langer en specifieker worden.</p>
       </article>
-      <section class="stat-grid build-metric-grid">
-        ${metricCard("Doel", "Energie", "voor training en herstel")}
-        ${metricCard("Marathonpace", "±12,06", "km/u")}
-        ${metricCard("Fase 1–2", "Normaal", "eten")}
-        ${metricCard("Fase 3", "Long runs", "voeden")}
-        ${metricCard("Fase 4", "Koolhydraten", "serieus inzetten")}
-        ${metricCard("Fase 5", "Taper", "+ carb loading")}
-        ${metricCard("Belangrijk", "Niets nieuws", "op marathondag")}
-      </section>
+      <article class="info-card nutrition-glance">
+        <h3>Voeding in één oogopslag</h3>
+        ${nutritionGlanceRows().map(([phase, title, text]) => `
+          <div class="nutrition-glance-row">
+            <span class="chip">${phase}</span>
+            <div>
+              <h4>${title}</h4>
+              <p>${text}</p>
+            </div>
+          </div>
+        `).join("")}
+      </article>
       <article class="info-card">
         <h3>Voedingsfilosofie</h3>
         <p>De basis is simpel: niet elke dag hoeft een “marathondag” te zijn. Rustige dagen vragen minder brandstof dan long-run-dagen of marathontempo-trainingen. Naarmate het schema zwaarder wordt, worden koolhydraten belangrijker. Niet omdat je ongezond moet eten, maar omdat langere duurlopen en marathonspecifieke trainingen brandstof vragen.</p>
@@ -2422,6 +2694,16 @@
       ["Fase 3 — long runs voeden", "Long runs worden structureel. Koolhydraten rond long runs en marathonpace-runs worden belangrijker."],
       ["Fase 4 — prestatiebrandstof", "Zwaarste fase. 4 runs per week, long runs tot 30–32 km en marathontempo op vermoeide benen. Niet proberen te cutten. Brandstof en herstel zijn prioriteit."],
       ["Fase 5 — taper + carb loading", "Volume omlaag, koolhydraten bewust hoger richting marathon. Geen experimenten."],
+    ];
+  }
+
+  function nutritionGlanceRows() {
+    return [
+      ["Fase 1–2", "Normale basis", "Normaal eten, genoeg eiwit en voldoende koolhydraten rond trainingen, maar nog geen ingewikkeld marathonvoedingsplan."],
+      ["Fase 3", "Long runs voeden", "Long runs worden structureel. Meer koolhydraten rond long runs, ontbijt oefenen en beginnen met gels of sportdrank testen."],
+      ["Fase 4", "Prestatiebrandstof", "Zwaarste fase. Koolhydraten, vocht, zout en herstel worden belangrijk. Niet hard cutten in deze fase."],
+      ["Fase 5", "Taper & carb loading", "Trainingsvolume gaat omlaag. Koolhydraten bewust verhogen richting marathon en de maag rustig houden."],
+      ["Marathondag", "Niets nieuws", "Alleen eten, drinken, gels en ontbijt gebruiken die al getest zijn tijdens long runs."],
     ];
   }
 
@@ -2615,8 +2897,18 @@
         <details class="info-block data-manage">
           <summary>Data beheren</summary>
           <div class="details-body">
-            <p>Alle trainingsdata staat alleen lokaal op dit apparaat.</p>
-            <button class="danger-button" type="button" data-reset>Wis lokale trainingsdata</button>
+            <p>Je trainingsdata wordt lokaal op dit apparaat opgeslagen. App-updates zouden je data niet moeten wissen, maar maak af en toe een backup als je veel wijzigingen aan de app doet.</p>
+            <div class="data-actions">
+              <button class="secondary-button" type="button" data-export-data>Exporteer trainingsdata</button>
+              <button class="secondary-button" type="button" data-import-data>Importeer trainingsdata</button>
+              <button class="secondary-button" type="button" data-check-data>Controleer opgeslagen data</button>
+            </div>
+            <input class="visually-hidden" type="file" accept="application/json" data-import-file />
+            <label class="backup-label" for="backup-import-text">Backup plakken</label>
+            <textarea id="backup-import-text" class="backup-textarea" data-import-text rows="4" placeholder="Plak hier eventueel een backup-JSON."></textarea>
+            <button class="secondary-button" type="button" data-import-pasted>Geplakte backup importeren</button>
+            <p class="muted small">Importeren vervangt de huidige lokale trainingsdata pas na bevestiging. Exporteer eerst als je twijfelt.</p>
+            <button class="danger-button danger-button-soft" type="button" data-reset>Wis lokale trainingsdata</button>
           </div>
         </details>
       </section>
@@ -3065,13 +3357,33 @@
     const entries = (byExercise.get(exerciseId) || []).slice().sort((a, b) => (a.date || "").localeCompare(b.date || ""));
     const definition = findExerciseDefinition(exerciseId);
     const name = fallbackName || entries[entries.length - 1]?.exerciseName || definition?.name || exerciseId;
+    const header = `
+      <section class="build-page stats-page">
+        <div class="section-title build-title">
+          <h2>Statistieken</h2>
+        </div>
+        <div class="build-tabs" role="tablist" aria-label="Statistieken onderdelen">
+          ${[
+            ["overview", "Overzicht"],
+            ["running", "Hardlopen"],
+            ["strength", "Krachttraining"],
+            ["exercises", "Oefeningen"],
+            ["marathon", "Marathon"],
+            ["insights", "Inzichten"],
+          ].map(([id, label]) => `<button type="button" data-stats-tab="${id}" class="${id === "exercises" ? "is-active" : ""}">${label}</button>`).join("")}
+        </div>
+    `;
     if (!entries.length) {
       app.innerHTML = `
+        ${header}
         <button class="secondary-button back-button" type="button" data-stats-overview>Terug naar statistieken</button>
         <section class="stat-card exercise-detail">
           <h3>${name}</h3>
           <p class="muted">Nog geen data voor deze oefening.</p>
+          <div class="chart-placeholder small-placeholder"><span></span><span></span><span></span><span></span></div>
+          <p class="muted small">Log gewicht, reps of seconden tijdens je training om hier progressie te zien.</p>
           ${definition ? `<p class="muted small">${definition.planned ? `Gepland in schema: ${plannedLabel(definition)}` : ""}</p>` : ""}
+        </section>
         </section>
       `;
       return;
@@ -3088,6 +3400,7 @@
     const bestReps = Math.max(0, ...entries.map((entry) => Number(entry.selectedReps) || 0));
     const detailMap = new Map([[exerciseId, entries]]);
     app.innerHTML = `
+      ${header}
       <button class="secondary-button back-button" type="button" data-stats-overview>Terug naar statistieken</button>
       <section class="stat-card exercise-detail">
         <h3>${name}</h3>
@@ -3117,6 +3430,7 @@
             )
             .join("")}
         </div>
+      </section>
       </section>
     `;
     window.requestAnimationFrame(() => {
@@ -3522,18 +3836,19 @@
       return;
     }
     const context = todayViewContext();
-    const milestone = getMilestoneForWeek(context.week.calendarWeek);
+    const milestone = getMilestoneForDate(context.dateIso);
     if (!milestone) {
       state.milestoneActiveKey = "";
       state.milestoneDismissedKey = "";
       closeMilestone();
       return;
     }
-    if (state.milestoneActiveKey !== milestone.key) {
-      state.milestoneActiveKey = milestone.key;
+    const contextKey = `${milestone.key}:${context.dateIso}`;
+    if (state.milestoneActiveKey !== contextKey) {
+      state.milestoneActiveKey = contextKey;
       state.milestoneDismissedKey = "";
     }
-    if (state.milestoneDismissedKey === milestone.key) {
+    if (state.milestoneDismissedKey === contextKey) {
       closeMilestone();
       return;
     }
@@ -3666,6 +3981,10 @@
 
     const navButton = target.closest("[data-view]");
     if (navButton) {
+      if (navButton.dataset.view === "stats") {
+        openStatistics({ tab: "overview" });
+        return;
+      }
       state.view = navButton.dataset.view;
       state.preview = null;
       state.selectedExerciseId = null;
@@ -3698,15 +4017,11 @@
     }
     const exerciseStatsButton = target.closest("[data-open-exercise-stats]");
     if (exerciseStatsButton) {
-      state.view = "stats";
-      state.preview = null;
-      state.statsTab = "exercises";
-      state.selectedExerciseId = exerciseStatsButton.dataset.openExerciseStats;
-      state.selectedExerciseName = exerciseStatsButton.dataset.exerciseName || "";
-      closeMenu();
-      closeCountdown();
-      closeMilestone();
-      render();
+      openStatistics({
+        tab: "exercises",
+        exerciseId: exerciseStatsButton.dataset.openExerciseStats,
+        exerciseName: exerciseStatsButton.dataset.exerciseName || "",
+      });
       return;
     }
     if (target.closest("[data-open-week-current]")) {
@@ -3723,10 +4038,7 @@
       return;
     }
     if (target.closest("[data-stats-overview]")) {
-      state.selectedExerciseId = null;
-      state.selectedExerciseName = "";
-      state.statsTab = "exercises";
-      renderStats();
+      openStatistics({ tab: "exercises" });
       return;
     }
     const viewSessionToday = target.closest("[data-view-session-today]");
@@ -3785,10 +4097,33 @@
       renderWeek();
       return;
     }
+    if (target.closest("[data-export-data]")) {
+      const filename = `marathon-training-backup-${toIsoDate(today())}.json`;
+      downloadJsonFile(filename, exportAppData());
+      return;
+    }
+    if (target.closest("[data-import-data]")) {
+      document.querySelector("[data-import-file]")?.click();
+      return;
+    }
+    if (target.closest("[data-import-pasted]")) {
+      const text = document.querySelector("[data-import-text]")?.value || "";
+      if (!text.trim()) {
+        window.alert("Plak eerst een backup-JSON.");
+        return;
+      }
+      importAppDataFromText(text);
+      return;
+    }
+    if (target.closest("[data-check-data]")) {
+      window.alert(`Opgeslagen data:\n\n${storageSummary()}`);
+      return;
+    }
     if (target.closest("[data-reset]")) {
       const first = window.confirm("Trainingsdata wissen?\n\nDit verwijdert alle lokaal opgeslagen trainingslogs, gewichten, reps, voltooide trainingen en statistieken van dit apparaat. Dit kan niet automatisch worden hersteld.");
       const second = first && window.confirm("Laatste bevestiging: wil je echt alle lokale trainingsdata verwijderen?");
       if (second) {
+        localStorage.removeItem(STORAGE.appData);
         localStorage.removeItem(STORAGE.logs);
         localStorage.removeItem(STORAGE.completed);
         localStorage.removeItem(STORAGE.preferences);
@@ -3814,6 +4149,16 @@
     if (target.matches("[data-cardio-done]")) {
       const card = target.closest("[data-cardio-key]");
       if (card) upsertCardio(card);
+      return;
+    }
+    if (target.matches("[data-import-file]")) {
+      const file = target.files?.[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = () => importAppDataFromText(String(reader.result || ""));
+      reader.onerror = () => window.alert("Backupbestand kon niet worden gelezen.");
+      reader.readAsText(file);
+      target.value = "";
     }
   });
 
