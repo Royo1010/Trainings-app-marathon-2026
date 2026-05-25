@@ -16,6 +16,8 @@
   const menuOverlay = document.getElementById("menu-overlay");
   const countdownOverlay = document.getElementById("countdown-overlay");
   const countdownContent = document.getElementById("countdown-content");
+  const milestoneOverlay = document.getElementById("milestone-overlay");
+  const milestoneContent = document.getElementById("milestone-content");
   const navButtons = Array.from(document.querySelectorAll("[data-view]"));
   const weeks = window.TRAINING_WEEKS || [];
   const phases = window.TRAINING_PLAN || [];
@@ -32,6 +34,10 @@
     selectedExerciseName: "",
     runBuildTab: "overview",
     statsTab: "overview",
+    nutritionTab: "overview",
+    targetPhaseId: "",
+    milestoneActiveKey: "",
+    milestoneDismissedKey: "",
   };
 
   function parseLocalDate(iso) {
@@ -332,6 +338,151 @@
       "fase-6": "Herstellen, rustig bewegen en opnieuw opbouwen.",
     };
     return focus[phaseId] || "Consistent trainen en slim herstellen.";
+  }
+
+  function milestoneDefinitions() {
+    return [
+      {
+        key: "phase-1-start",
+        week: 22,
+        type: "phase-start",
+        phaseId: "fase-1",
+        label: "Fase-update",
+        title: "Fase 1 begint — Basisfase",
+        intro: "Roy, dit is de rustige start van je marathonvoorbereiding. Krachttraining blijft dominant en hardlopen wordt voorzichtig toegevoegd.",
+        change: "Je loopt 2 keer per week: één easy run en één korte tempo-intro richting 3:30-tempo.",
+        running: "Rustig wennen aan lopen. 12 km/u wordt kort aangeraakt, maar nog niet lang vastgehouden.",
+        strength: "Krachttraining blijft de hoofdstructuur. Upper/lower blijft belangrijk.",
+        nutrition: "Nog geen ingewikkeld marathonvoedingsplan nodig. Normaal eten, genoeg eiwit, en op hardloopdagen eventueel iets meer koolhydraten.",
+        focus: "Rustig bouwen. Niet bewijzen.",
+        actions: ["week", "phase", "nutritionPhase"],
+      },
+      {
+        key: "phase-2-start",
+        week: 27,
+        type: "phase-start",
+        phaseId: "fase-2",
+        label: "Fase-update",
+        title: "Fase 2 begint — Overgangsfase",
+        intro: "Je gaat nu van 2 naar 3 runs per week. Hardlopen wordt meer een vaste pijler van je week.",
+        change: "Er komt een derde run bij. De krachttraining blijft aanwezig, maar de week wordt iets meer hybride.",
+        running: "Meer frequentie. Nog niet extreem meer volume.",
+        strength: "Nog steeds serieus trainen, maar niet zo zwaar dat het je loopopbouw saboteert.",
+        nutrition: "Op hardloopdagen iets bewuster koolhydraten nemen. Begin te letten op wat goed valt vóór het lopen.",
+        focus: "Wennen aan vaker lopen zonder herstelproblemen.",
+        actions: ["week", "phase", "nutritionPhase"],
+      },
+      {
+        key: "phase-3-start",
+        week: 29,
+        type: "phase-start",
+        phaseId: "fase-3",
+        label: "Fase-update",
+        title: "Fase 3 begint — Hybride opbouwfase",
+        intro: "Dit is de eerste echte marathonopbouwfase. Vanaf nu krijgt de long run een vaste plek in je week.",
+        change: "Je loopt 3 keer per week: easy run, marathonpace-run en long run.",
+        running: "De long runs bouwen op van ongeveer 60 minuten naar bijna 2 uur. Marathontempo wordt wekelijks geoefend.",
+        strength: "Krachttraining blijft serieus, maar wordt iets meer ondersteunend. Geen domme PR-jacht als de long runs zwaarder worden.",
+        nutrition: "Vanaf deze fase worden koolhydraten rond long runs belangrijker. Begin met long-run-ontbijt testen en later met gels/sportdrank.",
+        focus: "De marathonmotor bouwen.",
+        note: "Bij start Fase 3 zit je ongeveer 19 weken voor de marathon.",
+        actions: ["week", "phase", "nutritionLongRuns", "longRuns"],
+      },
+      {
+        key: "phase-4-start",
+        week: 37,
+        type: "phase-start",
+        phaseId: "fase-4",
+        label: "Fase-update",
+        title: "Fase 4 begint — Piekfase",
+        intro: "Dit is de belangrijkste marathonspecifieke fase. Hardlopen wordt nu leidend.",
+        change: "Je gaat naar 4 runs per week. Long runs worden langer en sommige bevatten marathontempo.",
+        running: "12 km/u leren lopen met vermoeide benen. De sleutelweken zijn week 39, 41, 42 en 43.",
+        strength: "Krachttraining wordt ondersteunend. Sterk blijven, maar niet slopen.",
+        nutrition: "Dit is geen fase om hard te cutten. Koolhydraten, herstel, vocht en zout worden belangrijker. Test gels en drinken tijdens long runs.",
+        focus: "Racespecifiek vertrouwen bouwen.",
+        actions: ["week", "phase", "nutritionLongRuns", "marathonPace"],
+      },
+      {
+        key: "first-mp-long-run",
+        week: 39,
+        type: "key-week",
+        phaseId: "fase-4",
+        label: "Mijlpaal deze week",
+        title: "Mijlpaal — Eerste marathonpace-long-run",
+        intro: "Deze week komt marathontempo voor het eerst echt terug binnen een lange duurloop.",
+        change: "De long run is 24 km met 2 stukken van 3 km op 11,8–12,0 km/u.",
+        running: "Leren schakelen tussen rustig tempo en marathontempo terwijl je al kilometers in de benen hebt.",
+        strength: "Midweekbelasting bewust beheersen. Geen extra zware beentraining rond deze long run.",
+        nutrition: "Begin serieuzer met voeding vooraf en eventueel voeding/drinken tijdens de long run. Dit is een goede week om te testen wat werkt.",
+        focus: "Eerste vertrouwen opbouwen in marathontempo tijdens een lange run.",
+        actions: ["week", "longRuns", "nutritionLongRuns"],
+      },
+      {
+        key: "dress-rehearsal",
+        week: 42,
+        type: "key-week",
+        phaseId: "fase-4",
+        label: "Mijlpaal deze week",
+        title: "Mijlpaal — Belangrijkste generale repetitie",
+        intro: "Dit is één van de belangrijkste weken van je voorbereiding.",
+        change: "De long run is 28 km met 10–12 km rond marathontempo.",
+        running: "12 km/u lopen nadat je al lang onderweg bent. Dit is geen volledige marathontest, maar wel de belangrijkste vertrouwenstraining.",
+        strength: "Geen zware krachttraining stapelen. Alles moet de long run ondersteunen.",
+        nutrition: "Test ontbijt, gels, drinken en pacing alsof het marathondag is.",
+        focus: "Bewijzen aan je lichaam dat marathontempo later in een lange run gecontroleerd kan voelen.",
+        actions: ["week", "longRuns", "nutritionLongRuns"],
+      },
+      {
+        key: "longest-run",
+        week: 43,
+        type: "key-week",
+        phaseId: "fase-4",
+        label: "Mijlpaal deze week",
+        title: "Mijlpaal — Langste duurloop",
+        intro: "Deze week loop je de langste duurloop van de voorbereiding.",
+        change: "De long run is 30–32 km rustig. Geen verplicht marathontempo.",
+        running: "Afstandsvertrouwen, voeding, hydratatie, mentale rust en belastbaarheid.",
+        strength: "Krachttraining moet licht en ondersteunend blijven. Geen zware benen creëren.",
+        nutrition: "Oefen je voeding en drinken. Niet wachten tot je leeg bent.",
+        focus: "Langste afstand beheerst voltooien zonder jezelf kapot te lopen.",
+        actions: ["week", "longRuns", "nutritionLongRuns"],
+      },
+      {
+        key: "phase-5-start",
+        week: 45,
+        type: "phase-start",
+        phaseId: "fase-5",
+        label: "Fase-update",
+        title: "Fase 5 begint — Taperfase",
+        intro: "De zwaarste training zit erop. Nu draait het om fris worden.",
+        change: "Het volume gaat omlaag. Je houdt korte prikkels, maar bouwt geen nieuwe vermoeidheid meer op.",
+        running: "Ritme behouden, scherp blijven, niet forceren.",
+        strength: "Alleen onderhoud. Geen zware benen, geen nieuwe oefeningen.",
+        nutrition: "Richting marathon worden koolhydraten belangrijker. De laatste dagen geen experimenten.",
+        focus: "Fit, rustig en vol vertrouwen aan de start staan.",
+        actions: ["week", "phase", "nutritionMarathon"],
+      },
+      {
+        key: "marathon-week",
+        week: 47,
+        type: "key-week",
+        phaseId: "fase-5",
+        label: "Mijlpaal deze week",
+        title: "Marathonweek",
+        intro: "Dit is de week waarvoor je hebt getraind. Geen experimenten meer. Plan uitvoeren.",
+        change: "Korte rustige loopjes, eventueel een shake-out, en dan de marathon op zondag 22 november 2026.",
+        running: "Fris blijven, vertrouwen houden, niet ineens extra trainen.",
+        strength: "Geen zware krachttraining meer.",
+        nutrition: "Race-ontbijt, gels, drinken en carb loading uitvoeren zoals getest. Geen nieuwe gels, geen nieuw ontbijt, geen onbekende sportdrank.",
+        focus: "Rustig blijven en uitvoeren.",
+        actions: ["week", "nutritionMarathon", "marathonWeek"],
+      },
+    ];
+  }
+
+  function getMilestoneForWeek(weekNo) {
+    return milestoneDefinitions().find((item) => item.week === weekNo) || null;
   }
 
   function sessionNavLabel(week, session) {
@@ -805,7 +956,7 @@
     const makeSelect = (kind, label, optionHtml) => `
       <div class="field">
         <label>${label}</label>
-        <select data-log-field="${kind}" data-exercise-id="${exercise.id}">
+        <select data-log-field="${kind}" data-exercise-id="${exercise.id}" inputmode="${kind === "weight" ? "decimal" : "numeric"}" autocomplete="off">
           ${optionHtml}
         </select>
       </div>`;
@@ -864,7 +1015,7 @@
     const dateIso = options.dateIso || toIsoDate(today());
     return `
       ${isPreview ? `<button class="secondary-button back-button" type="button" data-back-week>Terug naar weekoverzicht</button>` : ""}
-      <section class="hero-card">
+      <section class="hero-card session-hero-card">
         <p class="status-line">${phase.phaseName} · Week ${week.calendarWeek} · Sessie ${active.sessionNumber}/${week.sessions.length}</p>
         <h2 class="training-title">${active.title}</h2>
         <p class="session-summary">${sessionSummary(active)}</p>
@@ -1215,8 +1366,8 @@
         ${week.sessions
           .map((item) => {
             const key = sessionKey(week, item);
-            const status = done.has(key) ? "afgerond" : key === activeKey ? "actief" : "nog te doen";
-            const statusClass = status === "afgerond" ? "status-done" : status === "actief" ? "status-active" : "status-next";
+            const status = done.has(key) ? "✓ Voltooid" : key === activeKey ? "Actief" : "Nog te doen";
+            const statusClass = done.has(key) ? "status-done" : key === activeKey ? "status-active" : "status-next";
             const summary = sessionSummary(item);
             const runSummary = item.cardio ? runCardSummary(item, item.cardio) : "geen";
             const focus = sessionWeekFocus(item);
@@ -1391,7 +1542,7 @@
         ${phases
           .map(
             (phase) => `
-          <article class="phase-card">
+          <article class="phase-card" data-phase-id="${phase.phaseId}">
             <h3>${phase.phaseName}</h3>
             <p class="status-line">${phase.weekRange} · ${formatDate(phase.startDate)} - ${formatDate(phase.endDate)}</p>
             <div class="compact-meta phase-meta">
@@ -1401,7 +1552,7 @@
               <span class="chip">${phaseWeeksToMarathonText(phase) || "Na marathon"}</span>
             </div>
             <p class="goal"><strong>Doel:</strong> ${phase.phaseDetails?.primaryGoal || phase.goal}</p>
-            <details class="phase-details">
+            <details class="phase-details"${state.targetPhaseId === phase.phaseId ? " open" : ""}>
               <summary>Lees faseplan</summary>
               <div class="details-body">
                 ${renderPhaseDetails(phase)}
@@ -1412,6 +1563,11 @@
           .join("")}
       </section>
     `;
+    if (state.targetPhaseId) {
+      window.requestAnimationFrame(() => {
+        document.querySelector(`[data-phase-id="${state.targetPhaseId}"]`)?.scrollIntoView({ block: "start", behavior: "smooth" });
+      });
+    }
   }
 
   function phaseGuide(phase) {
@@ -1646,6 +1802,13 @@
         <div class="phase-detail-block"><h4>Fase 5 · dalend</h4><p>Korte easy runs, korte MP-prikkels, shake-out en marathon.</p></div>
         <p>De frequentie stijgt niet in één keer naar 4 runs. Eerst wordt het lichaam belastbaar gemaakt, daarna wordt de loopfrequentie verhoogd, en pas in de piekfase wordt hardlopen echt leidend.</p>
       </article>
+      <section class="accordion-list">
+        <div class="section-title section-title-strong">
+          <div>
+            <h2>Extra verdieping</h2>
+            <p>Open wat je uitgebreider wilt lezen.</p>
+          </div>
+        </div>
       <details class="info-block">
         <summary>Marathontempo-opbouw</summary>
         <div class="details-body">
@@ -1697,6 +1860,7 @@
           <p>Deze weken laten zien of de opbouw werkt. Vooral week 39, 41, 42 en 43 zijn belangrijk voor vertrouwen richting 3:30.</p>
         </div>
       </details>
+      </section>
     `;
   }
 
@@ -2178,6 +2342,240 @@
     `;
   }
 
+  function renderNutrition() {
+    const tabs = [
+      ["overview", "Overzicht"],
+      ["phases", "Per fase"],
+      ["training", "Voor trainingen"],
+      ["longRuns", "Long runs & gels"],
+      ["marathonWeek", "Marathonweek"],
+      ["practical", "Praktisch eten"],
+    ];
+    const renderTab = {
+      overview: renderNutritionOverview,
+      phases: renderNutritionPhases,
+      training: renderNutritionTraining,
+      longRuns: renderNutritionLongRuns,
+      marathonWeek: renderNutritionMarathonWeek,
+      practical: renderNutritionPractical,
+    }[state.nutritionTab] || renderNutritionOverview;
+    app.innerHTML = `
+      <section class="build-page nutrition-page">
+        <div class="section-title build-title">
+          <h2>Voeding</h2>
+        </div>
+        <div class="build-tabs" role="tablist" aria-label="Voeding onderdelen">
+          ${tabs.map(([id, label]) => `<button type="button" data-nutrition-tab="${id}" class="${state.nutritionTab === id ? "is-active" : ""}">${label}</button>`).join("")}
+        </div>
+        ${renderTab()}
+      </section>
+    `;
+  }
+
+  function renderNutritionOverview() {
+    return `
+      <article class="info-card build-hero-card">
+        <h3>Voedingsplan richting 3:30 marathon</h3>
+        <p>Dit voedingsplan ondersteunt mijn marathonvoorbereiding richting 3:30. Het doel is niet om elke dag exact hetzelfde te eten, maar om mijn voeding slimmer af te stemmen op de training. In de eerste fases is normaal en eiwitrijk eten voldoende. Vanaf de long runs en piekfase worden koolhydraten, vocht, zout en herstel steeds belangrijker.</p>
+        <p>Voeding is hier geen los dieet, maar onderdeel van de training: brandstof voor zware sessies, herstel na long runs en een getest plan voor marathondag.</p>
+      </article>
+      <section class="stat-grid build-metric-grid">
+        ${metricCard("Doel", "Energie", "voor training en herstel")}
+        ${metricCard("Marathonpace", "±12,06", "km/u")}
+        ${metricCard("Fase 1–2", "Normaal", "eten")}
+        ${metricCard("Fase 3", "Long runs", "voeden")}
+        ${metricCard("Fase 4", "Koolhydraten", "serieus inzetten")}
+        ${metricCard("Fase 5", "Taper", "+ carb loading")}
+        ${metricCard("Belangrijk", "Niets nieuws", "op marathondag")}
+      </section>
+      <article class="info-card">
+        <h3>Voedingsfilosofie</h3>
+        <p>De basis is simpel: niet elke dag hoeft een “marathondag” te zijn. Rustige dagen vragen minder brandstof dan long-run-dagen of marathontempo-trainingen. Naarmate het schema zwaarder wordt, worden koolhydraten belangrijker. Niet omdat je ongezond moet eten, maar omdat langere duurlopen en marathonspecifieke trainingen brandstof vragen.</p>
+        <ul class="compact-list">
+          <li>Eerst normaal eten en herstel bewaken.</li>
+          <li>Daarna koolhydraten rond runs verhogen.</li>
+          <li>Daarna long-run-voeding oefenen.</li>
+          <li>Daarna gels, sportdrank en vocht testen.</li>
+          <li>Daarna taperen en carb loaden.</li>
+          <li>Op marathondag alleen uitvoeren wat al getest is.</li>
+        </ul>
+        <p>Eerst trainen om beter te lopen. Daarna eten om die training ook echt te kunnen verwerken.</p>
+      </article>
+      <article class="info-card">
+        <h3>Koolhydraat-ladder per fase</h3>
+        <div class="compact-meta">
+          <span class="chip">Normaal</span>
+          <span class="chip">Meer rond runs</span>
+          <span class="chip">Long-run brandstof</span>
+          <span class="chip">Piekfase</span>
+          <span class="chip">Carb loading</span>
+        </div>
+        ${nutritionLadderItems().map(([title, text]) => `<div class="phase-detail-block"><h4>${title}</h4><p>${text}</p></div>`).join("")}
+      </article>
+    `;
+  }
+
+  function nutritionLadderItems() {
+    return [
+      ["Fase 1 — normaal", "2 runs per week. Geen ingewikkeld voedingsplan nodig. Focus op eiwit, normale koolhydraten en herstel."],
+      ["Fase 2 — iets bewuster", "3 runs per week. Op hardloopdagen iets meer koolhydraten rond de training."],
+      ["Fase 3 — long runs voeden", "Long runs worden structureel. Koolhydraten rond long runs en marathonpace-runs worden belangrijker."],
+      ["Fase 4 — prestatiebrandstof", "Zwaarste fase. 4 runs per week, long runs tot 30–32 km en marathontempo op vermoeide benen. Niet proberen te cutten. Brandstof en herstel zijn prioriteit."],
+      ["Fase 5 — taper + carb loading", "Volume omlaag, koolhydraten bewust hoger richting marathon. Geen experimenten."],
+    ];
+  }
+
+  function renderNutritionPhases() {
+    const rows = [
+      {
+        title: "Fase 1 — Basisfase",
+        meta: "Week 22 t/m 26 · 2 runs per week, krachttraining dominant",
+        goal: "Normaal, gezond en voldoende eten. Nog geen marathonvoeding nodig.",
+        carbs: "Normale hoeveelheid. Op dagen met een run eventueel iets meer brood, havermout, rijst, aardappelen, pasta of fruit.",
+        protein: "Hoog genoeg houden voor krachttraining en herstel.",
+        before: "Niet te zwaar eten vlak voor hardlopen. Een banaan, boterham of lichte maaltijd kan genoeg zijn.",
+        after: "Normale maaltijd met eiwit + koolhydraten.",
+        focus: "Niet overcompliceren. Eerst consistent trainen.",
+      },
+      {
+        title: "Fase 2 — Overgangsfase",
+        meta: "Week 27 t/m 28 · 3 runs per week",
+        goal: "Wennen aan meer loopfrequentie en herstel ondersteunen.",
+        carbs: "Iets meer op hardloopdagen. Vooral rondom tempo-intro’s en langere easy runs.",
+        protein: "Normaal hoog houden; krachttraining blijft belangrijk.",
+        before: "2–3 uur vooraf een lichte maaltijd met koolhydraten.",
+        after: "Koolhydraten + eiwit. Bijvoorbeeld yoghurt/kwark met fruit, brood, rijstmaaltijd of shake + maaltijd.",
+        focus: "Let op wat goed valt vóór het lopen.",
+      },
+      {
+        title: "Fase 3 — Hybride opbouwfase",
+        meta: "Week 29 t/m 36 · 3 runs per week + long runs",
+        goal: "Long runs en marathonpace-runs beter ondersteunen.",
+        carbs: "Bewuster inzetten. Niet structureel laag in koolhydraten eten als de long runs langer worden.",
+        protein: "Hoog genoeg houden voor herstel van krachttraining en loopbelasting.",
+        before: "Ontbijt oefenen: havermout met banaan, brood met jam/honing, yoghurt met fruit of een simpele koolhydraatrijke maaltijd.",
+        after: "Herstelmaaltijd met koolhydraten + eiwit.",
+        focus: "Vanaf nu voeding testen, zodat je in Fase 4 niet hoeft te gokken.",
+      },
+      {
+        title: "Fase 4 — Piekfase / marathonspecifieke fase",
+        meta: "Week 37 t/m 44 · 4 runs per week, zwaarste hardloopfase",
+        goal: "Presteren en herstellen. Koolhydraten zijn nu trainingsbrandstof.",
+        carbs: "Hoger rondom zware weken, marathonpace-long-runs en lange duurlopen.",
+        protein: "Normaal hoog houden, maar herstel draait nu ook sterk om koolhydraten, vocht en zout.",
+        before: "Race-achtig ontbijt oefenen. Niet te vet, niet te vezelrijk, geen experimenten.",
+        after: "Herstel serieus nemen: koolhydraten, eiwit, vocht en zout.",
+        focus: "Niet cutten in deze fase. Brandstof is belangrijker dan strak dieetdenken.",
+      },
+      {
+        title: "Fase 5 — Taperfase",
+        meta: "Week 45 t/m 47 · volume omlaag, marathon nadert",
+        goal: "Fris worden, glycogeen aanvullen en maag rustig houden.",
+        carbs: "In de laatste dagen richting marathon bewust verhogen.",
+        protein: "Normaal houden.",
+        before: "Alleen eten wat al getest is. Laatste 24–48 uur niet extreem veel vezels of vet als dat je maag belast.",
+        after: "Na de marathon eten, drinken, zout aanvullen en ontspannen herstellen.",
+        focus: "Geen nieuwe gels, geen nieuw ontbijt, geen nieuwe supplementen, geen experimenten.",
+      },
+    ];
+    return `<section class="info-list">${rows.map(renderNutritionPhaseCard).join("")}</section>`;
+  }
+
+  function renderNutritionPhaseCard(row) {
+    return `
+      <article class="info-card">
+        <h3>${row.title}</h3>
+        <p class="status-line">${row.meta}</p>
+        <p><strong>Voedingsdoel:</strong> ${row.goal}</p>
+        <p><strong>Koolhydraten:</strong> ${row.carbs}</p>
+        <p><strong>Eiwit:</strong> ${row.protein}</p>
+        <p><strong>Voor training:</strong> ${row.before}</p>
+        <p><strong>Na training:</strong> ${row.after}</p>
+        <p><strong>Belangrijkste aandachtspunt:</strong> ${row.focus}</p>
+      </article>
+    `;
+  }
+
+  function renderNutritionTraining() {
+    const rows = [
+      ["Easy Run", "Normaal eten. Bij korte easy runs is extra voeding meestal niet nodig.", "Meestal niets nodig.", "Normale maaltijd.", "Easy run blijft easy. Voeding hoeft niet ingewikkeld."],
+      ["Marathonpace Run", "Zorg dat je niet leeg start. Eet 2–3 uur vooraf koolhydraten.", "Bij korte sessies meestal niets nodig. Bij langere sessies eventueel sportdrank testen.", "Koolhydraten + eiwit.", "Koolhydraten helpen om 11,8–12,0 km/u gecontroleerd te lopen."],
+      ["Long Run", "Ontbijt of maaltijd oefenen. Niet te zwaar, niet te vet, niet te onbekend.", "Vanaf 90+ minuten gels/sportdrank testen.", "Goed herstellen met koolhydraten, eiwit en vocht.", "Long runs zijn de plek om marathonvoeding te testen."],
+      ["Long Run met Marathontempo", "Race-achtig eten. Dit is een generale repetitie.", "Gels/drinken gebruiken zoals je mogelijk op marathondag wilt doen.", "Herstel serieus nemen.", "Niet alleen benen testen, ook maag en brandstofplan testen."],
+      ["Krachttraining", "Normale maaltijd met eiwit en koolhydraten.", "Niets nodig, tenzij de sessie erg lang is.", "Eiwit + normale maaltijd.", "Spiermassa en herstel ondersteunen."],
+      ["Hybride dag", "Zorg voor genoeg energie, vooral als er ook een run bij zit.", "Tijdens meestal niets nodig, behalve bij langere runblokken.", "Koolhydraten + eiwit.", "Niet onderschatten: kracht + run vraagt meer herstel dan één losse sessie."],
+    ];
+    return `<section class="info-list">${rows.map(([title, before, during, after, focus]) => `
+      <article class="info-card">
+        <h3>${title}</h3>
+        <p><strong>Vooraf:</strong> ${before}</p>
+        <p><strong>Tijdens:</strong> ${during}</p>
+        <p><strong>Na afloop:</strong> ${after}</p>
+        <p><strong>Focus:</strong> ${focus}</p>
+      </article>
+    `).join("")}</section>`;
+  }
+
+  function renderNutritionLongRuns() {
+    return `
+      <article class="info-card build-hero-card">
+        <h3>Long runs & gels</h3>
+        <p>Long runs zijn niet alleen looptraining, maar ook voedingstraining. Je test hier wat je maag verdraagt, hoeveel koolhydraten je nodig hebt, wanneer je moet drinken en welke producten werken.</p>
+      </article>
+      <section class="info-list">
+        ${foodListCard("Wanneer begin ik met gels oefenen?", ["60–70 min: meestal nog niet nodig", "80–90 min: eventueel eerste test", "90+ min: gels of sportdrank serieus oefenen", "2 uur+: voeding en drinken plannen", "Week 39/41/42/43: racefueling oefenen", "Marathonweek: niets nieuws meer"])}
+        ${foodListCard("Praktische richtlijn tijdens lange runs", ["Begin niet pas als je leeg bent", "Neem voeding vroeg genoeg", "Test gels met water", "Test sportdrank apart", "Noteer wat goed of slecht valt", "Houd het simpel"])}
+        ${foodListCard("Mogelijk marathon-gelplan", ["Gel 1: rond 20–25 min", "Gel 2: rond 45–50 min", "Gel 3: rond 70–75 min", "Gel 4: rond 95–100 min", "Gel 5: rond 120–125 min", "Gel 6: rond 145–150 min", "Gel 7: rond 170–175 min", "Gel 8: rond 195–200 min, alleen als getest en nodig"], "Dit is geen verplicht schema. Dit moet getest worden tijdens long runs. Niet op marathondag voor het eerst proberen.")}
+        ${foodListCard("Wat log ik na een long run?", ["Ontbijt", "Tijd tussen eten en lopen", "Aantal gels", "Water/sportdrank", "Maaggevoel", "Energiegevoel", "Kramp ja/nee", "Wat werkte goed?", "Wat moet anders?"])}
+      </section>
+    `;
+  }
+
+  function renderNutritionMarathonWeek() {
+    const rows = [
+      ["Maandag–woensdag", "Normaal eten. Voldoende koolhydraten, eiwit en vocht. Geen extreme veranderingen."],
+      ["Donderdag–vrijdag", "Koolhydraten iets verhogen. Denk aan rijst, pasta, brood, aardappelen, havermout, banaan, krentenbollen of pannenkoeken."],
+      ["Zaterdag", "Simpel, vertrouwd en koolhydraatrijk. Niet extreem vet of vezelrijk als dat je maag belast. Geen experimenten."],
+      ["Zondagochtend", "Race-ontbijt 3–4 uur voor start, zoals eerder getest. Bijvoorbeeld brood/bagel met jam/honing, banaan, havermout of een vertrouwde maaltijd."],
+      ["Laatste uur", "Alleen iets kleins als dat getest is. Bijvoorbeeld sportdrank, banaan of kleine snack."],
+      ["Tijdens marathon", "Gebruik het geteste gel-/drinkplan. Niet wachten tot je leeg bent."],
+      ["Na marathon", "Eten, drinken, zout aanvullen en ontspannen herstellen."],
+    ];
+    return `
+      <article class="info-card build-hero-card">
+        <h3>Marathonweek</h3>
+        <p>In marathonweek wil je geen nieuwe dingen proberen. Het doel is fris worden, koolhydraten aanvullen, maag rustig houden en het plan uitvoeren dat je in de long runs hebt getest.</p>
+      </article>
+      <section class="info-list">
+        ${rows.map(([title, text]) => `<article class="info-card"><h3>${title}</h3><p>${text}</p></article>`).join("")}
+        ${foodListCard("Niet doen in marathonweek", ["Geen nieuwe gels", "Geen nieuw ontbijt", "Geen onbekende sportdrank", "Geen extreem vezelrijke maaltijd vlak voor de race", "Geen zware alcoholavond", "Geen nieuw supplement", "Geen paniekdieet"])}
+      </section>
+    `;
+  }
+
+  function renderNutritionPractical() {
+    return `
+      <section class="info-list">
+        ${foodListCard("Koolhydraatbronnen", ["rijst", "pasta", "aardappelen", "brood", "bagels", "wraps", "havermout", "banaan", "krentenbollen", "ontbijtkoek", "jam/honing", "pannenkoeken", "cornflakes/rice krispies", "sportdrank", "gels"])}
+        ${foodListCard("Eiwitbronnen", ["kwark", "yoghurt", "whey isolate", "eieren", "kipfilet", "gehakt", "hüttenkäse", "tonijn", "mager vlees", "peulvruchten als je ze goed verdraagt"])}
+        ${foodListCard("Makkelijke ontbijtopties", ["havermout met banaan", "brood met jam/honing", "yoghurt/kwark met fruit en oats", "krentenbol + banaan", "pannenkoeken als je dat goed verdraagt"])}
+        ${foodListCard("Makkelijke lunchopties", ["volkorenbrood met kipfilet/hüttenkäse", "wraps met kip/ei", "rijst- of pastamaaltijd", "brood + fruit + yoghurt/kwark"])}
+        ${foodListCard("Makkelijke avondmaaltijden", ["rijst + groente + gehakt/kip/ei", "pasta + simpele saus + eiwitbron", "aardappelen + groente + vlees/ei", "wraps met kip/gehakt/bonen", "noodles/rijstmaaltijd als snelle optie"])}
+        ${foodListCard("Voorzichtig vlak vóór long runs", ["heel vet eten", "heel veel vezels", "pittig eten", "grote hoeveelheden rauwkost", "onbekende supplementen", "nieuwe gels of sportdrank"])}
+      </section>
+    `;
+  }
+
+  function foodListCard(title, items, note = "") {
+    return `
+      <article class="info-card">
+        <h3>${title}</h3>
+        <ul class="compact-list">${items.map((item) => `<li>${item}</li>`).join("")}</ul>
+        ${note ? `<p class="muted small">${note}</p>` : ""}
+      </article>
+    `;
+  }
+
   function renderStats() {
     const logs = getLogs();
     const completed = getCompleted();
@@ -2444,7 +2842,7 @@
         <p class="status-line">${analytics.phase.phaseName} · ${marathonCountdownText(toIsoDate(today()))}</p>
         <p>${phaseFocus(analytics.phase.phaseId)}</p>
       </section>
-      ${analytics.exerciseProgress.bestProgress ? renderBestProgressCard(analytics.exerciseProgress.bestProgress) : `<section class="stat-card"><h3>Meeste vooruitgang geboekt</h3><p class="muted small">Nog niet genoeg data om vooruitgang betrouwbaar te berekenen.</p></section>`}
+      ${analytics.exerciseProgress.bestProgress ? renderBestProgressCard(analytics.exerciseProgress.bestProgress) : renderStatsPlaceholderCard("Meeste vooruitgang geboekt", "Log een oefening minimaal drie keer om betrouwbare vooruitgang te zien.")}
       ${renderChartCard("Geplande vs voltooide sessies", "Week", "Sessies voltooid", "planned-completed", analytics.completed.length >= 2)}
       <section class="stat-card">
         <h3>Laatste training</h3>
@@ -2490,7 +2888,7 @@
         ${metricCard("Meest gelogd", analytics.mostLogged ? analytics.mostLogged.name : "-")}
         ${metricCard("Meeste vooruitgang", analytics.exerciseProgress.bestProgress ? analytics.exerciseProgress.bestProgress.name : "-", analytics.exerciseProgress.bestProgress ? `+${formatNumber(Math.round(analytics.exerciseProgress.bestProgress.percent * 10) / 10)}%` : "minimaal 3 logs nodig")}
       </section>
-      ${analytics.exerciseProgress.bestProgress ? renderBestProgressCard(analytics.exerciseProgress.bestProgress) : `<section class="stat-card"><h3>Meeste vooruitgang geboekt</h3><p class="muted small">Nog niet genoeg data om vooruitgang betrouwbaar te berekenen.</p></section>`}
+      ${analytics.exerciseProgress.bestProgress ? renderBestProgressCard(analytics.exerciseProgress.bestProgress) : renderStatsPlaceholderCard("Meeste vooruitgang geboekt", "Na minimaal drie logs per oefening verschijnt hier welke beweging het meest vooruitgaat.")}
       <section class="stat-card">
         <h3>Laatste krachttraining</h3>
         <p>${analytics.lastStrength ? `${analytics.lastStrength.exerciseName} · ${resultText(analytics.lastStrength)} · ${formatDate(analytics.lastStrength.date)}` : "Nog geen krachtdata."}</p>
@@ -2519,7 +2917,7 @@
         ${
           analytics.byExercise.size
             ? [...analytics.byExercise.entries()].map(([exerciseId, entries], index) => renderExerciseStats(exerciseId, entries, index)).join("")
-            : `<div class="empty-state"><h2>Nog geen krachtdata</h2><p class="muted">Log een oefening op Vandaag en kom hier terug.</p></div>`
+            : renderStatsEmptyState("Nog geen krachtdata", "Log een oefening op Vandaag en kom hier terug. Daarna verschijnen hier oefeningkaarten, trends en details.")
         }
       </section>
     `;
@@ -2539,7 +2937,7 @@
         ${metricCard("Intervalruns", analytics.intervalRuns)}
         ${metricCard("Consistente week", mostConsistentWeek ? `Week ${mostConsistentWeek[0]}` : "-", mostConsistentWeek ? `${mostConsistentWeek[1]} sessies voltooid` : "")}
       </section>
-      ${analytics.exerciseProgress.bestProgress ? renderBestProgressCard(analytics.exerciseProgress.bestProgress) : `<section class="stat-card"><h3>Meeste vooruitgang geboekt</h3><p class="muted small">Nog niet genoeg data om vooruitgang betrouwbaar te berekenen.</p></section>`}
+      ${analytics.exerciseProgress.bestProgress ? renderBestProgressCard(analytics.exerciseProgress.bestProgress) : renderStatsPlaceholderCard("Meeste vooruitgang geboekt", "Nog niet genoeg logs. Een paar consistente metingen maken dit straks leuker.")}
       <section class="stat-card">
         <h3>Oefening die aandacht nodig heeft</h3>
         <p class="muted small">${attentionExerciseText(analytics)}</p>
@@ -2596,8 +2994,49 @@
     return `
       <section class="stat-card chart-card">
         <h3>${title}</h3>
-        ${hasData ? `<canvas class="line-chart" width="320" height="160" data-chart="${chartId}" aria-label="${title}"></canvas><p class="chart-axis-label">${xLabel} · ${yLabel}</p>` : `<p class="muted small">Nog niet genoeg data om deze grafiek te tonen.</p>`}
+        ${hasData ? `<canvas class="line-chart" width="320" height="160" data-chart="${chartId}" aria-label="${title}"></canvas><p class="chart-axis-label">${xLabel} · ${yLabel}</p>` : renderChartPlaceholder(title, xLabel, yLabel)}
       </section>
+    `;
+  }
+
+  function renderChartPlaceholder(title, xLabel, yLabel) {
+    return `
+      <div class="chart-placeholder" aria-label="${escapeAttr(title)} placeholder">
+        <span></span><span></span><span></span><span></span>
+      </div>
+      <p class="chart-axis-label">${xLabel} · ${yLabel}</p>
+      <p class="muted small">${chartPlaceholderText(title)}</p>
+    `;
+  }
+
+  function chartPlaceholderText(title) {
+    const lower = title.toLowerCase();
+    if (lower.includes("kilometer")) return "Log je eerste runs om je weekvolume te zien.";
+    if (lower.includes("long")) return "Vink long runs af om de opbouw zichtbaar te maken.";
+    if (lower.includes("marathontempo")) return "Na MP-runs verschijnt hier hoeveel specifieke 3:30-training je doet.";
+    if (lower.includes("kracht") || lower.includes("gewicht")) return "Log krachtsets om progressie over tijd te zien.";
+    if (lower.includes("reps")) return "Log deze oefening vaker om reps over tijd te vergelijken.";
+    if (lower.includes("prestatie")) return "Na een paar logs zie je hier je prestatie-index.";
+    return "Nog niet genoeg data om deze grafiek te tonen.";
+  }
+
+  function renderStatsPlaceholderCard(title, text) {
+    return `
+      <section class="stat-card">
+        <h3>${title}</h3>
+        <div class="mini-placeholder-bars"><span></span><span></span><span></span></div>
+        <p class="muted small">${text}</p>
+      </section>
+    `;
+  }
+
+  function renderStatsEmptyState(title, text) {
+    return `
+      <div class="empty-state stats-empty-state">
+        <div class="chart-placeholder small-placeholder"><span></span><span></span><span></span><span></span></div>
+        <h2>${title}</h2>
+        <p class="muted">${text}</p>
+      </div>
     `;
   }
 
@@ -2615,7 +3054,7 @@
         ${
           ordered.length >= 2
             ? `<canvas class="sparkline" width="320" height="42" data-sparkline="${index}" data-exercise-id="${exerciseId}"></canvas>`
-            : `<p class="muted small">Nog te weinig data voor grafiek.</p>`
+            : renderChartPlaceholder("Oefeningprogressie", "Datum", "Score")
         }
         <button class="inline-link-button" type="button" data-open-exercise-stats="${escapeAttr(exerciseId)}" data-exercise-name="${escapeAttr(last.exerciseName)}">Details bekijken →</button>
       </article>
@@ -2690,7 +3129,7 @@
     return `
       <section class="stat-card chart-card">
         <h3>${title}</h3>
-        ${hasData ? `<canvas class="line-chart" width="320" height="160" data-exercise-detail-chart="${kind}" aria-label="${title}"></canvas><p class="chart-axis-label">${xLabel} · ${yLabel}</p>` : `<p class="muted small">Nog niet genoeg data om deze grafiek te tonen.</p>`}
+        ${hasData ? `<canvas class="line-chart" width="320" height="160" data-exercise-detail-chart="${kind}" aria-label="${title}"></canvas><p class="chart-axis-label">${xLabel} · ${yLabel}</p>` : renderChartPlaceholder(title, xLabel, yLabel)}
       </section>
     `;
   }
@@ -2985,6 +3424,11 @@
     saveLogs(logs);
   }
 
+  function persistVisibleLogs() {
+    document.querySelectorAll("[data-exercise-row]").forEach((row) => upsertStrength(row));
+    document.querySelectorAll("[data-cardio-key]").forEach((card) => upsertCardio(card));
+  }
+
   function openMenu() {
     if (!menuOverlay) return;
     menuOverlay.hidden = false;
@@ -3019,6 +3463,131 @@
     if (countdownOverlay) countdownOverlay.hidden = true;
   }
 
+  function milestoneActionLabel(action) {
+    const labels = {
+      week: "Bekijk week",
+      phase: "Bekijk fase",
+      nutritionPhase: "Bekijk voeding",
+      nutritionLongRuns: "Bekijk voeding",
+      nutritionMarathon: "Bekijk voeding",
+      longRuns: "Bekijk long runs",
+      marathonPace: "Bekijk marathontempo",
+      marathonWeek: "Bekijk marathonweek",
+    };
+    return labels[action] || "Bekijk";
+  }
+
+  function renderMilestoneContent(milestone, context) {
+    const phase = getPhase(context.week.phaseId);
+    return `
+      <div class="milestone-kicker">${milestone.label}</div>
+      <h3>${milestone.title}</h3>
+      <p>${milestone.intro}</p>
+      <div class="compact-meta">
+        <span class="chip">Week ${context.week.calendarWeek}</span>
+        <span class="chip">${phase.phaseName}</span>
+        <span class="chip">${marathonCountdownText(context.dateIso)}</span>
+      </div>
+      <div class="milestone-grid">
+        <div class="phase-detail-block"><h4>Wat verandert er?</h4><p>${milestone.change}</p></div>
+        <div class="phase-detail-block"><h4>Hardloopfocus</h4><p>${milestone.running}</p></div>
+        <div class="phase-detail-block"><h4>Krachtfocus</h4><p>${milestone.strength}</p></div>
+        <div class="phase-detail-block"><h4>Voedingsfocus</h4><p>${milestone.nutrition}</p></div>
+        <div class="phase-detail-block"><h4>Belangrijkste focus</h4><p>${milestone.focus}</p></div>
+      </div>
+      ${milestone.note ? `<p class="muted small">${milestone.note}</p>` : ""}
+      <div class="milestone-actions">
+        ${milestone.actions.map((action) => `<button class="detail-action-button" type="button" data-milestone-action="${action}" data-milestone-week="${milestone.week}" data-milestone-phase="${milestone.phaseId}">${milestoneActionLabel(action)}</button>`).join("")}
+        <button class="secondary-button" type="button" data-milestone-close>Begrepen</button>
+      </div>
+    `;
+  }
+
+  function openMilestone(milestone, context) {
+    if (!milestoneOverlay || !milestoneContent) return;
+    milestoneContent.innerHTML = renderMilestoneContent(milestone, context);
+    milestoneOverlay.hidden = false;
+  }
+
+  function closeMilestone() {
+    if (milestoneOverlay) milestoneOverlay.hidden = true;
+  }
+
+  function syncMilestonePopup() {
+    if (!milestoneOverlay || !milestoneContent) return;
+    if (state.view !== "today") {
+      state.milestoneActiveKey = "";
+      state.milestoneDismissedKey = "";
+      closeMilestone();
+      return;
+    }
+    const context = todayViewContext();
+    const milestone = getMilestoneForWeek(context.week.calendarWeek);
+    if (!milestone) {
+      state.milestoneActiveKey = "";
+      state.milestoneDismissedKey = "";
+      closeMilestone();
+      return;
+    }
+    if (state.milestoneActiveKey !== milestone.key) {
+      state.milestoneActiveKey = milestone.key;
+      state.milestoneDismissedKey = "";
+    }
+    if (state.milestoneDismissedKey === milestone.key) {
+      closeMilestone();
+      return;
+    }
+    openMilestone(milestone, context);
+  }
+
+  function dismissMilestone() {
+    if (state.milestoneActiveKey) state.milestoneDismissedKey = state.milestoneActiveKey;
+    closeMilestone();
+  }
+
+  function openMilestoneTarget(action, milestoneWeek, phaseId) {
+    const week = weeks.find((item) => item.calendarWeek === Number(milestoneWeek)) || todayViewContext().week;
+    closeMilestone();
+    if (action === "week") {
+      state.view = "week";
+      state.preview = null;
+      state.viewedWeekIndex = weeks.indexOf(week);
+    }
+    if (action === "phase") {
+      state.view = "phases";
+      state.preview = null;
+      state.targetPhaseId = phaseId || week.phaseId;
+    }
+    if (action === "nutritionPhase") {
+      state.view = "nutrition";
+      state.preview = null;
+      state.nutritionTab = "phases";
+    }
+    if (action === "nutritionLongRuns") {
+      state.view = "nutrition";
+      state.preview = null;
+      state.nutritionTab = "longRuns";
+    }
+    if (action === "nutritionMarathon" || action === "marathonWeek") {
+      state.view = "nutrition";
+      state.preview = null;
+      state.nutritionTab = "marathonWeek";
+    }
+    if (action === "longRuns") {
+      state.view = "runBuild";
+      state.preview = null;
+      state.runBuildTab = "longRuns";
+    }
+    if (action === "marathonPace") {
+      state.view = "runBuild";
+      state.preview = null;
+      state.runBuildTab = "marathonPace";
+    }
+    closeMenu();
+    closeCountdown();
+    render();
+  }
+
   function render() {
     const activeView = state.view === "sessionPreview" ? "week" : state.view;
     navButtons.forEach((button) => button.classList.toggle("is-active", button.dataset.view === activeView));
@@ -3029,7 +3598,9 @@
     if (state.view === "sessionPreview") renderSessionPreview();
     if (state.view === "phases") renderPhases();
     if (state.view === "runBuild") renderRunBuild();
+    if (state.view === "nutrition") renderNutrition();
     if (state.view === "stats") renderStats();
+    syncMilestonePopup();
   }
 
   document.addEventListener("click", (event) => {
@@ -3046,6 +3617,7 @@
       moveTodaySelection(-1);
       closeMenu();
       closeCountdown();
+      closeMilestone();
       render();
       return;
     }
@@ -3056,6 +3628,7 @@
       moveTodaySelection(1);
       closeMenu();
       closeCountdown();
+      closeMilestone();
       render();
       return;
     }
@@ -3080,6 +3653,17 @@
       return;
     }
 
+    if (target.closest("[data-milestone-close]") || target === milestoneOverlay) {
+      dismissMilestone();
+      return;
+    }
+
+    const milestoneAction = target.closest("[data-milestone-action]");
+    if (milestoneAction) {
+      openMilestoneTarget(milestoneAction.dataset.milestoneAction, milestoneAction.dataset.milestoneWeek, milestoneAction.dataset.milestonePhase);
+      return;
+    }
+
     const navButton = target.closest("[data-view]");
     if (navButton) {
       state.view = navButton.dataset.view;
@@ -3096,6 +3680,12 @@
     if (runTab) {
       state.runBuildTab = runTab.dataset.runTab;
       renderRunBuild();
+      return;
+    }
+    const nutritionTab = target.closest("[data-nutrition-tab]");
+    if (nutritionTab) {
+      state.nutritionTab = nutritionTab.dataset.nutritionTab;
+      renderNutrition();
       return;
     }
     const statsTab = target.closest("[data-stats-tab]");
@@ -3115,6 +3705,7 @@
       state.selectedExerciseName = exerciseStatsButton.dataset.exerciseName || "";
       closeMenu();
       closeCountdown();
+      closeMilestone();
       render();
       return;
     }
@@ -3127,6 +3718,7 @@
       state.viewedWeekIndex = weeks.indexOf(context.week);
       closeMenu();
       closeCountdown();
+      closeMilestone();
       render();
       return;
     }
@@ -3149,6 +3741,7 @@
         state.viewedWeekIndex = weeks.indexOf(week);
         closeMenu();
         closeCountdown();
+        closeMilestone();
         render();
       }
       return;
@@ -3179,7 +3772,7 @@
     if (target.closest("[data-complete-session]")) {
       const context = todayViewContext();
       if (context.session) completeSession(context.week, context.session, "manual", context.dateIso);
-      renderToday();
+      render();
       return;
     }
     if (target.closest("[data-week-prev]")) {
@@ -3222,6 +3815,19 @@
       const card = target.closest("[data-cardio-key]");
       if (card) upsertCardio(card);
     }
+  });
+
+  document.addEventListener("input", (event) => {
+    const target = event.target;
+    if (target.matches("[data-log-field]")) {
+      const row = target.closest("[data-exercise-row]");
+      if (row) upsertStrength(row);
+    }
+  });
+
+  window.addEventListener("pagehide", persistVisibleLogs);
+  document.addEventListener("visibilitychange", () => {
+    if (document.visibilityState === "hidden") persistVisibleLogs();
   });
 
   function installDoubleTapGuard() {

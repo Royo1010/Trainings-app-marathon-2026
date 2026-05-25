@@ -9,10 +9,10 @@
     <meta name="apple-mobile-web-app-title" content="Marathon" />
     <meta name="mobile-web-app-capable" content="yes" />
     <meta name="format-detection" content="telephone=no" />
-    <link rel="manifest" href="./manifest.json?v=20260524-12" />
+    <link rel="manifest" href="./manifest.json?v=20260524-13" />
     <link rel="icon" href="./icon.svg" type="image/svg+xml" />
     <link rel="apple-touch-icon" href="./icon.svg" />
-    <link rel="stylesheet" href="./style.css?v=20260524-12" />
+    <link rel="stylesheet" href="./style.css?v=20260524-13" />
     <title>Marathon Training</title>
   </head>
   <body>
@@ -44,6 +44,7 @@
           <button class="menu-item" type="button" data-view="week">Week</button>
           <button class="menu-item" type="button" data-view="phases">Fases</button>
           <button class="menu-item" type="button" data-view="runBuild">Hardloopopbouw</button>
+          <button class="menu-item" type="button" data-view="nutrition">Voeding</button>
           <button class="menu-item" type="button" data-view="stats">Statistieken</button>
         </nav>
       </div>
@@ -58,10 +59,20 @@
         </section>
       </div>
 
+      <div id="milestone-overlay" class="countdown-overlay milestone-overlay" hidden>
+        <section class="countdown-sheet milestone-sheet" role="dialog" aria-modal="true" aria-labelledby="milestone-title">
+          <div class="menu-head">
+            <span id="milestone-title">Fase-update</span>
+            <button class="close-button" type="button" data-milestone-close aria-label="Mijlpaal sluiten">×</button>
+          </div>
+          <div id="milestone-content" class="countdown-content milestone-content"></div>
+        </section>
+      </div>
+
       <main id="app" class="content" aria-live="polite"></main>
     </div>
 
-    <script src="./training-data.js?v=20260524-12"></script>
-    <script src="./app.js?v=20260524-12"></script>
+    <script src="./training-data.js?v=20260524-13"></script>
+    <script src="./app.js?v=20260524-13"></script>
   </body>
 </html>
