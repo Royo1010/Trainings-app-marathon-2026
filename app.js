@@ -1,19 +1,17 @@
 (function () {
   "use strict";
 
+  const APP_VERSION = "clean-storage-v1";
+  const APP_SCOPE = "/marathon-330/";
+  const STORAGE_KEY = "marathon330TrainingAppData_v1";
   const STORAGE = {
-    appData: "marathonTrainingAppData",
-    resetMarker: "marathonTrainingAppDataReset20260525",
-    logs: "marathonApp.logs",
-    completed: "marathonApp.completedSessions",
-    preferences: "marathonApp.preferences",
-    version: "marathonApp.version",
+    appData: STORAGE_KEY,
   };
   const APP_DATA_VERSION = 1;
-  // BELANGRIJK VOOR TOEKOMSTIGE UPDATES: verander storage keys niet zonder migratie.
+  // BELANGRIJK VOOR TOEKOMSTIGE UPDATES: verander STORAGE_KEY niet zonder migratie.
   // Overschrijf bestaande localStorage-data nooit met lege defaults. workoutLogs en
-  // runLogs zijn de bron van waarheid; exerciseStats is afgeleid en mag opnieuw
-  // berekend worden. Bij toekomstige updates bestaande data behouden.
+  // runLogs zijn de bron van waarheid; exerciseStats is optioneel/afgeleid en mag
+  // opnieuw berekend worden. Lege data is geldig; alleen corrupte JSON is corrupt.
 
   const app = document.getElementById("app");
   const todayPill = document.getElementById("today-pill");
@@ -41,12 +39,13 @@
     SESSION_PREVIEW: "sessionPreview",
   };
 
-  const APP_STORAGE_KEYS = [
-    STORAGE.appData,
-    STORAGE.logs,
-    STORAGE.completed,
-    STORAGE.preferences,
-    STORAGE.version,
+  const LEGACY_STORAGE_KEYS = [
+    "marathonTrainingAppData",
+    "marathonTrainingAppDataReset20260525",
+    "marathonApp.logs",
+    "marathonApp.completedSessions",
+    "marathonApp.preferences",
+    "marathonApp.version",
     "trainingLogs",
     "workoutLogs",
     "exerciseLogs",
@@ -57,6 +56,13 @@
     "appData",
     "trainingData",
   ];
+  const APP_STORAGE_KEYS = [STORAGE.appData, ...LEGACY_STORAGE_KEYS];
+  let lastStorageStatus = {
+    status: "unknown",
+    error: null,
+    lastSavedAt: null,
+    lastLoadedAt: null,
+  };
 
   const state = {
     view: VIEWS.TODAY,
@@ -173,6 +179,14 @@
     return aliases[view] || view || VIEWS.TODAY;
   }
 
+  function storageDebugEnabled() {
+    return new URLSearchParams(window.location.search).get("debugStorage") === "1";
+  }
+
+  function debugStorage(payload) {
+    if (storageDebugEnabled()) console.debug("[storage]", payload);
+  }
+
   function normalizeLogs(raw) {
     return {
       strength: Array.isArray(raw?.strength) ? raw.strength.filter(isPlainObject) : [],
@@ -194,27 +208,7 @@
     return Boolean(value) && typeof value === "object" && !Array.isArray(value);
   }
 
-  function migrateAppData(raw) {
-    const source = isPlainObject(raw) ? { ...raw } : {};
-    const workoutLogs = normalizeLogs(source.workoutLogs || source.logs || {});
-    const completedSessions = normalizeCompleted(source.completedSessions || source.completed);
-    const createdAt = source.createdAt || new Date().toISOString();
-    return {
-      ...source,
-      appDataVersion: APP_DATA_VERSION,
-      createdAt,
-      updatedAt: source.updatedAt || createdAt,
-      workoutLogs,
-      runLogs: Array.isArray(source.runLogs) ? source.runLogs : workoutLogs.cardio.slice(),
-      completedSessions,
-      exerciseStats: isPlainObject(source.exerciseStats) ? source.exerciseStats : {},
-      userSettings: isPlainObject(source.userSettings) ? source.userSettings : {},
-      uiState: isPlainObject(source.uiState) ? source.uiState : {},
-      dismissedTemporaryUi: isPlainObject(source.dismissedTemporaryUi) ? source.dismissedTemporaryUi : {},
-    };
-  }
-
-  function emptyAppData() {
+  function createEmptyAppData() {
     const now = new Date().toISOString();
     return {
       appDataVersion: APP_DATA_VERSION,
@@ -226,8 +220,50 @@
       exerciseStats: {},
       userSettings: {},
       uiState: {},
+      schemaProgress: {},
+      nutritionLogs: {},
       dismissedTemporaryUi: {},
+      meta: {
+        lastMigrationAt: null,
+        storageInitialized: true,
+      },
     };
+  }
+
+  function emptyAppData() {
+    return createEmptyAppData();
+  }
+
+  function validateAppData(raw) {
+    const source = isPlainObject(raw) ? { ...raw } : createEmptyAppData();
+    const createdAt = source.createdAt || new Date().toISOString();
+    const workoutLogs = normalizeLogs(source.workoutLogs || source.logs || {});
+    const runLogs = Array.isArray(source.runLogs) ? source.runLogs.filter(isPlainObject) : workoutLogs.cardio.slice();
+    const completedSessions = normalizeCompleted(source.completedSessions || source.completed);
+    return {
+      ...source,
+      appDataVersion: Number(source.appDataVersion) || APP_DATA_VERSION,
+      createdAt,
+      updatedAt: source.updatedAt || createdAt,
+      workoutLogs,
+      runLogs,
+      completedSessions,
+      exerciseStats: isPlainObject(source.exerciseStats) ? source.exerciseStats : {},
+      userSettings: isPlainObject(source.userSettings) ? source.userSettings : {},
+      uiState: isPlainObject(source.uiState) ? source.uiState : {},
+      schemaProgress: isPlainObject(source.schemaProgress) ? source.schemaProgress : {},
+      nutritionLogs: isPlainObject(source.nutritionLogs) ? source.nutritionLogs : {},
+      dismissedTemporaryUi: isPlainObject(source.dismissedTemporaryUi) ? source.dismissedTemporaryUi : {},
+      meta: {
+        ...(isPlainObject(source.meta) ? source.meta : {}),
+        storageInitialized: true,
+        lastMigrationAt: source.meta?.lastMigrationAt || null,
+      },
+    };
+  }
+
+  function migrateAppData(raw) {
+    return validateAppData(raw);
   }
 
   function appStorageKeysFound() {
@@ -244,8 +280,8 @@
   }
 
   function isAppStorageKey(key) {
-    if (APP_STORAGE_KEYS.includes(key) || key === STORAGE.resetMarker) return true;
-    return /^(marathon|training|workout|exercise|completed|runLogs|appData|trainingData)/i.test(key);
+    if (APP_STORAGE_KEYS.includes(key)) return true;
+    return /^marathon330(CorruptBackup|TrainingAppData)/i.test(key);
   }
 
   function rawStorageValue(key) {
@@ -258,7 +294,6 @@
 
   function removeKnownAppStorageKeys() {
     appStorageKeysFound().forEach((key) => {
-      if (key === STORAGE.resetMarker) return;
       try {
         localStorage.removeItem(key);
       } catch (error) {
@@ -267,87 +302,105 @@
     });
   }
 
-  function createFreshAppData() {
-    const fresh = emptyAppData();
-    saveAppData(fresh);
-    try {
-      localStorage.setItem(STORAGE.resetMarker, new Date().toISOString());
-    } catch (error) {
-      console.warn("Reset-marker kon niet worden opgeslagen:", error);
-    }
-    return fresh;
-  }
-
-  function ensureFreshStorageStart() {
-    try {
-      if (localStorage.getItem(STORAGE.resetMarker)) return;
-      removeKnownAppStorageKeys();
-      createFreshAppData();
-    } catch (error) {
-      console.warn("Frisse storage-start kon niet worden uitgevoerd:", error);
-    }
-  }
-
-  function legacyDataSnapshot() {
-    return migrateAppData({
-      appDataVersion: 1,
-      workoutLogs: safeRead(STORAGE.logs, {}),
-      completedSessions: safeRead(STORAGE.completed, []),
-      userSettings: safeRead(STORAGE.preferences, {}),
-      createdAt: new Date().toISOString(),
+  function removeLegacyStorageKeys() {
+    LEGACY_STORAGE_KEYS.forEach((key) => {
+      try {
+        localStorage.removeItem(key);
+      } catch (error) {
+        console.warn("Legacy storage-key kon niet worden verwijderd:", key, error);
+      }
     });
   }
 
+  function createFreshAppData() {
+    const fresh = createEmptyAppData();
+    saveAppData(fresh);
+    return fresh;
+  }
+
+  function ensureCleanStorageStart() {
+    try {
+      if (localStorage.getItem(STORAGE.appData)) return;
+      removeLegacyStorageKeys();
+      createFreshAppData();
+    } catch (error) {
+      console.warn("Schone storage-start kon niet worden uitgevoerd:", error);
+    }
+  }
+
+  function corruptBackupKey() {
+    const stamp = new Date().toISOString().replace(/\D/g, "").slice(0, 14);
+    return `marathon330CorruptBackup_${stamp}`;
+  }
+
   function loadAppData() {
-    let stored = null;
     let rawAppData = null;
     try {
       rawAppData = localStorage.getItem(STORAGE.appData);
     } catch (error) {
-      console.warn("App-data kon niet worden gelezen; oude storage-keys worden geprobeerd:", error);
-      return legacyDataSnapshot();
+      lastStorageStatus = { ...lastStorageStatus, status: "read-error", error, lastLoadedAt: new Date().toISOString() };
+      console.warn("App-data kon niet worden gelezen:", error);
+      return createEmptyAppData();
     }
-    if (rawAppData) {
+
+    if (!rawAppData) {
+      removeLegacyStorageKeys();
+      const fresh = saveAppData(createEmptyAppData(), { touchUpdatedAt: false, status: "empty-created" });
+      lastStorageStatus = { ...lastStorageStatus, status: "empty-created", error: null, lastLoadedAt: new Date().toISOString(), lastSavedAt: fresh.updatedAt };
+      debugStorage({
+        appVersion: APP_VERSION,
+        storageKey: STORAGE.appData,
+        status: lastStorageStatus.status,
+        workoutLogs: 0,
+        runLogs: 0,
+        completedSessions: 0,
+      });
+      return fresh;
+    }
+
+    let parsed;
+    try {
+      parsed = JSON.parse(rawAppData);
+    } catch (error) {
       try {
-        stored = JSON.parse(rawAppData);
-      } catch (error) {
-        console.warn("App-data is corrupt; oude storage-keys blijven ongemoeid:", error);
-        return legacyDataSnapshot();
+        localStorage.setItem(corruptBackupKey(), rawAppData);
+      } catch (backupError) {
+        console.warn("Corrupte app-data kon niet als backup worden bewaard:", backupError);
       }
+      console.warn("App-data JSON was corrupt en is vervangen door lege geldige data:", error);
+      const fresh = saveAppData(createEmptyAppData(), { touchUpdatedAt: false, status: "corrupt-reset" });
+      lastStorageStatus = { ...lastStorageStatus, status: "corrupt-reset", error, lastLoadedAt: new Date().toISOString(), lastSavedAt: fresh.updatedAt };
+      return fresh;
     }
-    if (stored) {
-      const migrated = migrateAppData(stored);
-      const needsMigration =
-        stored.appDataVersion !== APP_DATA_VERSION ||
-        !stored.workoutLogs ||
-        !stored.completedSessions ||
-        !stored.exerciseStats ||
-        !stored.userSettings ||
-        !stored.uiState;
-      if (needsMigration) saveAppData(migrated);
-      return migrated;
-    }
-    const legacy = legacyDataSnapshot();
-    saveAppData(legacy);
-    return legacy;
+
+    const normalized = validateAppData(parsed);
+    const changed = JSON.stringify(normalized) !== JSON.stringify(parsed);
+    if (changed) saveAppData(normalized, { touchUpdatedAt: false, status: "migrated" });
+    lastStorageStatus = { ...lastStorageStatus, status: "ok", error: null, lastLoadedAt: new Date().toISOString(), lastSavedAt: normalized.updatedAt };
+    debugStorage({
+      appVersion: APP_VERSION,
+      storageKey: STORAGE.appData,
+      status: lastStorageStatus.status,
+      appDataVersion: normalized.appDataVersion,
+      workoutLogs: normalizeLogs(normalized.workoutLogs).strength.length + normalizeLogs(normalized.workoutLogs).cardio.length,
+      runLogs: normalizeLogs(normalized.workoutLogs).cardio.length,
+      completedSessions: normalizeCompleted(normalized.completedSessions).length,
+    });
+    return normalized;
   }
 
   function saveAppData(data, options = {}) {
-    const { mirrorLegacy = false } = options;
-    const migrated = migrateAppData(data);
-    migrated.updatedAt = new Date().toISOString();
+    const { touchUpdatedAt = true, status = "saved" } = options;
+    const normalized = validateAppData(data);
+    if (touchUpdatedAt) normalized.updatedAt = new Date().toISOString();
     try {
-      localStorage.setItem(STORAGE.appData, JSON.stringify(migrated));
-      if (mirrorLegacy) {
-        safeWrite(STORAGE.logs, migrated.workoutLogs);
-        safeWrite(STORAGE.completed, migrated.completedSessions);
-        safeWrite(STORAGE.preferences, migrated.userSettings);
-        safeWrite(STORAGE.version, { version: config.version, appDataVersion: migrated.appDataVersion, savedAt: migrated.updatedAt });
-      }
+      localStorage.setItem(STORAGE.appData, JSON.stringify(normalized));
+      lastStorageStatus = { status, error: null, lastSavedAt: normalized.updatedAt, lastLoadedAt: lastStorageStatus.lastLoadedAt };
     } catch (error) {
+      lastStorageStatus = { ...lastStorageStatus, status: "write-error", error };
       console.warn("App-data kon niet worden opgeslagen:", error);
     }
-    return migrated;
+    return normalized;
   }
 
   function exportAppData() {
@@ -366,10 +419,10 @@
         }
       }
       const legacy = {
-        workoutLogs: parseMaybeJson(raw.keys[STORAGE.logs] || raw.keys.workoutLogs || raw.keys.trainingLogs || raw.keys.marathonTrainingLogs, {}),
+        workoutLogs: parseMaybeJson(raw.keys.workoutLogs || raw.keys.trainingLogs || raw.keys.marathonTrainingLogs || raw.keys["marathonApp.logs"], {}),
         runLogs: parseMaybeJson(raw.keys.runLogs, []),
-        completedSessions: parseMaybeJson(raw.keys[STORAGE.completed] || raw.keys.completedSessions || raw.keys.completedWorkouts, []),
-        userSettings: parseMaybeJson(raw.keys[STORAGE.preferences], {}),
+        completedSessions: parseMaybeJson(raw.keys.completedSessions || raw.keys.completedWorkouts || raw.keys["marathonApp.completedSessions"], []),
+        userSettings: parseMaybeJson(raw.keys["marathonApp.preferences"], {}),
       };
       return migrateAppData(legacy);
     }
@@ -407,6 +460,26 @@
     };
   }
 
+  function appDisplayMode() {
+    const standalone = window.matchMedia?.("(display-mode: standalone)")?.matches || window.navigator.standalone === true;
+    return standalone ? "Beginscherm-app" : "Safari/browser";
+  }
+
+  function serviceWorkerStatus() {
+    if (!("serviceWorker" in navigator)) return "niet actief";
+    return navigator.serviceWorker.controller ? "actief" : "beschikbaar, nog niet actief";
+  }
+
+  function reloadApp() {
+    window.location.reload();
+  }
+
+  function forceReloadApp() {
+    const url = new URL(window.location.href);
+    url.searchParams.set("reload", Date.now().toString());
+    window.location.href = url.toString();
+  }
+
   function storageDiagnostics() {
     const keys = appStorageKeysFound();
     const rawMain = rawStorageValue(STORAGE.appData);
@@ -419,16 +492,23 @@
         parseErrors.push(`${STORAGE.appData}: ${error.message}`);
       }
     }
-    const data = parsed ? migrateAppData(parsed) : emptyAppData();
+    const data = parsed ? validateAppData(parsed) : createEmptyAppData();
     const logs = normalizeLogs(data.workoutLogs);
     const completed = normalizeCompleted(data.completedSessions);
     const uniqueExercises = new Set(logs.strength.map((entry) => entry.exerciseId).filter(Boolean));
-    const legacyKeys = keys.filter((key) => key !== STORAGE.appData && key !== STORAGE.resetMarker);
+    const legacyKeys = keys.filter((key) => key !== STORAGE.appData && LEGACY_STORAGE_KEYS.includes(key));
     const totalLogs = logs.strength.length + logs.cardio.length + completed.length;
-    const status = parseErrors.length ? "mogelijk oude/corrupte data" : rawMain ? (totalLogs ? "gezond" : "leeg") : "leeg";
+    const status = parseErrors.length ? "corrupt-reset nodig" : rawMain ? (totalLogs ? "gezond" : "leeg") : "leeg";
     const sizeKb = rawMain ? Math.round((rawMain.length / 1024) * 10) / 10 : 0;
     return {
       status,
+      appVersion: APP_VERSION,
+      storageKey: STORAGE.appData,
+      appScope: APP_SCOPE,
+      currentUrl: window.location.href,
+      mode: appDisplayMode(),
+      serviceWorker: serviceWorkerStatus(),
+      lastStorageStatus,
       keys,
       legacyKeys,
       parseErrors,
@@ -449,8 +529,12 @@
     const diagnostics = storageDiagnostics();
     const data = diagnostics.data;
     return [
-      `Hoofdkey: ${STORAGE.appData}`,
+      `App-versie: ${APP_VERSION}`,
+      `Storage-key: ${STORAGE.appData}`,
       `Dataversie: v${data.appDataVersion}`,
+      `URL: ${window.location.href}`,
+      `Modus: ${appDisplayMode()}`,
+      `Service worker: ${serviceWorkerStatus()}`,
       `Aangemaakt: ${data.createdAt ? new Date(data.createdAt).toLocaleString("nl-NL") : "onbekend"}`,
       `Laatst opgeslagen: ${data.updatedAt ? new Date(data.updatedAt).toLocaleString("nl-NL") : "onbekend"}`,
       `Workout logs: ${diagnostics.workoutLogCount}`,
@@ -524,10 +608,13 @@
 
   function repairAppData() {
     const diagnostics = storageDiagnostics();
-    let source = diagnostics.parseErrors.length ? legacyDataSnapshot() : diagnostics.data;
-    if (!diagnostics.hasMain && diagnostics.legacyKeys.length) source = legacyDataSnapshot();
-    saveAppData(migrateAppData(source));
-    return diagnostics.parseErrors.length || diagnostics.legacyKeys.length || !diagnostics.hasMain;
+    if (diagnostics.parseErrors.length) {
+      saveAppData(createEmptyAppData(), { touchUpdatedAt: false, status: "corrupt-reset" });
+      return true;
+    }
+    removeLegacyStorageKeys();
+    saveAppData(validateAppData(diagnostics.data), { status: "repaired" });
+    return diagnostics.legacyKeys.length || !diagnostics.hasMain;
   }
 
   function freshStartStorage() {
@@ -3144,6 +3231,15 @@
           <p>Je trainingsdata wordt lokaal op dit apparaat opgeslagen. App-updates zouden je data normaal niet moeten wissen, maar omdat deze app actief wordt doorontwikkeld, is het verstandig om af en toe een backup te maken.</p>
         </article>
         ${renderDataStatusCard(diagnostics)}
+        ${renderAppDiagnosisCard(diagnostics)}
+        <article class="info-card">
+          <h3>App bijwerken</h3>
+          <p class="muted small">Gebruik deze knoppen nadat je nieuwe bestanden op GitHub Pages hebt gezet. Dit wist geen trainingsdata; de app probeert alleen de nieuwste code opnieuw te laden.</p>
+          <div class="data-actions">
+            <button class="primary-button" type="button" data-reload-app>Herlaad app</button>
+            <button class="secondary-button" type="button" data-force-reload-app>Forceer nieuwste versie laden</button>
+          </div>
+        </article>
         <article class="info-card">
           <h3>Backup maken</h3>
           <div class="data-actions">
@@ -3170,7 +3266,7 @@
         </article>
         <article class="info-card">
           <h3>Data repareren</h3>
-          <p class="muted small">Vult ontbrekende velden aan en migreert oude bekende app-keys naar ${STORAGE.appData}. Dit verwijdert niets zonder bevestiging.</p>
+          <p class="muted small">Controleert de nieuwe storage-key, vult ontbrekende velden aan en ruimt oude app-keys op. Lege logs zijn geldige data.</p>
           <button class="secondary-button" type="button" data-repair-data>Repareer / migreer data</button>
         </article>
         <article class="info-card danger-zone">
@@ -3194,7 +3290,7 @@
         <p class="status-line">Status: ${diagnostics.status}</p>
         ${!hasAnyData && !diagnostics.parseErrors.length ? `<p class="muted small">Nog geen trainingsdata opgeslagen. Zodra je oefeningen of runs logt, verschijnt hier je opslagstatus.</p>` : ""}
         <div class="data-status-grid">
-          ${dataMetric("Hoofdkey", STORAGE.appData)}
+          ${dataMetric("Storage-key", STORAGE.appData)}
           ${dataMetric("Dataversie", data.appDataVersion ? `v${data.appDataVersion}` : "onbekend")}
           ${dataMetric("Laatst opgeslagen", data.updatedAt ? new Date(data.updatedAt).toLocaleString("nl-NL") : "nog niet opgeslagen")}
           ${dataMetric("Workout logs", diagnostics.workoutLogCount)}
@@ -3210,20 +3306,44 @@
     `;
   }
 
+  function renderAppDiagnosisCard(diagnostics) {
+    const data = diagnostics.data;
+    return `
+      <article class="stat-card data-status-card">
+        <h3>App-diagnose</h3>
+        <div class="data-status-grid">
+          ${dataMetric("App-versie", APP_VERSION)}
+          ${dataMetric("Storage-key", diagnostics.storageKey)}
+          ${dataMetric("App-scope", diagnostics.appScope)}
+          ${dataMetric("Modus", diagnostics.mode)}
+          ${dataMetric("Service worker", diagnostics.serviceWorker)}
+          ${dataMetric("Storage-status", diagnostics.status)}
+          ${dataMetric("Laatste opslagmoment", data.updatedAt ? new Date(data.updatedAt).toLocaleString("nl-NL") : "nog niet opgeslagen")}
+        </div>
+        <p class="muted small">Huidige URL: ${escapeAttr(diagnostics.currentUrl)}</p>
+      </article>
+    `;
+  }
+
   function dataMetric(label, value) {
     return `<div class="data-metric"><span>${label}</span><strong>${value}</strong></div>`;
   }
 
   function renderStats() {
-    const logs = getLogs();
-    const completed = getCompleted();
     let analytics;
     try {
+      const logs = getLogs();
+      const completed = getCompleted();
       analytics = statsAnalytics(logs, completed);
     } catch (error) {
-      console.error("Statistieken konden niet worden opgebouwd:", error);
-      app.innerHTML = renderStatsFallback();
-      return;
+      console.warn("UNREADABLE_STATS_REASON", error);
+      try {
+        analytics = statsAnalytics(normalizeLogs(createEmptyAppData().workoutLogs), []);
+      } catch (fallbackError) {
+        console.warn("STATISTICS_EMPTY_FALLBACK_FAILED", fallbackError);
+        app.innerHTML = renderStatsFallback();
+        return;
+      }
     }
 
     if (state.selectedExerciseId) {
@@ -3285,7 +3405,7 @@
       <section class="build-page stats-page">
         <div class="section-title build-title">
           <h2>Statistieken</h2>
-          <p>De pagina is geopend, maar sommige lokale data kon niet worden gelezen.</p>
+          <p>De statistiekenpagina is geopend met een veilige lege staat.</p>
         </div>
         <div class="build-tabs" role="tablist" aria-label="Statistieken onderdelen">
           ${[
@@ -3297,7 +3417,7 @@
             ["insights", "Inzichten"],
           ].map(([id, label]) => `<button type="button" data-stats-tab="${id}" class="${state.statsTab === id ? "is-active" : ""}">${label}</button>`).join("")}
         </div>
-        ${renderStatsEmptyState("Nog geen leesbare statistiekdata", "Je bestaande opslag is niet gewist. Exporteer je data onder Data beheren als backup en log daarna opnieuw of importeer een geldige backup.")}
+        ${renderStatsEmptyState("Nog geen trainingsdata", "Log je eerste training om hier statistieken te zien. Lege data is geldig en wordt niet als fout behandeld.")}
         <button class="secondary-button" type="button" data-open-data>Open Data beheren</button>
       </section>
     `;
@@ -3457,7 +3577,7 @@
       const [minKm, maxKm] = parseRange(km[1]);
       return ((minKm + maxKm) / 2 / 10) * 60;
     }
-    const ranges = [...source.matchAll(/(\d+)(?:[–-](\d+))?\s*min/i)];
+    const ranges = [...source.matchAll(/(\d+)(?:[–-](\d+))?\s*min/gi)];
     if (!ranges.length) return 0;
     return ranges.reduce((sum, match) => {
       const min = Number(match[1]);
@@ -4482,6 +4602,14 @@
       navigateToView(VIEWS.DATA);
       return;
     }
+    if (target.closest("[data-reload-app]")) {
+      reloadApp();
+      return;
+    }
+    if (target.closest("[data-force-reload-app]")) {
+      forceReloadApp();
+      return;
+    }
     if (target.closest("[data-export-data]")) {
       const filename = `marathon-training-backup-${toIsoDate(today())}.json`;
       downloadJsonFile(filename, exportAppData());
@@ -4599,7 +4727,7 @@
   }
 
   function boot() {
-    ensureFreshStorageStart();
+    ensureCleanStorageStart();
     autoCompleteStaleSessions();
     state.viewedWeekIndex = currentWeekIndex();
     state.selectedDateIso = toIsoDate(today());
@@ -4613,6 +4741,8 @@
   boot();
 
   window.MarathonApp = {
+    appVersion: APP_VERSION,
+    storageKey: STORAGE.appData,
     currentWeekIndex,
     activeSessionForWeek,
     getWeekByIndex,
@@ -4620,5 +4750,11 @@
     score,
     resultText,
     hasSessionData,
+    loadAppData,
+    saveAppData,
+    storageDiagnostics,
+    freshStartStorage,
+    openStatistics,
+    openExerciseStats,
   };
 })();
