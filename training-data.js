@@ -2,720 +2,1091 @@
   "use strict";
 
   const APP_CONFIG = {
-    sourceFile: "trainingsschema_marathon_codex.md",
-    startDate: "2026-05-25",
-    startCalendarWeek: 22,
-    version: "2026.05.24.11",
+    planId: "rehab_foundation_2026_07_27",
+    planVersion: 1,
+    planName: "Herstel- en fundamentprogramma — 8 weken",
+    planSubtitle: "Serieuze krachttraining, progressieve revalidatie en gecontroleerde loopopbouw",
+    sourceFile: "herstel_en_fundamentprogramma_8_weken.txt",
+    startDate: "2026-07-27",
+    endDate: "2026-09-20",
+    startCalendarWeek: 31,
+    marathonDate: "2026-11-22",
+    version: "2026.07.27.rehab-foundation.1",
+    description:
+      "Dit tijdelijke achtweekse programma maakt schouders, golfersellebogen, brachialis/elleboogflexoren, heupen, benen, kuiten en enkels belastbaarder. Het combineert serieuze krachttraining, isometrische en dynamische revalidatie en drie looptrainingen per week.",
+    continuationNotice:
+      "Dit herstel- en fundamentblok is afgerond. Voor de resterende periode richting de marathon is een nieuw vervolgschema nodig.",
+    marathonNuance:
+      "Dit is een tijdelijk herstel- en fundamentblok. Drie runs van ongeveer dertig minuten vormen nog geen volledige marathonvoorbereiding. Na vier tot zes weken moet worden beoordeeld of één looptraining geleidelijk langer kan worden; na week 8 is een nieuw marathonspecifiek vervolgblok nodig.",
+  };
+
+  const GENERAL_RULES = {
+    painScale: [
+      "0–2/10: prima; de beweging mag normaal worden uitgevoerd.",
+      "3/10: meestal acceptabel als de pijn stabiel blijft en de techniek niet verandert.",
+      "4/10: verminder gewicht, bewegingsuitslag, holdduur of totaal volume.",
+      "5/10 of hoger: stop de oefening of kies een vervanging.",
+      "Stop direct bij scherpe of plotselinge pijn, tintelingen, gevoelloosheid of merkbaar krachtverlies.",
+      "De volgende ochtend hoort de klacht ongeveer terug te zijn op het oude uitgangsniveau. Duidelijk meer pijn betekent dat de totale dosis te groot was.",
+    ],
+    doubleProgression: [
+      "Kies bij 3 × 8–12 een gewicht waarmee bijvoorbeeld 10, 9 en 8 nette herhalingen mogelijk zijn.",
+      "Behoud het gewicht totdat 12, 12 en 12 technisch goed lukt.",
+      "Verhoog daarna met de kleinste beschikbare stap en bouw opnieuw op vanaf lagere herhalingen.",
+      "Kleine schouder- en onderarmoefeningen: meestal 0,5–1 kg. Kabel: één kleine stap. Beenmachines: ongeveer 2,5–10 kg. Unilateraal: liever kleine stappen.",
+    ],
+    isometricProgression: [
+      "Verhoog eerst de holdduur van ongeveer 20 naar 30 en vervolgens 40 seconden.",
+      "Verhoog pas daarna het gewicht of de kabelweerstand.",
+      "Gebruik eventueel later een tweede gewrichtshoek.",
+      "Verhoog nooit tegelijk duur, gewicht én aantal sets.",
+    ],
   };
 
   const PHASES = [
     {
       phaseId: "fase-1",
-      phaseName: "Fase 1 — Basisfase",
-      weekRange: "Week 22 t/m 26",
-      startDate: "2026-05-25",
-      endDate: "2026-06-28",
-      goal:
-        "Krachttraining blijft dominant met 4 gymdagen en 2 hardloopmomenten. 12 km/u wordt voorzichtig geintroduceerd.",
-      structure: "Upper/Lower A/B, runs na upper body.",
+      phaseName: "Fase 1 — Kalibreren",
+      weekRange: "Programmaweek 1–2",
+      startDate: "2026-07-27",
+      endDate: "2026-08-09",
+      goal: "Techniek leren, pijnreacties beoordelen en een veilige maar serieuze uitgangsbelasting vinden.",
+      structure: "Vier sessies per week: één volledige krachttraining en drie 30/30-hybride sessies.",
       rules:
-        "500 meter roeien als warming-up. Meestal 1-3 reps in reserve. Brachialis/bicep links ontzien, heup/kuit/tibialis/enkel structureel aandacht.",
+        "Dynamische revalidatie RIR 3–4, isometrische holds 5–6/10 en alle runs volledig easy. Nog geen overhead press, pull-ups, chin-ups, zware vrije rows of gewone zware curls.",
       phaseDetails: {
-        runsPerWeek: "2",
-        gymPerWeek: "4",
-        primaryGoal: "Rustige start waarin kracht dominant blijft en hardlopen voorzichtig wordt toegevoegd.",
-        stats: ["1 easy run", "1 korte 3:30-tempo-intro", "nog geen aparte long run"],
+        runsPerWeek: "3 × ongeveer 30 min easy",
+        gymPerWeek: "4 kracht-/revalidatieprikkels",
+        primaryGoal: "Techniek, tolerantie en geschikte startgewichten vaststellen zonder automatisch licht te blijven trainen.",
+        stats: ["RIR 3–4 dynamisch", "holds 5–6/10", "3 easy runs", "overhead press nog niet"],
         sections: [
           {
-            title: "Korte samenvatting",
-            text: "Fase 1 is de rustige start van de marathonvoorbereiding. Je traint nog niet als volledige marathonloper, maar als sterke sporter die zijn lichaam laat wennen aan twee vaste loopprikkels per week.",
-          },
-          {
-            title: "Waarom deze fase?",
-            text: "Deze fase bouwt loopbelasting op zonder krachttraining, spiermassa en herstel meteen te verstoren. Hardlopen wordt bekend, maar de totale belasting blijft beheersbaar.",
+            title: "Kracht en revalidatie",
+            text: "De bewegingen worden technisch aangeleerd en serieus maar beheerst belast. Het doel is niet pijnvrij bewegen tegen elke prijs, maar een dosis vinden die tijdens de training verdraagbaar is en de volgende ochtend weer op uitgangsniveau zit.",
           },
           {
             title: "Hardlopen",
-            text: "Easy runs zijn meestal 20-30 minuten rond 9,5 km/u. De tempo-intro's raken kort 11,5-12,0 km/u aan. Het doel is gewenning, niet testen.",
+            text: "Alle drie de runs blijven volledig easy op RPE 3–4. Je moet volledige zinnen kunnen spreken. Er is nog geen interval- of progressionprikkel.",
           },
           {
-            title: "Marathontempo",
-            text: "12 km/u wordt kort aangeraakt met blokken zoals 3 x 2 min, 4 x 2 min, 3 x 3 min en 4 x 3 min. Dit is gewenning, geen bewijs.",
+            title: "Isometrisch",
+            text: "Holds voelen stevig maar nooit maximaal. Blijf ademen en stop voordat de houding langzaam instort.",
           },
           {
-            title: "Krachttraining",
-            text: "Upper/lower A/B blijft de hoofdstructuur. Borst, rug, schouders, benen, billen, core, kuiten en tibialis krijgen veel aandacht.",
+            title: "Terugkeerstatus",
+            text: "Nog geen overhead press, pull-ups, chin-ups, zware vrije rows of gewone zware curls. Eerst twee stabiele weken opbouwen.",
           },
           {
-            title: "Let op",
-            text: "Extra aandacht voor brachialis/bicep links, schouder, heup/voorzijde bovenbeen, linker enkel, kuiten en tibialis.",
-          },
-          {
-            title: "Mentale focus",
-            text: "Rustig beginnen. Niet bewijzen dat je 3:30 al aankan. Alleen consistent worden.",
+            title: "Wat moet dit opleveren?",
+            text: "Correcte uitvoering, inzicht in dezelfde-dag- en volgende-ochtendreacties, eerste stabiele belastbaarheid en passende startgewichten.",
           },
         ],
       },
     },
     {
       phaseId: "fase-2",
-      phaseName: "Fase 2 — Overgangsfase",
-      weekRange: "Week 27 t/m 28",
-      startDate: "2026-06-29",
-      endDate: "2026-07-12",
-      goal:
-        "Van 2 naar 3 runs per week, met 3 echte gymdagen plus een Easy Run + Mini Strength.",
-      structure: "Upper + Easy, Lower, Upper + Marathonpace Intro, Easy Run + Mini Strength.",
+      phaseName: "Fase 2 — Belasting opbouwen",
+      weekRange: "Programmaweek 3–5",
+      startDate: "2026-08-10",
+      endDate: "2026-08-30",
+      goal: "Dynamische weerstand verhogen, lopen voorzichtig intensiveren en gecontroleerd terugkeren naar functionelere bewegingen.",
+      structure: "Dezelfde vier sessies, met hogere weerstand en één gecontroleerd snellere looptraining.",
       rules:
-        "Kracht blijft serieus, maar de vierde sessie is compact. Geen PR-jacht; extra loopfrequentie rustig laten wennen.",
+        "Dynamisch RIR 2–3; holds 30–40 sec en 6–7/10. Landmine press alleen als de criteria zijn gehaald. Grip en curls gecontroleerd opbouwen.",
       phaseDetails: {
-        runsPerWeek: "3",
-        gymPerWeek: "3 + mini-strength",
-        primaryGoal: "De overgang maken van kracht-dominant naar hybride marathonopbouw.",
-        stats: ["1 easy run", "1 marathonpace-intro", "1 extra easy run", "geen echte long-runfase"],
+        runsPerWeek: "3 × ongeveer 30 min",
+        gymPerWeek: "4 kracht-/revalidatieprikkels",
+        primaryGoal: "Meer dynamische kracht en belastbaarheid opbouwen zonder de pijn- en herstelregels los te laten.",
+        stats: ["RIR 2–3 dynamisch", "holds 30–40 sec", "conditionele strides", "1 gecontroleerde snellere run"],
         sections: [
           {
-            title: "Korte samenvatting",
-            text: "Fase 2 voegt de derde run toe. Hardlopen wordt een vaste pijler van de week, terwijl krachttraining nog duidelijk aanwezig blijft.",
-          },
-          {
-            title: "Waarom deze fase?",
-            text: "De sprong van twee naar drie runs per week is belangrijk. Je krijgt meer loopfrequentie zonder meteen in een zware marathonfase te zitten.",
+            title: "Kracht en revalidatie",
+            text: "Wanneer de bovengrens technisch goed wordt gehaald en de reactie de volgende ochtend rustig is, gaat het gewicht omhoog. Revalidatie blijft dus niet permanent licht.",
           },
           {
             title: "Hardlopen",
-            text: "Easy runs worden ongeveer 30-35 minuten. De marathonpace-blokken worden iets langer dan in fase 1, maar blijven gecontroleerd.",
+            text: "Dag 2 krijgt alleen bij twee stabiele heupweken vier ontspannen versnellingen. Dag 3 bevat een gecontroleerde RPE-6-prikkel; Dag 4 eindigt geleidelijk wat vlotter.",
           },
           {
-            title: "Marathontempo",
-            text: "Je loopt bijvoorbeeld 4 x 3 min of 3 x 5 min rond 11,8-12,0 km/u. Het doel is langer vasthouden, niet forceren.",
+            title: "Grip en elleboogflexie",
+            text: "Curls met cuff worden zwaarder. Vanaf week 4–6 kan een losse neutrale kabelgreep worden getest als hard knijpen de elleboog niet irriteert.",
           },
           {
-            title: "Krachttraining",
-            text: "Je gaat van vier volledige gymdagen naar drie gymdagen plus mini-strength. Dat geeft hardlopen meer ruimte terwijl kracht en spiermassa onderhouden blijven.",
+            title: "Overhead press",
+            text: "De half-kneeling landmine press mag alleen worden geïntroduceerd als schoudertraining twee weken stabiel is, incline push-ups maximaal 2/10 geven en er geen extra napijn of krachtverlies is.",
           },
           {
-            title: "Mentale focus",
-            text: "Wennen aan meer loopfrequentie. Niet forceren. Deze fase moet je klaarzetten voor de echte hybride opbouw.",
+            title: "Wat moet dit opleveren?",
+            text: "Hogere belastbaarheid, langere stabiele holds, meer dynamische kracht en een eerste beheerste terugkeer naar normale grip en drukbewegingen.",
           },
         ],
       },
     },
     {
       phaseId: "fase-3",
-      phaseName: "Fase 3 — Hybride Opbouwfase",
-      weekRange: "Week 29 t/m 36",
-      startDate: "2026-07-13",
-      endDate: "2026-09-06",
-      goal:
-        "3 hardloopdagen + 3 gymdagen. Marathonpace wekelijks trainen en long run opbouwen richting ongeveer 2 uur.",
-      structure: "Run 1 Easy, Run 2 Marathonpace, Run 3 Long Run, Gym 1 Upper, Gym 2 Lower, Gym 3 Full Body.",
+      phaseName: "Fase 3 — Sterkte en terugkeer voorbereiden",
+      weekRange: "Programmaweek 6–8",
+      startDate: "2026-08-31",
+      endDate: "2026-09-20",
+      goal: "Oefeningen serieus verzwaren, functionele kracht herstellen en terugkeer naar overhead- en trekbewegingen voorbereiden.",
+      structure: "Dezelfde vier sessies met RIR 2 als richtpunt en voorwaardelijke terugkeerstappen.",
       rules:
-        "Runs krijgen prioriteit. Lower strength liever niet vlak voor long run. Vanaf 75-90 min voeding en hydratatie oefenen.",
+        "Grote beenoefeningen RIR 2, kleine dynamische oefeningen meestal RIR 2 en holds 7–8/10. Geen maximale pull-ups, zware vrije rows of maximale gewone curls.",
       phaseDetails: {
-        runsPerWeek: "3",
-        gymPerWeek: "3",
-        primaryGoal: "De marathonmotor bouwen terwijl krachttraining serieus maar onderhoudender wordt.",
-        stats: ["Run 1 easy", "Run 2 3:30-marathonpace", "Run 3 long run", "long run richting ongeveer 2 uur"],
+        runsPerWeek: "3 × ongeveer 30 min",
+        gymPerWeek: "4 kracht-/revalidatieprikkels",
+        primaryGoal: "Substantiële belastbaarheid bereiken en een veilige basis leggen voor het volgende marathonspecifieke blok.",
+        stats: ["grote beenoefeningen RIR 2", "holds 7–8/10", "3 × 4 min gecontroleerd", "overhead alleen conditioneel"],
         sections: [
           {
-            title: "Korte samenvatting",
-            text: "Fase 3 is de eerste echte hybride fase. Hardlopen wordt een hoofdpijler naast krachttraining: drie runs en drie gymtrainingen per week.",
-          },
-          {
-            title: "Waarom deze fase?",
-            text: "Je lichaam moet wennen aan structurele kilometers, langere duurlopen en wekelijks marathontempo, terwijl je sterk blijft.",
+            title: "Kracht en revalidatie",
+            text: "Grote beenoefeningen en kleine revalidatiebewegingen mogen serieus zwaar worden zolang uitvoering, pijnreactie en herstel stabiel blijven.",
           },
           {
             title: "Hardlopen",
-            text: "Easy runs lopen op van ongeveer 35 naar 50 minuten. De marathonpace-run bouwt op van korte blokken naar langere stukken rond 11,8-12,0 km/u.",
+            text: "Dag 3 bevat drie gecontroleerde stukken van vier minuten op RPE 6–7. Dag 2 en Dag 4 blijven technisch soepel en niet maximaal.",
           },
           {
-            title: "Marathontempo",
-            text: "Je traint 12 km/u wekelijks met voorbeelden zoals 3 × 4 min, 3 × 5 min, 2 × 8 min, 2 × 10 min en later 20 min + 8 min.",
+            title: "Overhead press",
+            text: "De machine overhead press mag pas worden getest na twee probleemloze weken landmine press. Start op 2 × 10–12 met RIR 4.",
           },
           {
-            title: "Lange duurloop",
-            text: "De long run is meestal rustig op 9,5-10,0 km/u. Het doel is duurvermogen, pezen/gewrichten, energiehuishouding en mentale gewenning.",
+            title: "Grip en trekken",
+            text: "Grip wordt geleidelijk teruggebracht, maar maximale pull-ups, zware vrije rows en maximale gewone curls blijven buiten dit blok.",
           },
           {
-            title: "Krachttraining",
-            text: "Krachttraining wordt onderhoudender. Geen PR-jacht, wel benen, billen, core, kuiten, tibialis en blessurepreventie blijven belangrijk.",
-          },
-          {
-            title: "Mentale focus",
-            text: "Leren dat hardlopen geen losse toevoeging meer is, maar een hoofdonderdeel van de week.",
-          },
-        ],
-      },
-    },
-    {
-      phaseId: "fase-4",
-      phaseName: "Fase 4 — Piekfase / Marathonspecifieke fase",
-      weekRange: "Week 37 t/m 44",
-      startDate: "2026-09-07",
-      endDate: "2026-11-01",
-      goal:
-        "4 hardloopmomenten per week, 12 km/u als marathontempo, 13 km/u als snelheidsreserve en long runs tot 30–32 km.",
-      structure: "4 runs leidend, 2 gymtrainingen aanbevolen, 3e gym alleen als herstel goed is.",
-      rules:
-        "Gym is onderhoud. Geen PR's, geen spierpijn najagen. Week 40 is cutback, week 43 zwaarste long-run week.",
-      phaseDetails: {
-        runsPerWeek: "4",
-        gymPerWeek: "2-3",
-        primaryGoal: "Racespecifiek vertrouwen bouwen voor een 3:30 marathon.",
-        stats: ["easy run", "marathonpace/techniek", "tempo of strides", "long run", "3 echte MP-long-runs + 1 optioneel"],
-        sections: [
-          {
-            title: "Korte samenvatting",
-            text: "Fase 4 is de belangrijkste marathonspecifieke fase. Het schema is minder veilig en specifieker richting 3:30: niet alleen lange duurlopen, maar ook marathontempo op vermoeide benen.",
-          },
-          {
-            title: "Waarom deze fase?",
-            text: "Een marathon van 3:30 vraagt het vermogen om ongeveer 12 km/u lang vol te houden. Echte vertrouwenstraining ontstaat wanneer je dit tempo loopt nadat je al veel kilometers in de benen hebt.",
-          },
-          {
-            title: "Hardlopen",
-            text: "De long runs lopen op richting 30–32 km. Daarnaast komen marathonpace-blokken en snellere prikkels terug, maar zware long runs vervangen deels de midweekse belasting.",
-          },
-          {
-            title: "3:30-marathontempo",
-            text: "MP betekent hier 11,8-12,0 km/u. Exact 3:30 tempo is ongeveer 12,06 km/u; 12,0 km/u is de praktische trainingsreferentie.",
-          },
-          {
-            title: "Belangrijkste marathonpace-long-runs",
-            text: "Week 39: 24 km met 2 × 3 km MP. Week 41: 26 km met 6–8 km MP aan het einde. Week 42: 28 km met 10–12 km aaneengesloten MP. Week 44: optioneel 22–24 km met 6 km MP.",
-          },
-          {
-            title: "Waarom deze aanpassing?",
-            text: "De oorspronkelijke lange duurlopen waren vooral rustig. Dat is veilig, maar voor een 3:30-poging geeft het extra vertrouwen om een paar keer marathontempo op vermoeide benen te lopen.",
-          },
-          {
-            title: "Totaal marathontempo in long runs",
-            text: "Zonder optionele week 44: ongeveer 22-26 km MP, circa 1u50 tot 2u10 specifieke ervaring. Met week 44: ongeveer 28-32 km MP, circa 2u20 tot 2u40 specifieke ervaring.",
-          },
-          {
-            title: "Waarom niet elke long run hard?",
-            text: "Dat kost te veel herstel en verhoogt het blessurerisico. De kunst is genoeg specifieke prikkels krijgen zonder jezelf kapot te trainen.",
-          },
-          {
-            title: "Langste duurloop",
-            text: "Week 43 blijft 30–32 km rustig. Die training is voor afstand, mentale hardheid en voeding/hydratatie, niet voor snelheid.",
-          },
-          {
-            title: "Krachttraining",
-            text: "Krachttraining wordt ondersteunend. Geen zware beentraining vlak voor de belangrijkste long runs, geen PR-jacht, wel core, heupen, kuiten, tibialis en blessurepreventie.",
-          },
-          {
-            title: "Mentale focus",
-            text: "Vertrouwen opbouwen: niet alleen hopen dat 12 km/u lukt, maar ervaren dat je 12 km/u kunt lopen terwijl je benen al moe zijn.",
-          },
-        ],
-      },
-    },
-    {
-      phaseId: "fase-5",
-      phaseName: "Fase 5 — Taperfase / Fris worden voor de marathon",
-      weekRange: "Week 45 t/m 47",
-      startDate: "2026-11-02",
-      endDate: "2026-11-22",
-      goal:
-        "Vermoeidheid laten zakken, benen fris krijgen, korte marathontempo-prikkels behouden en marathon lopen op 22 november.",
-      structure: "Volume omlaag: korte runs, lichte gym, marathonweek simpel houden.",
-      rules:
-        "Geen nieuwe oefeningen, geen spierpijn, geen testtraining. Rust is productief.",
-      phaseDetails: {
-        runsPerWeek: "3-4, dalend",
-        gymPerWeek: "0-2 licht",
-        primaryGoal: "Vermoeidheid laten zakken en scherp blijven voor zondag 22 november 2026.",
-        stats: ["minder kilometers", "korte MP-prikkels", "lichte gym", "marathonweek fris"],
-        sections: [
-          {
-            title: "Korte samenvatting",
-            text: "Fase 5 is de taper. De trainingsomvang gaat omlaag, maar korte marathontempo-prikkels blijven aanwezig zodat je scherp blijft.",
-          },
-          {
-            title: "Waarom deze fase?",
-            text: "Je wordt niet fitter door in de laatste weken extra te forceren. Je wordt beter door de opgebouwde training te laten landen.",
-          },
-          {
-            title: "Hardlopen",
-            text: "Long runs worden korter. Intensiteit blijft kort aanwezig, maar het volume daalt duidelijk.",
-          },
-          {
-            title: "Marathontempo",
-            text: "Korte prikkels zoals 2 × 10 min, 2 × 6 min en in marathonweek alleen korte stukjes of strides.",
-          },
-          {
-            title: "Krachttraining",
-            text: "Alleen onderhoud. Geen zware benen, geen spierpijn najagen en geen nieuwe oefeningen.",
-          },
-          {
-            title: "Wedstrijddag",
-            text: "Niet te hard starten, eerste kilometers controleren, rond 12,0 km/u blijven en voeding/hydratatie uitvoeren zoals geoefend.",
-          },
-          {
-            title: "Mentale focus",
-            text: "Rustig blijven. Vertrouwen op de voorbereiding. Niet in paniek extra trainen.",
-          },
-        ],
-      },
-    },
-    {
-      phaseId: "fase-6",
-      phaseName: "Fase 6 — Herstel en terugkeer naar krachttraining",
-      weekRange: "Week 48 t/m 52",
-      startDate: "2026-11-23",
-      endDate: "2026-12-27",
-      goal:
-        "Herstellen van de marathon en gecontroleerd terug naar normaal krachtgericht trainen.",
-      structure: "Week 48 herstel, daarna lichte full body, rustige upper/lower en nieuwe basis.",
-      rules:
-        "Geen tempo's, intervals of lange duurlopen. Geen PR's in november/december. Opbouw wordt bepaald door heup, bovenbeen, kuit, enkel en brachialis.",
-      phaseDetails: {
-        runsPerWeek: "0-2 optioneel",
-        gymPerWeek: "1-4 oplopend",
-        primaryGoal: "Herstellen van de marathon en gecontroleerd terug naar krachttraining.",
-        stats: ["week 48 herstel", "geen tempo", "geen lange duurloop", "kracht rustig herstarten"],
-        sections: [
-          {
-            title: "Korte samenvatting",
-            text: "Fase 6 begint na de marathon. De focus ligt op herstel, rustig bewegen en daarna stap voor stap terug naar normale krachttraining.",
-          },
-          {
-            title: "Waarom deze fase?",
-            text: "Na een marathon heeft het lichaam tijd nodig voordat zware benen, tempo's en PR-jacht weer logisch zijn.",
-          },
-          {
-            title: "Hardlopen",
-            text: "Alleen korte rustige loopjes als benen, heupen, kuiten en enkel goed voelen. Geen tempo, intervals of lange duurloop.",
-          },
-          {
-            title: "Krachttraining",
-            text: "Eerst lichte full body en mobiliteit, daarna terug naar upper/lower. Onderlichaam bouwt langzamer op dan bovenlichaam.",
-          },
-          {
-            title: "Let op",
-            text: "Geen zware lower body als heup, bovenbeen, kuit of enkel nog reageren. Geen nieuwe prikkels om herstel te bewijzen.",
-          },
-          {
-            title: "Mentale focus",
-            text: "De marathon is achter de rug. Rustig opnieuw bouwen is winst, geen terugval.",
+            title: "Wat moet dit opleveren?",
+            text: "Sterkere schouders, ellebogen, benen en kuiten, gecontroleerde terugkeer naar overheadwerk en een betere basis voor een nieuw marathonspecifiek vervolgplan.",
           },
         ],
       },
     },
   ];
 
-  const EXERCISE_PROFILES = {
-    "machine-chest-press": {
-      weightRange: { min: 0, max: 150, step: 0.5 },
-      repRange: { min: 1, max: 30 },
-      info:
-        "Hoofd- of onderhoudsprikkel voor borst. Machine is gekozen omdat dumbbells de brachialis sneller kunnen triggeren.",
-      tips: "Gecontroleerd zakken, niet stuiteren, ellebogen niet overdreven ver naar achteren.",
-      warning: "Stop bij pijn aan voorkant schouder of brachialis.",
-      alternatives: ["Incline Machine Press", "Pec Deck", "Cable Fly"],
-    },
-    "chest-supported-row-machine": {
-      weightRange: { min: 0, max: 140, step: 0.5 },
-      repRange: { min: 1, max: 30 },
-      info: "Rugoefening met minimale onderrugbelasting.",
-      tips: "Borst tegen steun, rustig trekken, geen explosieve herhalingen.",
-      warning: "Bij rhomboid of brachialisreactie gewicht verlagen of vervangen.",
-      alternatives: ["Low Row Machine", "Seated Cable Row", "Dumbbell Row als pijnvrij"],
-    },
-    "low-row-machine": {
-      weightRange: { min: 0, max: 140, step: 0.5 },
-      repRange: { min: 1, max: 30 },
-      info: "Belangrijke rugoefening die in het schema goed past bij brachialiscontrole.",
-      tips: "Neutrale of comfortabele greep, gecontroleerd trekken, geen rukken.",
-      warning: "Pijn maximaal 0-3/10 in brachialis.",
-      alternatives: ["Chest-Supported Row Machine", "Seated Cable Row als pijnarm"],
-    },
-    "shoulder-press-machine": {
-      weightRange: { min: 0, max: 100, step: 0.5 },
-      repRange: { min: 1, max: 30 },
-      info: "Schouderdrukken blijft in het schema, maar gecontroleerd.",
-      tips: "Rustig drukken, geen geforceerde diepe stretch.",
-      warning: "Alleen pijnvrij; stop bij voorkant-schouderpijn.",
-      alternatives: ["Dumbbell Shoulder Press als schouder/brachialis rustig is"],
-    },
-    "dumbbell-shoulder-press-of-shoulder-press-machine": {
-      weightRange: { min: 0, max: 60, step: 0.5 },
-      repRange: { min: 1, max: 30 },
-      info: "Dumbbells alleen als brachialis en schouder rustig voelen; anders machine kiezen.",
-      tips: "Pijnvrij bewegen en gecontroleerd drukken.",
-      warning: "Bij irritatie direct naar machine of overslaan.",
-      alternatives: ["Shoulder Press Machine"],
-    },
-    "pec-deck-of-cable-fly": {
-      weightRange: { min: 0, max: 80, step: 0.5 },
-      repRange: { min: 1, max: 30 },
-      info: "Borstaccessoire zonder zware dumbbells.",
-      tips: "Gecontroleerde stretch, kies de variant die die dag het beste voelt.",
-      warning: "Geen pijn in voorkant schouder.",
-      alternatives: ["Pec Deck", "Cable Fly", "Machine Chest Press extra set"],
-    },
-    "pec-deck": {
-      weightRange: { min: 0, max: 80, step: 0.5 },
-      repRange: { min: 1, max: 30 },
-      info: "Borstprikkel zonder zware dumbbells.",
-      tips: "Rustig bewegen en stretch controleren.",
-      warning: "Niet forceren bij voorkant-schouderpijn.",
-      alternatives: ["Cable Fly", "Machine Chest Press"],
-    },
-    "cable-fly": {
-      weightRange: { min: 0, max: 60, step: 0.5 },
-      repRange: { min: 1, max: 30 },
-      info: "Borstaccessoire met gecontroleerde range.",
-      tips: "Geen extreme stretch, rustig tempo.",
-      warning: "Stop bij schouderpijn.",
-      alternatives: ["Pec Deck", "Machine Chest Press"],
-    },
-    "rear-delt-fly-machine": {
-      weightRange: { min: 0, max: 70, step: 0.5 },
-      repRange: { min: 1, max: 30 },
-      info: "Belangrijk voor schouderbalans, houding en blessurepreventie.",
-      tips: "Elleboog licht gebogen, rustig bewegen, geen momentum.",
-      warning: "Niet zwaaien of forceren.",
-      alternatives: ["Face Pull"],
-    },
-    "face-pull": {
-      weightRange: { min: 0, max: 60, step: 0.5 },
-      repRange: { min: 1, max: 30 },
-      info: "Voor bovenrug, rear delts en schoudercontrole.",
-      tips: "Trek richting gezicht/voorhoofd, ellebogen hoog.",
-      warning: "Geen zwaar gewicht nodig.",
-      alternatives: ["Rear Delt Fly Machine", "External Rotation"],
-    },
-    "brachialis-rehab-hammer-curl-isometric-hold": {
-      inputType: "weight-seconds",
-      weightRange: { min: 0, max: 30, step: 0.5 },
-      secondsRange: { min: 10, max: 120, step: 5 },
-      info: "Lichte isometrische rehab voor brachialis/bicep.",
-      tips: "Elleboog ongeveer 90 graden, neutrale grip, pijn maximaal 2-3/10.",
-      warning: "Als dit irriteert: overslaan.",
-      alternatives: ["Brachialis Isometric Hold"],
-    },
-    "brachialis-isometric-hold": {
-      inputType: "weight-seconds",
-      weightRange: { min: 0, max: 30, step: 0.5 },
-      secondsRange: { min: 10, max: 120, step: 5 },
-      info: "Lichte brachialis-activatie, alleen pijnarm.",
-      tips: "Neutrale grip, rustig vasthouden.",
-      warning: "Niet forceren bij brachialispijn.",
-      alternatives: ["Overslaan als geirriteerd"],
-    },
-    "leg-press": {
-      weightRange: { min: 0, max: 300, step: 0.5 },
-      repRange: { min: 1, max: 30 },
-      info: "Hoofdoefening voor benen zonder gewone barbell squat.",
-      tips: "Voeten stevig, gecontroleerd zakken, onderrug tegen zitting.",
-      warning: "Niet zo diep dat je bekken kantelt; geen ego-gewicht.",
-      alternatives: ["Hack Squat als test", "Reverse Lunge"],
-    },
-    "hip-thrust-machine": {
-      weightRange: { min: 0, max: 250, step: 0.5 },
-      repRange: { min: 1, max: 30 },
-      info: "Belangrijk voor bilkracht, heupstabiliteit en hardloopondersteuning.",
-      tips: "Bovenin kort aanspannen, geen overdreven holle onderrug.",
-      warning: "Controle boven gewicht.",
-      alternatives: ["Glute bridge machine", "Back Extension als posterior-chain alternatief"],
-    },
-    "bulgarian-split-squat": {
-      weightRange: { min: 0, max: 80, step: 0.5 },
-      repRange: { min: 1, max: 30 },
-      info: "Single-leg oefening voor hardlopen, heupcontrole en links-rechtsbalans.",
-      tips: "Rustig zakken, romp stabiel, knie volgt voetlijn.",
-      warning: "Niet forceren als heup of bovenbeen zeurt.",
-      alternatives: ["Reverse Lunge", "Leg Press"],
-    },
-    "reverse-lunge": {
-      weightRange: { min: 0, max: 80, step: 0.5 },
-      repRange: { min: 1, max: 30 },
-      info: "Controleerbare single-leg oefening voor runner legs.",
-      tips: "Stap rustig naar achter, romp stabiel, knie volgt voetlijn.",
-      warning: "Niet forceren bij heup/bovenbeenklacht.",
-      alternatives: ["Walking Lunge", "Bulgarian Split Squat"],
-    },
-    "walking-lunge": {
-      weightRange: { min: 0, max: 80, step: 0.5 },
-      repRange: { min: 1, max: 30 },
-      info: "Hardloopondersteunende single-leg oefening.",
-      tips: "Gecontroleerde passen, romp stabiel.",
-      warning: "Niet forceren bij heup/bovenbeenklacht.",
-      alternatives: ["Reverse Lunge"],
-    },
-    "back-extension-machine": {
-      weightRange: { min: 0, max: 120, step: 0.5 },
-      repRange: { min: 1, max: 30 },
-      info: "Posterior chain, onderrugcontrole, hamstrings en billen.",
-      tips: "Beweeg gecontroleerd en focus op heupstrekking.",
-      warning: "Niet overstrekken.",
-      alternatives: ["Romanian Deadlift als alles rustig voelt"],
-    },
-    "romanian-deadlift": {
-      weightRange: { min: 0, max: 180, step: 0.5 },
-      repRange: { min: 1, max: 30 },
-      info: "Gedoseerde deadlift-achtige prikkel voor hamstrings en posterior chain.",
-      tips: "Heupen naar achter, rug neutraal, hamstrings voelen.",
-      warning: "Geen maximale gewichten; vervangen bij onderrug/rhomboidklacht.",
-      alternatives: ["Back Extension Machine"],
-    },
-    "hack-squat-testblok": {
-      weightRange: { min: 0, max: 220, step: 0.5 },
-      repRange: { min: 1, max: 30 },
-      info: "Testblok om te zien hoe knieen, heupen en onderrug reageren.",
-      tips: "Licht tot matig, technisch, rustig opbouwen.",
-      warning: "Voelt hij niet goed: vervangen door leg press.",
-      alternatives: ["Leg Press"],
-    },
-    "leg-press-of-hack-squat-test": {
-      weightRange: { min: 0, max: 300, step: 0.5 },
-      repRange: { min: 1, max: 30 },
-      info: "Leg press is de veilige hoofdoptie; hack squat alleen als alles goed reageert.",
-      tips: "Geen ego-gewicht.",
-      warning: "Bij twijfel: leg press.",
-      alternatives: ["Leg Press", "Back Extension"],
-    },
-    "leg-extension": {
-      weightRange: { min: 0, max: 120, step: 0.5 },
-      repRange: { min: 1, max: 30 },
-      info: "Quadricepsprikkel zonder grote systeemvermoeidheid.",
-      tips: "Gecontroleerd omhoog, bovenin kort aanspannen.",
-      warning: "Knieen moeten goed voelen.",
-      alternatives: ["Leg Press licht"],
-    },
-    "calf-raise": {
-      weightRange: { min: 0, max: 180, step: 0.5 },
-      repRange: { min: 1, max: 30 },
-      info: "Kuitkracht en enkel-/Achillesbestendigheid.",
-      tips: "Volledige range, bovenin kort vasthouden, langzaam zakken.",
-      warning: "In herstelweken eerst licht.",
-      alternatives: ["Seated Calf Raise"],
-    },
-    "tibialis-raise-tegen-de-muur": {
-      inputType: "reps-only",
-      repRange: { min: 1, max: 40 },
-      info: "Voor scheenbeenregio, enkelcontrole en hardloopbelasting.",
-      tips: "Rug tegen muur, tenen optrekken, gecontroleerd zakken.",
-      warning: "Branderig mag; scherpe pijn niet.",
-      alternatives: ["Tibialis Raise"],
-    },
-    "tibialis-raise-tegen-muur": {
-      inputType: "reps-only",
-      repRange: { min: 1, max: 40 },
-      info: "Voor scheenbeenregio, enkelcontrole en hardloopbelasting.",
-      tips: "Rug tegen muur, tenen optrekken, gecontroleerd zakken.",
-      warning: "Branderig mag; scherpe pijn niet.",
-      alternatives: ["Tibialis Raise"],
-    },
-    "tibialis-raise": {
-      inputType: "reps-only",
-      repRange: { min: 1, max: 40 },
-      info: "Enkel/scheenbeen-onderhoud.",
-      tips: "Gecontroleerde reps.",
-      warning: "Licht houden bij herstel.",
-      alternatives: ["Tibialis Raise tegen muur"],
-    },
-    "heupmobiliteit": {
-      inputType: "minutes",
-      minutesRange: { min: 1, max: 15 },
-      info: "Mobiliteit voor heupen en hardloopondersteuning.",
-      tips: "Kies 90/90 hip switches, hip flexor stretch, couch stretch of rustige diepe squat hold.",
-      warning: "Geen pijn forceren.",
-      alternatives: ["Mobiliteit 3-5 minuten"],
-    },
-    "lateral-raise": {
-      weightRange: { min: 0, max: 40, step: 0.5 },
-      repRange: { min: 1, max: 30 },
-      info: "Schouderbreedte en schouderbalans.",
-      tips: "Licht tot matig, gecontroleerd, geen zwaaien.",
-      warning: "Elleboog licht gebogen, geen momentum.",
-      alternatives: ["Cable Lateral Raise"],
-    },
-    "dips": {
-      inputType: "reps-only",
-      repRange: { min: 1, max: 30 },
-      info: "Drukoefening die alleen blijft zolang hij goed voelt.",
-      tips: "Niet extreem diep zakken, romp gecontroleerd.",
-      warning: "Stop bij voorkant-schouderpijn of brachialisreactie.",
-      alternatives: ["Machine Chest Press extra set", "Pec Deck", "Cable Fly"],
-    },
-    "pallof-press": {
-      weightRange: { min: 0, max: 60, step: 0.5 },
-      repRange: { min: 1, max: 30 },
-      info: "Anti-rotatie core-oefening voor rompspanning en hardlopen.",
-      tips: "Kabel op borsthoogte, romp stil houden, langzaam uitstrekken.",
-      warning: "Niet meedraaien.",
-      alternatives: ["Dead Bug", "Side Plank"],
-    },
-    "pallof-press-of-cable-woodchop": {
-      weightRange: { min: 0, max: 60, step: 0.5 },
-      repRange: { min: 1, max: 30 },
-      info: "Pallof is stabiele anti-rotatie; woodchop is dynamischer.",
-      tips: "Kies de variant die die dag beter voelt.",
-      warning: "Geen wilde rotatie.",
-      alternatives: ["Pallof Press", "Cable Woodchop", "Side Plank"],
-    },
-    "landmine-rotation": {
-      weightRange: { min: 0, max: 60, step: 0.5 },
-      repRange: { min: 1, max: 30 },
-      info: "Rotatiekracht en core, gecontroleerd.",
-      tips: "Romp draait gecontroleerd, heupen mogen meebewegen.",
-      warning: "Geen wilde swing of rugpijn forceren.",
-      alternatives: ["Pallof Press", "Cable Woodchop"],
-    },
-    "side-plank": {
-      inputType: "seconds",
-      secondsRange: { min: 10, max: 120, step: 5 },
-      info: "Laterale core en heupstabiliteit.",
-      tips: "Romp lang houden, heup stabiel.",
-      warning: "Stop bij schouderpijn.",
-      alternatives: ["Dead Bug", "Pallof Press"],
-    },
-    "dead-bug": {
-      inputType: "reps-only",
-      repRange: { min: 1, max: 30 },
-      info: "Core-oefening voor rompspanning en controle.",
-      tips: "Onderrug licht tegen de grond, langzaam bewegen.",
-      warning: "Geen haast, geen compensatie.",
-      alternatives: ["Side Plank", "Pallof Press"],
-    },
-    "farmer-s-carry": {
-      inputType: "weight-distance",
-      weightRange: { min: 0, max: 80, step: 0.5 },
-      distanceRange: { min: 10, max: 100, step: 5 },
-      info: "Carry alleen als rhomboid goed voelt.",
-      tips: "Rechte houding, schouders laag, niet scheef hangen.",
-      warning: "Bij rhomboidzeur vervangen door side plank of Pallof press.",
-      alternatives: ["Side Plank", "Pallof Press"],
-    },
-    "ab-wheel-of-side-plank": {
-      inputType: "reps-or-seconds",
-      repRange: { min: 1, max: 30 },
-      secondsRange: { min: 10, max: 120, step: 5 },
-      info: "Ab wheel alleen als schouder en brachialis goed voelen; anders side plank.",
-      tips: "Controle boven range.",
-      warning: "Geen schouder- of brachialispijn forceren.",
-      alternatives: ["Side Plank", "Dead Bug"],
-    },
-    "calf-raise-tibialis-raise-superset": {
-      inputType: "reps-only",
-      repRange: { min: 1, max: 40 },
-      info: "Superset voor kuit en tibialis als blessurepreventie.",
-      tips: "Rustige rondes, volledige controle.",
-      warning: "Bij peesgevoeligheid licht houden.",
-      alternatives: ["Calf Raise", "Tibialis Raise"],
-    },
-  };
+  const basePain = [
+    "Gebruik de algemene 0–5/10-pijnschaal: tot 3/10 kan verdraagbaar zijn als het stabiel blijft; bij 4/10 aanpassen en bij 5/10 stoppen.",
+    "Stop direct bij scherpe pijn, tintelingen, gevoelloosheid of onverwacht krachtverlies.",
+    "Controleer de volgende ochtend: de klacht hoort ongeveer terug te zijn op het oude uitgangsniveau.",
+  ];
 
-  function slugify(value) {
-    return value
-      .toLowerCase()
-      .normalize("NFD")
-      .replace(/[\u0300-\u036f]/g, "")
-      .replace(/[^a-z0-9]+/g, "-")
-      .replace(/^-|-$/g, "");
-  }
-
-  function exercise(name, planned, options = {}) {
-    const id = options.id || slugify(name.replace(/\s+or\s+/gi, " of "));
-    const profile = EXERCISE_PROFILES[id] || {};
-    const inputType = options.inputType || profile.inputType || "weight-reps";
-    const plannedText = planned.replace(/(\d)-(\d)/g, "$1–$2");
+  function detail(config) {
     return {
-      id,
-      name,
-      planned: plannedText,
-      inputType,
-      weightRange: options.weightRange || profile.weightRange || { min: 0, max: 120, step: 0.5 },
-      repRange: options.repRange || profile.repRange || { min: 1, max: 30 },
-      secondsRange: options.secondsRange || profile.secondsRange || { min: 10, max: 120, step: 5 },
-      minutesRange: options.minutesRange || profile.minutesRange || { min: 1, max: 15 },
-      distanceRange: options.distanceRange || profile.distanceRange || { min: 10, max: 100, step: 5 },
-      info: options.info || profile.info || "Volgens schema uitvoeren.",
-      tips: options.tips || profile.tips || "Controle, nette techniek en 1-3 reps in reserve waar passend.",
-      warning: options.warning || profile.warning || "Bij pijn boven 3/10 lichter maken of vervangen.",
-      alternatives: options.alternatives || profile.alternatives || [],
+      purpose: config.purpose,
+      muscles: config.muscles || [],
+      why: config.why,
+      setup: config.setup || [],
+      execution: config.execution || [],
+      posture: config.posture || [],
+      feel: config.feel || "",
+      mistakes: config.mistakes || [],
+      painRules: config.painRules || basePain,
+      progression: config.progression || GENERAL_RULES.doubleProgression,
+      regression: config.regression || [],
+      alternatives: config.alternatives || [],
+      phaseDifferences:
+        config.phaseDifferences || [
+          "Week 1–2: techniek en reactie kalibreren; dynamisch meestal RIR 3–4.",
+          "Week 3–5: naar RIR 2–3 en weerstand verhogen als de bovengrens technisch goed lukt.",
+          "Week 6–8: meestal RIR 2, zonder falen of compensatie.",
+        ],
+      cue: config.cue || "Beweeg gecontroleerd en houd de afgesproken positie vast.",
     };
   }
 
-  function cardio(title, instruction, options = {}) {
+  const EXERCISE_DETAILS = {
+    "warmup-bike-walk": detail({
+      purpose: "Lichaamstemperatuur en doorbloeding verhogen zonder vermoeidheid op te bouwen.",
+      muscles: ["Benen en heupen licht actief", "hart-longstelsel", "enkels in rustige cyclische beweging"],
+      why: "Een korte algemene warming-up maakt de eerste krachtbewegingen soepeler zonder energie weg te nemen van de werksets.",
+      setup: ["Kies fiets of loopband/wandelruimte.", "Gebruik een zeer lichte weerstand en een tempo waarbij praten eenvoudig blijft."],
+      execution: ["Beweeg drie minuten gelijkmatig.", "Laat het tempo in de laatste minuut iets vloeiender worden, niet zwaarder."],
+      posture: ["Romp ontspannen lang.", "Schouders laag en handen los.", "Normaal doorademen."],
+      feel: "Licht warmer en losser, niet buiten adem of vermoeid.",
+      mistakes: ["Te hard starten.", "Hoge weerstand kiezen.", "Van de warming-up een conditietest maken."],
+      progression: ["Geen echte progressie nodig; drie rustige minuten blijven voldoende."],
+      regression: ["Rustiger wandelen of minder fietsweerstand."],
+      alternatives: ["Rustig roeien als schouder en elleboog dat probleemloos verdragen."],
+      cue: "Warm worden, niet moe worden.",
+    }),
+    "bodyweight-squat": detail({
+      purpose: "Knie-, heup- en enkelbeweging voorbereiden op de zware beenoefeningen.",
+      muscles: ["Quadriceps", "bilspieren", "adductoren", "rompstabilisatoren"],
+      why: "De oefening laat je vóór belasting controleren of voetdruk, kniespoor en heupdiepte vandaag rustig voelen.",
+      setup: ["Voeten ongeveer schouderbreed.", "Tenen licht naar buiten als dat natuurlijk voelt.", "Armen voor je voor balans."],
+      execution: ["Zak rustig tussen je heupen.", "Houd de hele voet op de grond.", "Duw gecontroleerd terug omhoog."],
+      posture: ["Knieën volgen tenen.", "Ribben boven bekken.", "Geen geforceerde diepte."],
+      feel: "Lichte activiteit in bovenbenen en billen; gewrichten horen vrij te bewegen.",
+      mistakes: ["Hielen optillen.", "Knieën naar binnen laten vallen.", "Snel in de onderste positie stuiteren."],
+      progression: ["Blijft een warming-up: verbeter controle, voeg geen vermoeiend gewicht toe."],
+      regression: ["Minder diep zakken of een bank als diepte-doel gebruiken."],
+      alternatives: ["Sit-to-stand vanaf een bank."],
+      cue: "Hele voet zwaar op de vloer.",
+    }),
+    "glute-bridge": detail({
+      purpose: "Bilspieren en bekkencontrole activeren voor hip thrusts, split squats en hardlopen.",
+      muscles: ["Gluteus maximus", "hamstrings secundair", "rompstabilisatoren"],
+      why: "Geeft een eenvoudige eerste heupextensieprikkel zonder grip of zware gewrichtsbelasting.",
+      setup: ["Rug op de vloer, knieën gebogen.", "Voeten ongeveer heupbreed en dicht genoeg dat de schenen bovenin bijna verticaal zijn."],
+      execution: ["Kantel het bekken licht achterover.", "Duw via hielen en middenvoet omhoog.", "Stop bij gestrekte heupen en zak rustig."],
+      posture: ["Ribben laag.", "Geen overmatige holling in de onderrug.", "Knieën blijven boven de voeten."],
+      feel: "Vooral spanning in de billen, niet een knijpende sensatie voorin de heup.",
+      mistakes: ["Te hoog komen via de onderrug.", "Voeten te ver weg zetten.", "Knieën naar buiten of binnen laten wijken."],
+      progression: ["Blijft een rustige warming-up; maak de aanspanning bewuster in plaats van zwaarder."],
+      regression: ["Kleinere bewegingsuitslag."],
+      alternatives: ["Staande bilspier-aanspanning."],
+      cue: "Riemgesp richting gezicht.",
+    }),
+    "scapular-push-up": detail({
+      purpose: "Schouderbladcontrole en serratusactivatie voorbereiden zonder de ellebogen te buigen.",
+      muscles: ["Serratus anterior", "schouderbladstabilisatoren", "core"],
+      why: "Helpt de schouderbladen leren bewegen over de ribbenkast in plaats van ze voortdurend vast naar achteren te trekken.",
+      setup: ["Handen onder of iets breder dan schouders.", "Knieën of voeten op de vloer.", "Ellebogen gestrekt maar niet hard op slot."],
+      execution: ["Laat de borst licht tussen de schouders zakken.", "Duw daarna de vloer weg zodat de schouderbladen uit elkaar bewegen.", "Houd de beweging klein en rustig."],
+      posture: ["Romp als één lijn.", "Geen holle onderrug.", "Schouders niet naar de oren trekken."],
+      feel: "Activiteit langs de zijkant van de ribbenkast en rond de schouderbladen.",
+      mistakes: ["Ellebogen buigen.", "Hoofd naar voren steken.", "De plus maken door alleen de bovenrug extreem bol te trekken."],
+      progression: ["Van knieën naar voeten als warming-upcontrole goed blijft."],
+      regression: ["Staand tegen een muur."],
+      alternatives: ["Wall slide zonder gewicht."],
+      cue: "Duw de vloer rustig van je af.",
+    }),
+    "hip-circles": detail({
+      purpose: "Heupgewrichten rustig door beschikbare bewegingsrichtingen bewegen.",
+      muscles: ["Diepe heupspieren", "heupflexoren", "bilspieren", "adductoren"],
+      why: "Geeft vóór beenkracht een korte controle van heupmobiliteit zonder te claimen dat stijfheid de enige oorzaak van klachten is.",
+      setup: ["Sta rechtop en houd eventueel licht steun.", "Bekken blijft zoveel mogelijk stil."],
+      execution: ["Til één knie op.", "Maak een kleine gecontroleerde cirkel vanuit de heup.", "Voer vijf herhalingen per kant uit."],
+      posture: ["Romp lang.", "Niet meedraaien met de onderrug.", "Beweging blijft pijnvrij of maximaal licht gevoelig."],
+      feel: "Rustige beweging rondom de heup, geen scherpe diepe liespijn.",
+      mistakes: ["Grote snelle cirkels.", "Bekken volledig meedraaien.", "Door een knelpunt heen forceren."],
+      progression: ["Iets vloeiender of iets groter bewegen, niet sneller."],
+      regression: ["Kleinere cirkel of zittend uitvoeren."],
+      alternatives: ["90/90 hip switches in de mobiliteitsroutine."],
+      cue: "Kleine cirkel, stil bekken.",
+    }),
+    "arm-circles": detail({
+      purpose: "Schouders en armen rustig voorbereiden op rotator-cuff- en hefbewegingen.",
+      muscles: ["Deltoideus licht", "rotator cuff", "schouderbladspieren"],
+      why: "Een korte dynamische voorbereiding laat zien welke bewegingshoek vandaag comfortabel is.",
+      setup: ["Sta lang met ontspannen armen.", "Begin met kleine cirkels."],
+      execution: ["Maak tien rustige cirkels voorwaarts en tien achterwaarts.", "Vergroot alleen als dit soepel blijft."],
+      posture: ["Ribben boven bekken.", "Geen shrug.", "Normaal ademen."],
+      feel: "Losse, warme schouders zonder scherpe voorzijdepijn.",
+      mistakes: ["Te snel zwaaien.", "Ribben naar voren duwen.", "Door pijnlijke hoeken forceren."],
+      progression: ["Iets grotere maar altijd rustige cirkels."],
+      regression: ["Kleinere cirkels of één arm tegelijk."],
+      alternatives: ["Pendelbewegingen met ontspannen arm."],
+      cue: "Rustig groter, nooit forceren.",
+    }),
+    "wall-slide-unweighted": detail({
+      purpose: "Opwaartse rotatie van het schouderblad voorbereiden zonder externe weerstand.",
+      muscles: ["Serratus anterior", "onderste en bovenste trapezius", "rotator cuff"],
+      why: "Bereidt de serratus wall slide voor en leert dat schouderbladen tijdens armheffen mogen meebewegen.",
+      setup: ["Onderarmen tegen de muur.", "Voeten een halve stap naar achteren.", "Geen gewicht of band."],
+      execution: ["Schuif de armen rustig omhoog.", "Laat schouderbladen natuurlijk opwaarts draaien.", "Kom terug voordat controle verloren gaat."],
+      posture: ["Ribben boven bekken.", "Geen holle rug.", "Schouders niet geforceerd omlaag trekken."],
+      feel: "Lichte activiteit rond schouderbladen, geen knijpende pijn voorin de schouder.",
+      mistakes: ["Onderrug hol trekken.", "Schouderbladen vastknijpen.", "Armen hoger duwen dan controle toelaat."],
+      progression: ["Later foamroller en miniband gebruiken in de werksets."],
+      regression: ["Kortere bewegingsuitslag."],
+      alternatives: ["Scapular push-up tegen muur."],
+      cue: "Laat het schouderblad omhoog meedraaien.",
+    }),
+    "warmup-set-first-exercise": detail({
+      purpose: "De eerste werkbeweging en gekozen kabelweerstand testen voordat de echte sets starten.",
+      muscles: ["Dezelfde spieren als de eerste oefening, maar met lage belasting"],
+      why: "Maakt het makkelijker om een geschikt daggewicht te kiezen en onverwachte irritatie vroeg te herkennen.",
+      setup: ["Stel kabel en cuff exact in zoals bij de eerste oefening.", "Kies duidelijk minder weerstand dan je werkgewicht."],
+      execution: ["Voer 8–12 rustige herhalingen uit.", "Gebruik de volledige comfortabele beweging.", "Evalueer techniek en sensatie."],
+      posture: ["Zelfde technische regels als de werkset.", "Normaal ademen.", "Geen compensatie toestaan omdat het 'maar warming-up' is."],
+      feel: "Licht en voorbereid, niet vermoeid.",
+      mistakes: ["De opwarmset te zwaar maken.", "Snel bewegen.", "Een onprettige reactie negeren."],
+      progression: ["Geen progressiedoel; pas het werkgewicht aan op basis van deze set."],
+      regression: ["Nog lichtere kabelstand of kortere bewegingsuitslag."],
+      alternatives: ["Eén korte lichte isometrische proefhold."],
+      cue: "Test de beweging, bewijs niets.",
+    }),
+    "iso-cable-external-rotation": detail({
+      purpose: "Gecontroleerde isometrische rotator-cuffkracht opbouwen in een verdraagbare schouderhoek.",
+      muscles: ["Infraspinatus", "teres minor", "achterste deltoideus secundair", "rotator-cuffpees en schouderstabilisatoren"],
+      why: "De hold belast de buitenrotatoren zonder door een mogelijk gevoelige bewegingsfase te hoeven gaan. Een polsmanchet beperkt grijpen en ontziet daarmee de golferselleboog.",
+      setup: ["Kabel op ellebooghoogte.", "Zij naar het station.", "Elleboog ongeveer 90° gebogen naast de romp.", "Eventueel handdoek tussen elleboog en romp.", "Bij ellebooggevoeligheid een polsmanchet gebruiken."],
+      execution: ["Draai de onderarm een klein stukje naar buiten.", "Stop in een stevige maar niet scherpe positie.", "Houd 25–40 seconden tegen de kabel.", "Wissel van arm en blijf normaal ademen."],
+      posture: ["Bovenarm blijft rustig.", "Ribben boven bekken.", "Schouder niet optrekken.", "Niet met de romp meedraaien of het schouderblad hard naar achteren trekken."],
+      feel: "Spanning achter en aan de zijkant van de schouder; geen stekende pijn voorin.",
+      mistakes: ["Maximaal naar buiten draaien.", "Adem vasthouden.", "Schouder richting oor trekken.", "Romp wegdraaien.", "Hold laten instorten."],
+      progression: GENERAL_RULES.isometricProgression,
+      regression: ["Korter vasthouden.", "Kabel één stap lichter.", "Kleinere buitenrotatiehoek.", "Cuff gebruiken in plaats van handgreep."],
+      alternatives: ["Isometrische buitenrotatie tegen een muur", "lichte band-isometrie"],
+      phaseDifferences: ["Week 1–2: 25–30 sec op 5–6/10.", "Week 3–5: 30–40 sec op 6–7/10.", "Week 6–8: tot 7–8/10; pas gewicht verhogen nadat 3 × 40 sec stabiel is."],
+      cue: "Ribben stil, onderarm naar buiten, blijf ademen.",
+    }),
+    "iso-wrist-flexion": detail({
+      purpose: "De polsflexoren en hun mediale elleboogaanhechting gecontroleerd zwaar leren belasten.",
+      muscles: ["Flexor carpi radialis/ulnaris", "palmaris longus", "vingerflexoren secundair", "gemeenschappelijke flexorpees bij de golferselleboog"],
+      why: "Isometrie maakt een stevige peesbelasting mogelijk met weinig beweging. Het is een opstap naar langzame dynamische polsflexie en pronatie-/supinatiebelasting.",
+      setup: ["Zittend, onderarm volledig op bovenbeen of bank.", "Handpalm omhoog.", "Pols net voorbij de rand.", "Dumbbell vasthouden en pols licht optillen, niet maximaal krullen."],
+      execution: ["Houd de pols 30–45 seconden stil.", "Knijp alleen zo hard als nodig.", "Laat elleboog en onderarm ondersteund.", "Gebruik de andere hand niet tijdens de hold."],
+      posture: ["Pols in lijn met onderarm of licht gebogen.", "Schouders ontspannen.", "Normaal ademen."],
+      feel: "Stevige spanning in de onderarmflexoren; hoogstens stabiele lichte gevoeligheid aan de binnenzijde van de elleboog.",
+      mistakes: ["Volledig naar binnen krullen.", "Hard knijpen.", "Schokken.", "Met de andere hand helpen.", "Stekende pijn precies op het bot negeren."],
+      progression: GENERAL_RULES.isometricProgression,
+      regression: ["Lichtere dumbbell.", "Kortere hold.", "Pols dichter bij neutraal.", "Minder hard grijpen."],
+      alternatives: ["Isometrische polsflexie tegen de andere hand", "kabel met polsmanchet indien beschikbaar"],
+      phaseDifferences: ["Week 1–2: 30 sec en 5–6/10.", "Week 3–5: 30–40 sec en 6–7/10.", "Week 6–8: 40–45 sec of meer gewicht, maximaal 7–8/10."],
+      cue: "Houd de pols stil; knijp niet harder dan nodig.",
+    }),
+    "hack-squat-or-leg-press": detail({
+      purpose: "De belangrijkste zware knie- en heupstrekprikkel van de week leveren.",
+      muscles: ["Quadriceps primair", "gluteus maximus", "adductoren", "hamstrings en kuiten stabiliserend", "knie- en heupstructuren"],
+      why: "Hack squat en leg press laten substantiële beenbelasting toe met veel stabiliteit en zonder zware grip. Je kiest één variant; het zijn alternatieven binnen hetzelfde blok.",
+      setup: ["Kies in de logger Hack squat of Leg press.", "Voeten ongeveer schouderbreed en volledig op het platform.", "Tenen licht naar buiten.", "Plaats voeten zo dat hielen onderin blijven staan.", "Rug en bekken tegen de steun."],
+      execution: ["Adem in en span de buik.", "Zak in 2–3 seconden.", "Laat knieën de tenen volgen.", "Stop vóór bekkenverlies of scherpe heuppijn.", "Duw via de hele voet omhoog en vermijd agressieve lock-out."],
+      posture: ["Volledige voetdruk.", "Knieën in lijn met tweede/derde teen.", "Bekken blijft gecontroleerd.", "Geen hard ontspannen onderin."],
+      feel: "Zware spanning in bovenbenen en billen; geen scherpe voorste-heup- of kniepijn.",
+      mistakes: ["Hielen los.", "Knieën naar binnen.", "Bekken sterk onderrollen.", "Onderin hangen.", "Adem de hele set vasthouden.", "Beide varianten als twee verplichte oefeningen uitvoeren."],
+      progression: ["4 × 5–8 op RIR 2–3.", "Wanneer 4 × 8 met ongeveer RIR 2 lukt: verhoog 5–10 kg totaal of de kleinste machinestap.", "Behoud diepte en kniespoor na de verhoging."],
+      regression: ["Minder diepte.", "Lichter gewicht.", "Leg press kiezen als hack squat de heup irriteert.", "Voetpositie licht aanpassen zonder de voetdruk te verliezen."],
+      alternatives: ["Hack squat", "45° leg press", "horizontale leg press"],
+      phaseDifferences: ["Week 1–2: techniek en passend startgewicht, RIR 2–3.", "Week 3–5: progressie zodra 4 × 8 technisch lukt.", "Week 6–8: meestal RIR 2, nooit tot falen."],
+      cue: "Zak gecontroleerd en duw via je hele voet.",
+    }),
+    "hip-thrust-machine": detail({
+      purpose: "Zware heupextensiekracht opbouwen met weinig gripbelasting.",
+      muscles: ["Gluteus maximus primair", "hamstrings en adductoren secundair", "romp- en bekkenstabilisatoren"],
+      why: "Sterke bilspieren ondersteunen hardlopen en beenkracht, terwijl de machine ellebogen en grip nauwelijks belast.",
+      setup: ["Steun over het zachte deel van de heupen, niet de buik.", "Voeten zo dat schenen bovenin ongeveer verticaal zijn.", "Rug stevig tegen de steun."],
+      execution: ["Kantel het bekken licht achterover.", "Duw via hielen en middenvoet omhoog.", "Stop bij gestrekte heupen.", "Houd één seconde en zak gecontroleerd."],
+      posture: ["Ribben laag.", "Geen extra hoogte zoeken via een holle onderrug.", "Knieën blijven stabiel boven voeten."],
+      feel: "Sterke bilspiercontractie bovenin; geen druk in onderrug of scherpe voorste-heuppijn.",
+      mistakes: ["Te hoog doorstrekken.", "Voeten verkeerd plaatsen.", "Naar tenen duwen.", "Gewicht laten vallen."],
+      progression: ["Bouw naar 3 × 10 op RIR 2.", "Verhoog daarna één machineplaat of ongeveer 5 kg.", "Keer terug naar 6–8 nette reps."],
+      regression: ["Lichter gewicht.", "Kleinere range.", "Glute bridge op vloer."],
+      alternatives: ["Barbell hip thrust met comfortabele pad", "weighted glute bridge"],
+      cue: "Riemgesp omhoog; stop als de heup gestrekt is.",
+    }),
+    "leg-curl": detail({
+      purpose: "Hamstrings dynamisch versterken door kniebuiging en gecontroleerde excentrische belasting.",
+      muscles: ["Biceps femoris", "semitendinosus", "semimembranosus", "kuitspier secundair"],
+      why: "Hamstringkracht ondersteunt loopbelasting en vormt een tweede serieuze beenprikkel zonder gripbelasting.",
+      setup: ["Kies seated of lying variant.", "Lijn de machinedraaias zo goed mogelijk uit met de knie.", "Fixeer heupen tegen zitting of bank.", "Pad net boven de hiel/onderaan het onderbeen."],
+      execution: ["Buig in ongeveer 2 seconden.", "Knijp één seconde in de eindpositie.", "Laat in 3 seconden terugkomen.", "Behoud een volledige comfortabele range."],
+      posture: ["Heupen blijven tegen de steun.", "Geen schok uit de romp.", "Onderrug niet sterk hol trekken."],
+      feel: "Spanning over de achterkant van het bovenbeen; geen scherpe knie- of peespijn.",
+      mistakes: ["Halve reps voor meer gewicht.", "Gewicht terug laten vallen.", "Heupen optillen.", "Tempo versnellen.", "Door kramp heen drukken."],
+      progression: ["3 × 8–12 met dubbele progressie.", "Op Dag 3 mag hetzelfde patroon iets lichter op RIR 2–3.", "Verhoog pas als het langzame terugzakken intact blijft."],
+      regression: ["Lichter gewicht.", "Minder range.", "Eenbenig met nog minder gewicht als asymmetrie controle vraagt."],
+      alternatives: ["Seated leg curl", "lying leg curl", "slider leg curl als machine ontbreekt"],
+      cue: "Buig in twee, laat in drie terug.",
+    }),
+    "bulgarian-split-squat-smith": detail({
+      purpose: "Unilaterale beenkracht, heupcontrole en links-rechtsbelastbaarheid ontwikkelen.",
+      muscles: ["Quadriceps en gluteus maximus primair", "adductoren", "hamstrings", "heup- en enkelstabilisatoren"],
+      why: "De Smith-machine geeft stabiliteit en beperkt grip, zodat de benen serieus belast kunnen worden zonder dat ellebogen de limiterende factor zijn.",
+      setup: ["Achterste voet op een lage bank.", "Voorste voet voldoende ver naar voren.", "Meeste gewicht op het voorste been.", "Korte pas benadrukt quadriceps; langere pas benadrukt bilspier."],
+      execution: ["Zak vooral recht omlaag.", "Houd de voorste voet volledig op de vloer.", "Laat de knie natuurlijk naar voren bewegen in lijn met de tenen.", "Duw via de voorste voet omhoog."],
+      posture: ["Bekken blijft recht.", "Knie volgt tweede/derde teen.", "Romp stabiel.", "Achterste been helpt minimaal."],
+      feel: "Bovenbeen en bil van het voorste been; geen scherpe diepe heuppijn.",
+      mistakes: ["Afzetten met achterste been.", "Voorste hiel optillen.", "Bekken opendraaien.", "Knie naar binnen.", "Te hoge bank."],
+      progression: ["2–3 × 6–10 per been.", "Eerst reps opbouwen, daarna een kleine Smith-stap.", "Unilateraal liever conservatieve gewichtsverhogingen."],
+      regression: ["Lagere bank.", "Minder diepte.", "Gewone split squat met steun.", "Slechts 2 sets."],
+      alternatives: ["Smith split squat zonder verhoogde achtervoet", "supported reverse lunge"],
+      cue: "Zak recht omlaag; voorste voet doet het werk.",
+    }),
+    "seated-calf-raise": detail({
+      purpose: "Soleus- en kuitbelastbaarheid zwaar opbouwen, inclusief een gecontroleerde isometrische eindhold.",
+      muscles: ["Soleus primair", "gastrocnemius secundair", "Achillespees", "voet- en enkelstabilisatoren"],
+      why: "De soleus levert veel werk tijdens hardlopen. Zware dynamische kuitkracht plus een hold bouwt meer praktische belastbaarheid dan alleen eindeloze lichte reps.",
+      setup: ["Voorvoet stabiel op het platform.", "Kniepad stevig maar comfortabel.", "Hielen vrij om te zakken."],
+      execution: ["Zak gecontroleerd en pauzeer kort onderin.", "Kom volledig op de voorvoet.", "Houd bovenin één seconde.", "Zak in 2–3 seconden.", "Na de laatste rep 15–25 sec hoog/midden vasthouden."],
+      posture: ["Enkels bewegen recht.", "Niet over de kleine tenen naar buiten rollen.", "Hold mag niet langzaam inzakken."],
+      feel: "Diepe kuitspanning en rek onderin; geen scherpe Achilles- of enkelpijn.",
+      mistakes: ["Stuiteren.", "Korte halve reps.", "Naar buiten rollen.", "Hold laten zakken.", "Te snel gewicht verhogen."],
+      progression: ["Wanneer 3 × 12 plus hold volledig beheerst is: gewicht verhogen.", "Na verhoging terug naar 8–10 reps en kortere hold."],
+      regression: ["Lichter gewicht.", "Minder diepe rek.", "Kortere hold."],
+      alternatives: ["Bent-knee calf raise aan leg press", "zittende dumbbell calf raise"],
+      cue: "Volledig omhoog, langzaam omlaag, hold blijft hoog.",
+    }),
+    "weighted-dead-bug": detail({
+      purpose: "Rompstijfheid en bekkencontrole trainen terwijl armen en benen bewegen.",
+      muscles: ["Diepe buikspieren", "rectus abdominis", "obliques", "heupflexoren gecontroleerd"],
+      why: "Helpt ribben en bekken gecontroleerd houden bij krachttraining en hardlopen zonder zware rugbelasting.",
+      setup: ["Rug op de vloer.", "Heupen en knieën ongeveer 90°.", "Lichte dumbbell boven borst of handen tegen een bal."],
+      execution: ["Breng ribben licht omlaag.", "Strek langzaam één been en eventueel tegenovergestelde arm.", "Stop vóór de onderrug loskomt.", "Adem uit tijdens uitstrekken en kom rustig terug."],
+      posture: ["Onderug rustig tegen de vloer, niet maximaal persen.", "Nek ontspannen.", "Bekken blijft stil."],
+      feel: "Buikspanning; niet trekken in onderrug of knijpen voorin de heup.",
+      mistakes: ["Been te laag waardoor rug loskomt.", "Adem vasthouden.", "Snel bewegen.", "Te zwaar gewicht boven de borst."],
+      progression: ["2–3 × 6–8 per kant.", "Strek het been geleidelijk lager of voeg een lichte dumbbell toe; snelheid blijft traag."],
+      regression: ["Alleen hiel aantikken.", "Alleen benen of alleen armen bewegen.", "Geen extra gewicht."],
+      alternatives: ["Dead bug zonder gewicht", "ball press dead bug"],
+      cue: "Stop vóór je onderrug loskomt.",
+    }),
+    "cable-external-rotation-dynamic": detail({
+      purpose: "Rotator-cuffkracht door een gecontroleerde concentrische en excentrische beweging opbouwen.",
+      muscles: ["Infraspinatus", "teres minor", "achterste deltoideus secundair", "rotator-cuffpees"],
+      why: "Dynamische belasting vult de isometrische holds aan en bereidt de schouder voor op normale armbeweging en later overheadwerk.",
+      setup: ["Kabel op ellebooghoogte.", "Zij naar station.", "Elleboog 90° naast romp.", "Handdoek of polsmanchet gebruiken als dat controle/grip verbetert."],
+      execution: ["Draai in 2 seconden naar buiten.", "Stop vóór schouder of romp gaat compenseren.", "Laat in 3 seconden terugtrekken.", "Laat de stapel niet neerkomen."],
+      posture: ["Bovenarm rustig.", "Pols neutraal.", "Schouder laag zonder hard omlaag te trekken.", "Ribben boven bekken."],
+      feel: "Achter- en zijkant schouder; geen scherpe voorzijdepijn.",
+      mistakes: ["Romp meedraaien.", "Elleboog los van romp.", "Kabel terug laten schieten.", "Shruggen.", "Te grote range."],
+      progression: ["3 × 8–15.", "Na 3 × 15 perfect en rustige volgende ochtend: kabel één stap verhogen.", "Absolute gewichten blijven kleiner door de lange hefboom; dat is normaal."],
+      regression: ["Kabel lichter.", "Kleinere range.", "Terug naar isometrische hold."],
+      alternatives: ["Band external rotation", "side-lying dumbbell external rotation als elleboog het verdraagt"],
+      cue: "Twee tellen uit, drie tellen terug.",
+    }),
+    "serratus-wall-slide": detail({
+      purpose: "Serratusfunctie en gecontroleerde opwaartse schouderbladrotatie trainen.",
+      muscles: ["Serratus anterior primair", "onderste/bovenste trapezius", "rotator cuff", "core stabiliserend"],
+      why: "De oefening leert armheffen zonder schouderbladen geforceerd vast te zetten en ondersteunt later duw- en overheadbewegingen.",
+      setup: ["Foamroller horizontaal tegen muur.", "Onderarmen op roller.", "Lichte miniband om polsen indien verdraagbaar.", "Halve stap van de muur."],
+      execution: ["Duw onderarmen licht in de roller.", "Duw polsen zacht uit elkaar tegen de band.", "Rol langzaam omhoog.", "Laat schouderbladen rond de ribbenkast opwaarts bewegen en keer rustig terug."],
+      posture: ["Ribben boven bekken.", "Geen holle onderrug.", "Schouders niet krampachtig naar achteren/omlaag trekken."],
+      feel: "Activiteit langs de zijribben en gecontroleerde beweging rond schouderbladen.",
+      mistakes: ["Ribben naar voren steken.", "Te zware band.", "Onderarmen van roller halen.", "Schouderbladen vastknijpen."],
+      progression: ["3 × 8–12.", "Eerst reps, daarna iets meer bandspanning of grotere gecontroleerde hoogte."],
+      regression: ["Zonder band.", "Zonder foamroller als simpele wall slide.", "Kleinere hoogte."],
+      alternatives: ["Forearm wall slide", "scapular push-up plus"],
+      cue: "Ribben stil; schouderblad mag omhoog draaien.",
+    }),
+    "incline-pushup-plus": detail({
+      purpose: "Duwkracht en serratusbelasting opbouwen in een schaalbare gesloten-ketenbeweging.",
+      muscles: ["Borstspieren", "triceps", "voorste deltoideus", "serratus anterior", "core"],
+      why: "De incline maakt de belasting doseerbaar. De plus traint schouderbladprotractie en vormt een belangrijk criterium voor terugkeer naar overhead press.",
+      setup: ["Handen iets breder dan schouders op bank of stang.", "Handen eventueel enkele graden naar buiten.", "Lichaam in één rechte lijn."],
+      execution: ["Laat borst gecontroleerd zakken.", "Ellebogen ongeveer 30–60° van de romp.", "Duw omhoog.", "Duw bovenin nog iets verder van de ondergrond zonder de rug overdreven bol te maken."],
+      posture: ["Schouderbladen bewegen natuurlijk naar elkaar bij zakken en uit elkaar bij de plus.", "Schouders weg van oren zonder hard omlaag te trekken.", "Ribben en bekken blijven gestapeld."],
+      feel: "Borst, triceps en zijribben/serratus; maximaal lichte stabiele schoudergevoeligheid.",
+      mistakes: ["Ellebogen recht zijwaarts.", "Heupen doorzakken.", "Schouderbladen vastzetten.", "Plus maken via extreme bovenrugbol.", "Elke rep pijnlijker laten worden."],
+      progression: ["3 × 8–15 op RIR 2–3.", "Van hoge naar lagere verhoging, daarna vloer, gewichtsvest/rugzak of band.", "Maak pas moeilijker bij 3 × 15 met goede controle."],
+      regression: ["Hogere bank of muur.", "Kleinere diepte.", "Plus apart uitvoeren."],
+      alternatives: ["Machine chest press met comfortabele greep", "wall push-up plus"],
+      phaseDifferences: ["Week 1–2: comfortabele hoogte, RIR 3–4.", "Week 3–5: lagere incline mogelijk bij maximaal 2/10 en rustige volgende ochtend.", "Week 6–8: RIR 2–3; niet automatisch naar vloer als techniek verslechtert."],
+      cue: "Zak als plank; duw bovenin de bank weg.",
+    }),
+    "cable-scaption-cuffs": detail({
+      purpose: "Armheffen in het scapulaire vlak versterken met minimale gripbelasting.",
+      muscles: ["Middelste/voorste deltoideus", "supraspinatus en overige rotator cuff", "serratus/trapezius voor schouderbladbeweging"],
+      why: "Scaption sluit aan bij normale schouderfunctie. Cuffs ontzien de golferselleboog en lange hefboom geeft voldoende prikkel met weinig absoluut gewicht.",
+      setup: ["Kabels laag.", "Polsmanchetten gebruiken.", "Armen 20–30° vóór de zijlijn.", "Duimen omhoog of schuin omhoog."],
+      execution: ["Hef gecontroleerd tot schouderhoogte of eerder.", "Pauzeer kort zonder shrug.", "Laat in 3 seconden zakken."],
+      posture: ["Ribben boven bekken.", "Geen momentum uit benen.", "Hand niet lager laten hangen dan elleboog.", "Schouderblad mag bewegen."],
+      feel: "Zijkant schouder en stabiele cuffactiviteit; geen knijpende voorzijdepijn.",
+      mistakes: ["Intern roteren alsof je een kan leeggiet.", "Boven schouderhoogte forceren.", "Shruggen.", "Rug hol trekken.", "Te zwaar kabelgewicht."],
+      progression: ["3 × 10–15.", "Eerst 15 technisch nette reps; daarna één kleine kabelstap en terug naar 10."],
+      regression: ["Kleinere hoogte.", "Eén arm tegelijk.", "Lichtere kabel of geen cuffspanning."],
+      alternatives: ["Dumbbell scaption met zeer losse greep", "landmine press alleen via het terugkeerpad"],
+      cue: "Duimen omhoog; hef vóór je zijlijn.",
+    }),
+    "rear-delt-fly-machine": detail({
+      purpose: "Achterste schouder en schouderbladcontrole versterken met rompsteun.",
+      muscles: ["Achterste deltoideus primair", "rhomboidei en middelste trapezius secundair", "rotator cuff stabiliserend"],
+      why: "Borststeun beperkt compensatie uit onderrug. Een neutrale/losse greep of cuffs kan elleboog- en gripbelasting verminderen.",
+      setup: ["Zitting zo dat handgrepen op schouderhoogte zijn.", "Borst tegen steun.", "Neutrale greep indien mogelijk.", "Elleboog licht gebogen."],
+      execution: ["Beweeg armen naar buiten en licht naar achteren.", "Stop als bovenarmen ongeveer in lijn met romp zijn.", "Keer langzaam terug."],
+      posture: ["Borst blijft op steun.", "Schouders niet optrekken.", "Schouderbladen niet maximaal samenknijpen.", "Polsen neutraal."],
+      feel: "Achterkant schouders en lichte bovenrugactiviteit; geen brachialis- of binnenelleboogpijn.",
+      mistakes: ["Te ver naar achteren trekken.", "Momentum.", "Hard knijpen.", "Schouders naar oren.", "Gewicht terug laten vallen."],
+      progression: ["2–3 × 10–15.", "Eerst reps en tempo; daarna een kleine machinestap."],
+      regression: ["Losser grijpen, straps/cuffs, lagere weerstand of kortere range."],
+      alternatives: ["Cable rear-delt fly met cuffs", "face pull met cuffs"],
+      cue: "Beweeg vanuit de achterste schouder, niet uit een harde knijp.",
+    }),
+    "single-leg-leg-press": detail({
+      purpose: "Zware unilaterale knie- en heupkracht ontwikkelen met hoge stabiliteit.",
+      muscles: ["Quadriceps", "gluteus maximus", "adductoren", "heup- en kniestabilisatoren"],
+      why: "Geeft de tweede serieuze beenprikkel en laat links/rechts gecontroleerd werken zonder gripbelasting.",
+      setup: ["Eén voet ongeveer midden op platform.", "Bekken volledig tegen rugleuning.", "Andere voet blijft weg van het platform."],
+      execution: ["Laat in controle zakken.", "Stop vóór bekken aan één kant optilt of onderrolt.", "Duw via de hele voet terug.", "Vermijd agressieve lock-out."],
+      posture: ["Heupen recht.", "Knie volgt tenen.", "Volledige voetdruk.", "Rug tegen steun."],
+      feel: "Bovenbeen en bil van het werkende been; geen scherpe voorste-heuppijn.",
+      mistakes: ["Andere voet mee laten helpen.", "Bekken draaien.", "Knie naar binnen.", "Te diepe range.", "Hard op slot duwen."],
+      progression: ["3 × 6–10 per been.", "Start RIR 3 en bouw naar RIR 2.", "Verhoog klein wanneer beide kanten 10 reps technisch halen."],
+      regression: ["Lichter gewicht.", "Minder diepte.", "Bilaterale leg press als unilaterale bekkencontrole onvoldoende is."],
+      alternatives: ["Supported split squat", "lage step-up"],
+      cue: "Bekken stil, hele voet duwt.",
+    }),
+    "step-up": detail({
+      purpose: "Functionele unilaterale heup- en knie-extensie voor trap-/loopachtige kracht.",
+      muscles: ["Gluteus maximus", "quadriceps", "adductoren", "heupstabilisatoren", "kuit secundair"],
+      why: "De oefening traint kracht over één been en kan zonder zware grip via Smith, vest of belt-constructie worden verzwaard.",
+      setup: ["Box niet extreem hoog; bovenbeen ongeveer horizontaal of lager.", "Hele werkvoet op de box.", "Achterste voet licht op de vloer."],
+      execution: ["Leun licht vanuit de heup voorover.", "Duw de box weg met het bovenste been.", "Breng bekken boven standbeen.", "Zak langzaam terug."],
+      posture: ["Knie volgt tenen.", "Bekken blijft horizontaal.", "Romp blijft lang.", "Achterste been helpt minimaal."],
+      feel: "Bil en bovenbeen van het been op de box; geen afzet in de achterste kuit.",
+      mistakes: ["Hard afzetten met achterste voet.", "Alleen tenen op box.", "Knie naar binnen.", "Te hoge box.", "Ongecontroleerd afstappen."],
+      progression: ["3 × 6–10 per been.", "Eerst hoogte/controle constant houden en reps opbouwen.", "Daarna Smith, gewichtsvest of belt squat-constructie."],
+      regression: ["Lagere box.", "Steun vasthouden.", "Langzame step-down met hulp omhoog."],
+      alternatives: ["Smith step-up", "supported reverse lunge"],
+      cue: "Bovenste been doet het werk.",
+    }),
+    "standing-calf-raise": detail({
+      purpose: "Zware kuit- en Achillesbelastbaarheid opbouwen met vrijwel gestrekte knie.",
+      muscles: ["Gastrocnemius primair", "soleus", "Achillespees", "voet- en enkelstabilisatoren"],
+      why: "Kuitkracht ondersteunt loopeconomie en enkelbelastbaarheid. Hier hoort serieuze dynamische weerstand bij, niet alleen lichte isometrie.",
+      setup: ["Voorvoet stabiel op platform.", "Knieën vrijwel gestrekt maar niet hard op slot.", "Machinepad of Smith comfortabel geplaatst."],
+      execution: ["Zak diep en gecontroleerd.", "Kom volledig omhoog.", "Verdeel druk over bal van grote én kleine teen.", "Laatste rep 20–30 sec vasthouden."],
+      posture: ["Enkel beweegt recht.", "Geen knieflexie om gewicht te verplaatsen.", "Hold blijft hoog."],
+      feel: "Oppervlakkige kuitspanning en gecontroleerde rek; geen scherpe Achilles- of enkelpijn.",
+      mistakes: ["Naar buiten rollen.", "Stuiteren.", "Halve reps.", "Knieën hard locken.", "Hold laten instorten."],
+      progression: ["3 × 6–10 plus 20–30 sec hold.", "Eerst 10 reps en volledige hold; daarna gewicht verhogen."],
+      regression: ["Lichter gewicht.", "Minder diepe rek.", "Bilateraal met steun."],
+      alternatives: ["Standing calf raise machine", "Smith calf raise", "leg-press calf raise"],
+      cue: "Druk door grote én kleine teen.",
+    }),
+    "short-lever-copenhagen": detail({
+      purpose: "Adductoren en laterale rompcontrole versterken met een korte, doseerbare hefboom.",
+      muscles: ["Adductor longus/brevis/magnus", "gracilis", "obliques", "heupstabilisatoren"],
+      why: "Adductoren helpen heup- en bekkencontrole tijdens hardlopen. De korte hefboom is een voorzichtige start omdat deze oefening forse spierpijn kan geven.",
+      setup: ["Zijwaarts naast bank.", "Bovenste knie op bank.", "Steun op onderarm.", "Onderste been vrij."],
+      execution: ["Til heupen op.", "Trek onderste been licht richting bovenste.", "Houd romp recht 15–30 sec.", "Wissel gecontroleerd."],
+      posture: ["Schouder boven elleboog.", "Bekken niet naar achteren draaien.", "Romp in één lijn.", "Normaal ademen."],
+      feel: "Binnenkant bovenbeen van het bovenste been en zijkant romp; geen scherpe liespijn.",
+      mistakes: ["Te lange hefboom starten.", "Heupen laten zakken.", "Bekken openen.", "Adem vasthouden.", "Te veel sets bij eerste keer."],
+      progression: ["2 × 15–30 sec per kant.", "Eerst holdduur; later pas langere hefboom of extra set."],
+      regression: ["Kortere hold.", "Heupen minder hoog.", "Isometrische bal-/kussensqueeze."],
+      alternatives: ["Side-lying adduction", "adductor squeeze"],
+      cue: "Knie in de bank, heupen lang.",
+    }),
+    "iso-elbow-flexion-cuff": detail({
+      purpose: "Elleboogbuigers isometrisch belasten zonder hard te hoeven grijpen.",
+      muscles: ["Brachialis", "biceps brachii", "brachioradialis", "distale biceps-/brachialisregio"],
+      why: "De cuff maakt het mogelijk te onderzoeken of elleboogflexie zelf verdraagbaar is terwijl de golferselleboog niet door grip wordt beperkt.",
+      setup: ["Kabel laag.", "Cuff rond onderarm net boven pols.", "Bovenarm naast romp.", "Elleboog ongeveer 70–90° gebogen.", "Pols neutraal."],
+      execution: ["Houd onderarm stil tegen trekkracht.", "Elleboog blijft naast romp.", "Adem door gedurende 25–40 sec."],
+      posture: ["Schouder niet naar voren.", "Ribben boven bekken.", "Geen polsbuiging.", "Geen rompzwaai."],
+      feel: "Stevige spanning in voorzijde bovenarm/elleboogflexoren; geen scherpe distale-biceps- of binnenelleboogpijn.",
+      mistakes: ["Hard knijpen ondanks cuff.", "Schouder naar voren trekken.", "Hoek langzaam verliezen.", "Maximaal persen.", "Adem vasthouden."],
+      progression: ["Begin 5–6/10 en bouw naar 3 × 40 sec.", "Verhoog daarna kabel.", "Vanaf week 4 wisselen tussen ongeveer 60° en 100° omdat isometrische kracht hoekspecifiek is."],
+      regression: ["Lichtere kabel.", "Kortere hold.", "Comfortabelere hoek.", "Bovenarm extra ondersteunen."],
+      alternatives: ["Isometrische elbow-flexion tegen band met cuff", "handmatige weerstand zonder grip"],
+      phaseDifferences: ["Week 1–2: 70–90°, 25–30 sec, 5–6/10.", "Week 3–5: 30–40 sec, 6–7/10 en eventueel tweede hoek.", "Week 6–8: tot 7–8/10, zonder vormverlies."],
+      cue: "Elleboog blijft naast je romp; cuff doet het trekwerk.",
+    }),
+    "slow-cable-elbow-flexion-cuff": detail({
+      purpose: "Brachialis en overige elleboogbuigers dynamisch concentrisch én excentrisch versterken.",
+      muscles: ["Brachialis primair", "biceps brachii", "brachioradialis", "distale elleboogflexorstructuren"],
+      why: "De cuff scheidt elleboogflexie van zware grip. Dit is de brug naar neutrale kabelgreep, rope hammer curl en later normale curls/trekbewegingen.",
+      setup: ["Cuff rond onderarm.", "Kabel laag.", "Bovenarm naast romp.", "Start bijna gestrekt maar niet vergrendeld."],
+      execution: ["Buig in 2 seconden tot ongeveer 100–110°.", "Houd één seconde.", "Laat in 3 seconden terugzakken.", "Bovenarm blijft stil."],
+      posture: ["Pols neutraal.", "Schouder niet naar voren.", "Geen rompzwaai.", "Normaal ademen."],
+      feel: "Geleidelijke spierbelasting in de voorzijde bovenarm; geen scherpe pijn bij de elleboogplooi.",
+      mistakes: ["Bovenarm naar voren.", "Te ver doorcurlen.", "Kabel terug laten trekken.", "Grip onnodig aanspannen.", "Volledige lock-out forceren."],
+      progression: ["3 × 8–12 met 2-1-3-tempo.", "Cuff → losse neutrale kabelgreep → rope hammer curl → dumbbell hammer curl → later gewone curls/trekken.", "Ga alleen een stap verder bij stabiele volgende ochtend."],
+      regression: ["Kleinere range.", "Lichter gewicht.", "Alleen isometrische variant.", "Langzamere maar kortere beweging."],
+      alternatives: ["Rope hammer curl met losse greep zodra toegestaan", "band curl met cuff"],
+      phaseDifferences: ["Week 1–2: cuff en RIR 3–4.", "Week 3–5: RIR 2–3 en cuff zwaarder.", "Week 6–8: eventueel neutrale losse grip, meestal RIR 2; geen maximale gewone curls."],
+      cue: "Bovenarm stil; drie tellen terug.",
+    }),
+    "weighted-wrist-flexion": detail({
+      purpose: "Polsflexoren en de gemeenschappelijke flexorpees dynamisch en progressief belasten.",
+      muscles: ["Pols- en vingerflexoren", "pronator teres secundair", "mediale elleboogpeesaanhechting"],
+      why: "Volledig herstel vraagt naast holds ook concentrische en vooral gecontroleerde excentrische belasting.",
+      setup: ["Onderarm volledig ondersteund.", "Handpalm omhoog.", "Pols net over rand.", "Dumbbell stevig maar niet krampachtig."],
+      execution: ["Krul in 2 seconden omhoog.", "Onderarm blijft stil.", "Laat in 3–4 seconden zakken door een comfortabele volledige range."],
+      posture: ["Schouder ontspannen.", "Elleboog blijft ondersteund.", "Geen vinger-openrol tenzij bewust en pijnvrij."],
+      feel: "Werk in onderarmflexoren; lichte stabiele peesgevoeligheid kan, stekende botpijn niet.",
+      mistakes: ["Snel laten vallen.", "Onderarm optillen.", "Hard knijpen.", "Maximaal in flexie persen.", "Pijn na iedere rep laten toenemen."],
+      progression: ["Bij 3 × 15 met maximaal 2/10 en rustige volgende ochtend: 0,5–1 kg verhogen.", "Ga terug naar 8–10 reps en bouw weer op."],
+      regression: ["Lichter gewicht.", "Kleinere range.", "Terug naar isometrische polsflexie."],
+      alternatives: ["Cable wrist flexion", "band wrist flexion"],
+      cue: "Twee omhoog, vier rustig omlaag.",
+    }),
+    "pronation-supination-lever": detail({
+      purpose: "Onderarmrotatie en belastbaarheid van pronator-/supinatorstructuren opbouwen.",
+      muscles: ["Pronator teres/quadratus", "supinator", "biceps secundair", "pols- en elleboogstabilisatoren"],
+      why: "Pronatie kan bij golferselleboog gevoelig zijn. Een verstelbare hefboom maakt zeer kleine, controleerbare belastingsstappen mogelijk.",
+      setup: ["Elleboog 90° en bovenarm naast romp.", "Onderarm ondersteund.", "Pak uiteinde van lichte dumbbell/hamer/stang.", "Start met korte hefboom."],
+      execution: ["Draai in ongeveer 3 seconden van handpalm omhoog naar omlaag.", "Beweeg alleen vanuit onderarm.", "Keer even langzaam terug."],
+      posture: ["Pols blijft neutraal.", "Elleboog en schouder stil.", "Geen knijpende maximale grip."],
+      feel: "Gelijkmatige spanning rond onderarm; geen scherpe mediale elleboogpijn.",
+      mistakes: ["Te lange hefboom starten.", "Pols buigen.", "Elleboog van steun tillen.", "Snel door eindstand vallen.", "Gewicht onderschatten."],
+      progression: ["2–3 × 8–12 per richting.", "Maak zwaarder met iets meer gewicht, langere hefboom of langzamer tempo — slechts één variabele tegelijk."],
+      regression: ["Kortere hefboom.", "Minder gewicht.", "Kleinere rotatiehoek."],
+      alternatives: ["Hammer pronation/supination", "kabelrotatie met lichte greep"],
+      cue: "Elleboog stil; de hefboom beweegt langzaam.",
+    }),
+    "face-pull": detail({
+      purpose: "Achterste schouder, bovenrug en schoudercontrole trainen met aanpasbare grip.",
+      muscles: ["Achterste deltoideus", "middelste/onderste trapezius", "rhomboidei", "rotator cuff"],
+      why: "Geeft de derde schouderprikkel en kan via cuffs worden uitgevoerd als rope-grip de golferselleboog irriteert.",
+      setup: ["Kabel op oog-/voorhoofdhoogte.", "Rope los vastpakken of cuffs rond polsen/onderarmen.", "Sta stabiel zonder achterover te hangen."],
+      execution: ["Trek richting voorhoofd.", "Laat ellebogen niet extreem hoog uitwaaieren.", "Eindig met handen naast gezicht.", "Laat gecontroleerd terugkomen."],
+      posture: ["Ribben boven bekken.", "Schouders niet optrekken.", "Geen achteroverleunende row.", "Polsen neutraal."],
+      feel: "Achterste schouders en bovenrug; geen trekkende brachialis- of binnenelleboogpijn.",
+      mistakes: ["Momentum.", "Achterover leunen.", "Te hard knijpen.", "Ellebogen extreem hoog.", "Rope naar borst trekken."],
+      progression: ["2–3 × 10–15.", "Eerst reps/tempo; daarna kleine kabelstap.", "Grip pas zwaarder maken als elleboog stabiel blijft."],
+      regression: ["Cuffs gebruiken.", "Lichtere kabel.", "Kortere range."],
+      alternatives: ["Rear-delt flymachine", "cable rear-delt fly met cuffs"],
+      cue: "Trek naar je voorhoofd zonder achterover te leunen.",
+    }),
+    "half-kneeling-landmine-press": detail({
+      purpose: "Gecontroleerde eerste terugkeer naar een schuine overheadachtige drukbeweging.",
+      muscles: ["Voorste deltoideus", "bovenste borst", "triceps", "serratus anterior", "rotator cuff", "core/bil voor stabiliteit"],
+      why: "De schuine baan is vaak beter doseerbaar dan volledig verticaal drukken en laat het schouderblad natuurlijk meebewegen.",
+      setup: ["Kniel met de knie aan dezelfde kant als de drukkende arm op de vloer.", "Andere voet voor.", "Pak stangeinde met neutrale greep.", "Start bij schouderhoogte."],
+      execution: ["Span bil van de knielende zijde.", "Druk stang schuin omhoog en naar voren.", "Laat schouderblad meebewegen.", "Laat gecontroleerd terugzakken."],
+      posture: ["Ribben boven bekken.", "Geen holle rug.", "Schouder niet naar voren uit positie laten glijden.", "Pols in lijn met onderarm."],
+      feel: "Gecontroleerde spanning in schouder, borst en serratus; geen toenemende voorzijdepijn.",
+      mistakes: ["Ribben omhoog.", "Onderrug hol.", "Schouderblad vastzetten.", "Te zwaar starten.", "Iedere rep pijnlijker laten worden."],
+      progression: ["Start 2–3 × 8–12 op RIR 3–4.", "Eerst twee probleemloze weken opbouwen voordat machine overhead press wordt getest."],
+      regression: ["Lichtere stangbelasting.", "Staande two-hand landmine press.", "Kleinere range.", "Terug naar incline push-up plus."],
+      alternatives: ["Two-hand landmine press", "hoge incline push-up plus"],
+      phaseDifferences: ["Week 1–2: niet uitvoeren.", "Week 3–5: alleen beschikbaar na afvinken van alle voorwaarden.", "Week 6–8: verder opbouwen als reactie stabiel blijft; geen maximale belasting."],
+      cue: "Bil aan, ribben stil, schuin vooruit drukken.",
+    }),
+    "machine-overhead-press-neutral": detail({
+      purpose: "Verticale drukcapaciteit gecontroleerd terugbrengen na een stabiele landminefase.",
+      muscles: ["Deltoideus", "triceps", "bovenste borst", "serratus/trapezius", "rotator cuff"],
+      why: "De machine geeft stabiliteit en een neutrale greep, zodat de schouderbelasting zorgvuldig kan worden opgebouwd zonder vrije haltercontrole of zware grip.",
+      setup: ["Alleen na twee probleemloze weken landmine press.", "Handgrepen tussen kin- en oorhoogte, niet diep onder schouder.", "Rugsteun licht schuin.", "Neutrale/semi-neutrale greep.", "Ellebogen iets vóór romp."],
+      execution: ["Span buik en billen licht.", "Druk omhoog zonder ribben op te tillen.", "Laat schouderbladen natuurlijk opwaarts draaien.", "Stop eventueel vóór lock-out.", "Laat in 2–3 seconden zakken."],
+      posture: ["Geen holle onderrug.", "Schouderbladen niet hard omlaag trekken.", "Polsen boven ellebogen.", "Romp blijft tegen steun."],
+      feel: "Gelijkmatige schouder- en tricepsbelasting; geen toenemende voorzijdepijn of instabiliteit.",
+      mistakes: ["Te lage startpositie.", "Ellebogen exact zijwaarts.", "Borst extreem optillen.", "Schouderbladen vastknijpen.", "Gewicht verhogen terwijl bovenste range instabiel is."],
+      progression: ["Start 2 × 10–12 op RIR 4 en maximaal 2/10 pijn.", "Later 3 × 8–12 op RIR 2–3.", "Niet op dezelfde dag als meerdere nieuwe zware schouderprikkels."],
+      regression: ["Lichter gewicht.", "Kortere range.", "Eén stap terug naar landmine press.", "Hogere incline push-up plus."],
+      alternatives: ["Half-kneeling landmine press", "machine incline press met neutrale greep"],
+      phaseDifferences: ["Week 1–5: niet uitvoeren.", "Week 6–8: alleen testen na twee probleemloze landmineweken en alle criteria.", "Na week 8: verdere progressie hoort in een nieuw vervolgplan."],
+      cue: "Ribben laag; schouderblad mag omhoog.",
+    }),
+  };
+
+  function mobilityDetail(config) {
+    return detail({
+      ...config,
+      why:
+        `${config.why} Mobiliteit vergroot of onderhoudt bewegingsruimte, maar vervangt de progressieve krachtoefeningen niet.`,
+      phaseDifferences: [
+        "Week 1–2: rustig bereik verkennen, nooit forceren.",
+        "Week 3–5: iets vloeiender of langer als de volgende ochtend rustig blijft.",
+        "Week 6–8: bewegingskwaliteit onderhouden naast de zwaardere krachttraining.",
+      ],
+    });
+  }
+
+  Object.assign(EXERCISE_DETAILS, {
+    "half-kneeling-hip-flexor-stretch": mobilityDetail({
+      purpose: "Comfortabele heupextensieruimte en bekkencontrole oefenen.",
+      muscles: ["Iliopsoas", "rectus femoris", "voorste heupstructuren"],
+      why: "Kan spanning voorin heup/bovenbeen verminderen zonder te stellen dat 'korte heupflexoren' automatisch de oorzaak zijn.",
+      setup: ["Eén knie op zachte ondergrond, andere voet voor.", "Achterste bil aanspannen."],
+      execution: ["Kantel bekken achterover.", "Beweeg slechts een klein stukje naar voren.", "Houd 30–45 sec per kant."],
+      posture: ["Romp recht.", "Onderrug niet hol.", "Voorste knie stabiel."],
+      feel: "Rek voorzijde heup/bovenbeen, niet diep scherp in de lies.",
+      mistakes: ["Ver naar voren leunen.", "Onderrug hol trekken.", "Bil ontspannen."],
+      progression: ["2 × 30–45 sec; vergroot eerst controle en pas daarna lichte voorwaartse verplaatsing."],
+      regression: ["Kortere hold of knie verder naar achteren/voorvoet dichterbij voor minder rek."],
+      alternatives: ["Staande hip-flexor stretch met achterste bil aangespannen."],
+      cue: "Bil aan, riemgesp omhoog.",
+    }),
+    "couch-stretch": mobilityDetail({
+      purpose: "Voorzijde bovenbeen en heup gecontroleerd verlengen.",
+      muscles: ["Rectus femoris", "overige quadriceps", "heupflexoren"],
+      why: "Vult heup- en beenkracht aan door beschikbare heupextensie/knieflexie rustig te oefenen.",
+      setup: ["Achterste knie bij muur of bank, voet omhoog.", "Voorste voet voor.", "Begin met ruime afstand tot de muur."],
+      execution: ["Span achterste bil.", "Breng romp geleidelijk rechterop.", "Houd 30–45 sec per kant."],
+      posture: ["Bekken licht achterover.", "Geen holle rug.", "Niet in kniepijn hangen."],
+      feel: "Rek voorzijde bovenbeen/heup, geen scherpe kniedruk.",
+      mistakes: ["Knie direct tegen muur plaatsen.", "Rug hol trekken.", "Te snel rechtop komen."],
+      progression: ["2 × 30–45 sec; verklein de afstand tot muur geleidelijk."],
+      regression: ["Knie verder van muur of gewone half-kneeling stretch."],
+      alternatives: ["Staande quadricepsstretch met bekkencontrole."],
+      cue: "Begin verder van de muur dan je denkt.",
+    }),
+    "90-90-hip-switches": mobilityDetail({
+      purpose: "Interne en externe heuprotatie actief en gecontroleerd bewegen.",
+      muscles: ["Diepe heuprotatoren", "bilspieren", "adductoren"],
+      why: "Onderhoudt rotatiecapaciteit die nuttig is voor heupcontrole, zonder passief in eindstand te duwen.",
+      setup: ["Zit met beide knieën gebogen en voeten op de vloer.", "Handen eventueel achter je voor steun."],
+      execution: ["Laat beide knieën langzaam naar één kant zakken.", "Keer via het midden terug.", "Doe 2 × 6–10 per kant."],
+      posture: ["Zitbotten zo veel mogelijk op de vloer.", "Romp lang.", "Geen snelheid gebruiken."],
+      feel: "Rustige spanning rond buiten- en binnenzijde heup, geen knelling diep voorin.",
+      mistakes: ["Knieën laten vallen.", "Eindstand forceren.", "Bekken volledig optillen."],
+      progression: ["Minder handsteun of iets vloeiender bewegen."],
+      regression: ["Kleinere uitslag of één zijde tegelijk."],
+      alternatives: ["Seated hip internal-rotation rocks."],
+      cue: "Langzaam wisselen; zitbotten zwaar.",
+    }),
+    "adductor-rock-back": mobilityDetail({
+      purpose: "Adductoren dynamisch door een comfortabele lengtestand bewegen.",
+      muscles: ["Adductoren", "mediale hamstrings", "heupkapsel secundair"],
+      why: "Sluit aan bij Copenhagen- en unilaterale beenkracht door bewegingsruimte rond de binnenzijde van het bovenbeen te onderhouden.",
+      setup: ["Start op handen en knieën.", "Strek één been zijwaarts met voet of hak op vloer."],
+      execution: ["Duw heupen langzaam naar achteren.", "Pauzeer kort.", "Kom terug voor 2 × 8–12 per kant."],
+      posture: ["Rug neutraal.", "Bekken blijft recht.", "Geen draai naar het gestrekte been."],
+      feel: "Rek binnenzijde bovenbeen, geen scherpe liespijn.",
+      mistakes: ["Rug rond maken.", "Te ver achteruit duwen.", "Voetpositie forceren."],
+      progression: ["Iets grotere rustige range of korte pauze achterin."],
+      regression: ["Knie licht buigen of minder ver zijwaarts plaatsen."],
+      alternatives: ["Wide-knee rock-back."],
+      cue: "Heupen terug, rug lang.",
+    }),
+    "dynamic-hamstring-mobility": mobilityDetail({
+      purpose: "Hamstrings dynamisch door heupbuiging bewegen zonder lang passief trekken.",
+      muscles: ["Hamstrings", "kuit secundair", "achterste keten"],
+      why: "Vult leg curls en hardloopkracht aan door een gecontroleerde heupscharnier te oefenen.",
+      setup: ["Eén hak voor je.", "Knie licht gebogen.", "Standbeen stabiel."],
+      execution: ["Duw heupen naar achteren met lange rug.", "Houd 1–2 sec.", "Kom terug voor 2 × 8 per kant."],
+      posture: ["Rug lang.", "Bekken recht.", "Niet aan tenen trekken."],
+      feel: "Milde rek achterkant bovenbeen, geen zenuwachtige scherpe trekkracht.",
+      mistakes: ["Rug bol.", "Veren.", "Knie hard op slot.", "Tenen agressief aantrekken."],
+      progression: ["Iets dieper vanuit de heup, niet sneller."],
+      regression: ["Meer kniebuiging of minder heupscharnier."],
+      alternatives: ["Supine active hamstring extension."],
+      cue: "Heupen terug, rug blijft lang.",
+    }),
+    "calf-stretch-straight-knee": mobilityDetail({
+      purpose: "Kuit en enkel met gestrekte knie rustig door dorsiflexie bewegen.",
+      muscles: ["Gastrocnemius", "Achillespees", "enkelstructuren"],
+      why: "Ondersteunt de bewegingsruimte die nodig is voor squats, calf raises en hardlopen.",
+      setup: ["Achterste voet recht vooruit.", "Hiel op de grond.", "Knie gestrekt maar niet geforceerd."],
+      execution: ["Leun rustig naar voren.", "Houd 2 × 30 sec per kant."],
+      posture: ["Voetboog blijft actief.", "Niet naar buiten rollen.", "Bekken naar voren gericht."],
+      feel: "Rek hoog/midden in kuit, geen scherpe Achilles- of enkelpijn.",
+      mistakes: ["Hiel optillen.", "Voet uitdraaien.", "In de voorste enkel knellen."],
+      progression: ["Iets verder van de muur staan, hiel blijft laag."],
+      regression: ["Kortere pas of kortere hold."],
+      alternatives: ["Kuitstretch tegen leg-pressplatform zonder belasting."],
+      cue: "Hiel zwaar, voet recht vooruit.",
+    }),
+    "calf-stretch-bent-knee": mobilityDetail({
+      purpose: "Diepere kuitspier en enkelbeweging met gebogen knie oefenen.",
+      muscles: ["Soleus", "Achillespees", "enkelstructuren"],
+      why: "Sluit specifiek aan bij seated calf raise en de grote soleusbelasting tijdens hardlopen.",
+      setup: ["Zelfde positie als gestrekte-kniestretch.", "Achterste knie licht buigen terwijl hiel blijft staan."],
+      execution: ["Beweeg knie rustig naar voren.", "Houd 2 × 30 sec per kant."],
+      posture: ["Hiel blijft laag.", "Knie volgt tenen.", "Voet rolt niet naar binnen of buiten."],
+      feel: "Rek lager en dieper in de kuit, geen scherpe enkelknelling.",
+      mistakes: ["Hiel optillen.", "Knie naar binnen.", "Te hard in eindstand duwen."],
+      progression: ["Iets meer knieflexie bij stabiele hiel."],
+      regression: ["Minder kniebuiging of kleinere voorwaartse verplaatsing."],
+      alternatives: ["Soleus stretch met voorvoet op lichte verhoging."],
+      cue: "Buig de knie, houd de hiel zwaar.",
+    }),
+    "open-book-rotation": mobilityDetail({
+      purpose: "Bovenrugrotatie en ontspannen schouderbeweging onderhouden.",
+      muscles: ["Thoracale rotatoren", "borstspieren licht", "schoudergordel"],
+      why: "Kan bovenrugbeweging ondersteunen zonder te doen alsof een ronde bovenrug automatisch de oorzaak van schouderpijn is.",
+      setup: ["Lig op zij, heupen en knieën gebogen.", "Armen voor je en knieën op elkaar."],
+      execution: ["Draai bovenste arm en borstkas rustig open.", "Volg de hand met je ogen.", "Keer terug voor 2 × 6–8 per kant."],
+      posture: ["Knieën blijven bij elkaar.", "Beweging komt uit bovenrug, niet uit een draaiend bekken.", "Adem uit bij openen."],
+      feel: "Milde rotatie/rek in bovenrug en borst, geen scherpe schouderpijn.",
+      mistakes: ["Knie optillen.", "Arm naar vloer forceren.", "Snel veren.", "Adem vasthouden."],
+      progression: ["Langzamer uitademen en iets grotere comfortabele rotatie."],
+      regression: ["Kussen onder bovenste arm of kleinere range."],
+      alternatives: ["Seated thoracic rotation."],
+      cue: "Knieën samen; ogen volgen je hand.",
+    }),
+  });
+
+  const EXERCISE_META = {
+    "warmup-bike-walk": { inputType: "none" },
+    "bodyweight-squat": { inputType: "none" },
+    "glute-bridge": { inputType: "none" },
+    "scapular-push-up": { inputType: "none" },
+    "hip-circles": { inputType: "none" },
+    "arm-circles": { inputType: "none" },
+    "wall-slide-unweighted": { inputType: "none" },
+    "warmup-set-first-exercise": { inputType: "none" },
+    "iso-cable-external-rotation": { inputType: "weight-seconds", weightRange: { min: 0, max: 40, step: 0.5 }, secondsRange: { min: 15, max: 60, step: 5 }, protocol: { rest: "±30 sec tijdens armwissel", tempo: "statische hold", intensity: "week 1–2: 5–6/10; later 7–8/10" } },
+    "iso-wrist-flexion": { inputType: "weight-seconds", weightRange: { min: 0, max: 30, step: 0.5 }, secondsRange: { min: 15, max: 60, step: 5 }, protocol: { rest: "30–45 sec", tempo: "statische hold", intensity: "stevig, nooit maximaal" } },
+    "hack-squat-or-leg-press": { choices: ["Hack squat", "Leg press"], weightRange: { min: 0, max: 350, step: 2.5 }, repRange: { min: 1, max: 15 }, protocol: { rest: "2 min", tempo: "2–3 sec zakken", intensity: "RIR 2–3; niet tot falen" } },
+    "hip-thrust-machine": { weightRange: { min: 0, max: 300, step: 2.5 }, repRange: { min: 1, max: 20 }, protocol: { rest: "90 sec", tempo: "1 sec vasthouden bovenin; gecontroleerd zakken", intensity: "RIR 2" } },
+    "leg-curl": { weightRange: { min: 0, max: 160, step: 1 }, repRange: { min: 1, max: 20 }, protocol: { rest: "75–90 sec op Dag 1; 60 sec op Dag 3", tempo: "2 sec buigen, 1 sec knijpen, 3 sec terug", intensity: "RIR 2–3" } },
+    "bulgarian-split-squat-smith": { weightRange: { min: 0, max: 180, step: 2.5 }, repRange: { min: 1, max: 15 }, protocol: { rest: "60–90 sec na beide benen", tempo: "gecontroleerd zakken en opstaan", intensity: "1–3 reps over" } },
+    "seated-calf-raise": { weightRange: { min: 0, max: 180, step: 2.5 }, repRange: { min: 1, max: 20 }, protocol: { rest: "60 sec", tempo: "1 sec boven, 2–3 sec zakken", intensity: "laatste rep 15–25 sec hold" } },
+    "weighted-dead-bug": { weightRange: { min: 0, max: 30, step: 0.5 }, repRange: { min: 1, max: 15 }, protocol: { rest: "30 sec", tempo: "langzaam uitstrekken en uitademen", intensity: "stop vóór onderrug loskomt" } },
+    "cable-external-rotation-dynamic": { weightRange: { min: 0, max: 40, step: 0.5 }, repRange: { min: 1, max: 20 }, protocol: { rest: "30–45 sec tijdens armwissel", tempo: "2 sec uit, 3 sec terug", intensity: "faseafhankelijk RIR 3–4 naar RIR 2" } },
+    "serratus-wall-slide": { inputType: "reps-only", repRange: { min: 1, max: 20 }, protocol: { rest: "45 sec", tempo: "langzaam omhoog en terug", intensity: "controle vóór bandspanning" } },
+    "incline-pushup-plus": { inputType: "reps-only", repRange: { min: 1, max: 25 }, protocol: { rest: "60–75 sec", tempo: "gecontroleerd", intensity: "RIR 2–3" } },
+    "cable-scaption-cuffs": { weightRange: { min: 0, max: 40, step: 0.5 }, repRange: { min: 1, max: 20 }, protocol: { rest: "45–60 sec", tempo: "3 sec zakken", intensity: "technisch zwaar binnen comfortabele hoogte" } },
+    "rear-delt-fly-machine": { weightRange: { min: 0, max: 100, step: 0.5 }, repRange: { min: 1, max: 20 }, protocol: { rest: "60 sec", tempo: "rustig uit en langzaam terug", intensity: "geen momentum" } },
+    "single-leg-leg-press": { weightRange: { min: 0, max: 220, step: 2.5 }, repRange: { min: 1, max: 15 }, protocol: { rest: "60–75 sec na beide benen", tempo: "gecontroleerd zakken", intensity: "start RIR 3; bouw naar RIR 2" } },
+    "step-up": { weightRange: { min: 0, max: 160, step: 1 }, repRange: { min: 1, max: 15 }, protocol: { rest: "60 sec", tempo: "gecontroleerd omhoog en langzaam terug", intensity: "werkbeen blijft leidend" } },
+    "standing-calf-raise": { weightRange: { min: 0, max: 250, step: 2.5 }, repRange: { min: 1, max: 15 }, protocol: { rest: "60 sec", tempo: "diep en gecontroleerd; volledig omhoog", intensity: "laatste rep 20–30 sec hold" } },
+    "short-lever-copenhagen": { inputType: "seconds", secondsRange: { min: 10, max: 60, step: 5 }, protocol: { rest: "tijdens kantwissel", tempo: "statische hold", intensity: "voorzichtig starten; kan spierpijn geven" } },
+    "iso-elbow-flexion-cuff": { inputType: "weight-seconds", weightRange: { min: 0, max: 60, step: 0.5 }, secondsRange: { min: 15, max: 60, step: 5 }, protocol: { rest: "30–45 sec", tempo: "statische hold", intensity: "week 1–2: 5–6/10; later 7–8/10" } },
+    "slow-cable-elbow-flexion-cuff": { weightRange: { min: 0, max: 60, step: 0.5 }, repRange: { min: 1, max: 20 }, protocol: { rest: "45 sec", tempo: "2 sec omhoog, 1 sec vast, 3 sec omlaag", intensity: "RIR 3–4 naar RIR 2" } },
+    "weighted-wrist-flexion": { weightRange: { min: 0, max: 30, step: 0.5 }, repRange: { min: 1, max: 20 }, protocol: { rest: "45 sec", tempo: "2 sec omhoog, 3–4 sec omlaag", intensity: "maximaal 2/10 bij progressie" } },
+    "pronation-supination-lever": { weightRange: { min: 0, max: 15, step: 0.25 }, repRange: { min: 1, max: 20 }, protocol: { rest: "30–45 sec", tempo: "3 sec per richting", intensity: "korte hefboom als start" } },
+    "face-pull": { weightRange: { min: 0, max: 100, step: 0.5 }, repRange: { min: 1, max: 20 }, protocol: { rest: "45 sec", tempo: "gecontroleerd heen en terug", intensity: "geen momentum of harde grip" } },
+    "half-kneeling-landmine-press": { weightRange: { min: 0, max: 80, step: 0.5 }, repRange: { min: 1, max: 20 }, optional: true, protocol: { rest: "60–90 sec", tempo: "gecontroleerd drukken en zakken", intensity: "RIR 3–4" } },
+    "machine-overhead-press-neutral": { weightRange: { min: 0, max: 120, step: 0.5 }, repRange: { min: 1, max: 20 }, optional: true, protocol: { rest: "60–90 sec", tempo: "2–3 sec zakken", intensity: "start RIR 4; later RIR 2–3" } },
+  };
+
+  const NAMES = {
+    "warmup-bike-walk": "Rustig fietsen of wandelen",
+    "bodyweight-squat": "Bodyweight squat",
+    "glute-bridge": "Glute bridge",
+    "scapular-push-up": "Scapular push-up",
+    "hip-circles": "Gecontroleerde heupcirkels",
+    "arm-circles": "Rustige armcirkels",
+    "wall-slide-unweighted": "Wall slide zonder gewicht",
+    "warmup-set-first-exercise": "Lichte opwarmset eerste oefening",
+    "iso-cable-external-rotation": "Isometrische cable external rotation",
+    "iso-wrist-flexion": "Isometrische polsflexie voor golferselleboog",
+    "hack-squat-or-leg-press": "Hack squat of leg press",
+    "hip-thrust-machine": "Hip thrustmachine",
+    "leg-curl": "Seated of lying leg curl",
+    "bulgarian-split-squat-smith": "Bulgarian split squat in Smith-machine",
+    "seated-calf-raise": "Seated calf raise",
+    "weighted-dead-bug": "Weighted dead bug",
+    "cable-external-rotation-dynamic": "Cable external rotation — dynamisch",
+    "serratus-wall-slide": "Serratus wall slide met foamroller en miniband",
+    "incline-pushup-plus": "Incline push-up plus",
+    "cable-scaption-cuffs": "Cable scaption met polsmanchetten",
+    "rear-delt-fly-machine": "Rear-delt flymachine",
+    "single-leg-leg-press": "Single-leg leg press",
+    "step-up": "Step-up",
+    "standing-calf-raise": "Standing calf raise",
+    "short-lever-copenhagen": "Short-lever Copenhagen plank",
+    "iso-elbow-flexion-cuff": "Isometrische elleboogflexie met kabel en polsmanchet",
+    "slow-cable-elbow-flexion-cuff": "Slow cable elbow flexion met cuff",
+    "weighted-wrist-flexion": "Weighted wrist flexion — langzaam dynamisch",
+    "pronation-supination-lever": "Pronation/supination met hefboom",
+    "face-pull": "Face pull met rope of cuffs",
+    "half-kneeling-landmine-press": "Half-kneeling landmine press",
+    "machine-overhead-press-neutral": "Machine overhead press met neutrale greep",
+    "half-kneeling-hip-flexor-stretch": "Half-kneeling hip-flexor stretch",
+    "couch-stretch": "Couch stretch",
+    "90-90-hip-switches": "90/90 hip switches",
+    "adductor-rock-back": "Adductor rock-back",
+    "dynamic-hamstring-mobility": "Dynamische hamstringmobiliteit",
+    "calf-stretch-straight-knee": "Kuitstretch met gestrekte knie",
+    "calf-stretch-bent-knee": "Kuitstretch met gebogen knie",
+    "open-book-rotation": "Open-book rotatie voor de bovenrug",
+  };
+
+  function exercise(id, planned, block, options = {}) {
+    const meta = EXERCISE_META[id] || {};
+    const details = EXERCISE_DETAILS[id];
+    return {
+      id,
+      name: NAMES[id] || id,
+      planned,
+      block,
+      inputType: options.inputType || meta.inputType || "weight-reps",
+      weightRange: options.weightRange || meta.weightRange || { min: 0, max: 120, step: 0.5 },
+      repRange: options.repRange || meta.repRange || { min: 1, max: 30 },
+      secondsRange: options.secondsRange || meta.secondsRange || { min: 10, max: 120, step: 5 },
+      choices: options.choices || meta.choices || [],
+      protocol: options.protocol || meta.protocol || null,
+      optional: Boolean(options.optional ?? meta.optional),
+      statusLabel: options.statusLabel || "",
+      details,
+      info: details?.why || "Volgens het actieve schema uitvoeren.",
+      tips: details?.cue || "Beweeg gecontroleerd.",
+      warning: details?.painRules?.[0] || "Pas aan bij toenemende pijn.",
+      alternatives: details?.alternatives || [],
+    };
+  }
+
+  const DAY_1_EXERCISES = () => [
+    exercise("warmup-bike-walk", "3 min", "Warming-up"),
+    exercise("bodyweight-squat", "1×8", "Warming-up"),
+    exercise("glute-bridge", "1×8", "Warming-up"),
+    exercise("scapular-push-up", "1×8", "Warming-up"),
+    exercise("hip-circles", "1×5/kant", "Warming-up"),
+    exercise("iso-cable-external-rotation", "3×25–40 sec/kant", "Blok A — Isometrische basis"),
+    exercise("iso-wrist-flexion", "3×30–45 sec/arm", "Blok A — Isometrische basis"),
+    exercise("hack-squat-or-leg-press", "4×5–8", "Blok B — Hoofdkracht"),
+    exercise("hip-thrust-machine", "3×6–10", "Blok C — Heupextensie"),
+    exercise("leg-curl", "3×8–12", "Blok D — Hamstrings"),
+    exercise("bulgarian-split-squat-smith", "2–3×6–10/been", "Blok E — Unilateraal"),
+    exercise("seated-calf-raise", "3×8–12 + 15–25 sec hold", "Blok F — Kuiten"),
+    exercise("weighted-dead-bug", "2–3×6–8/kant", "Core-finisher"),
+  ];
+
+  const DAY_2_EXERCISES = () => [
+    exercise("arm-circles", "1×10/richting", "Warming-up"),
+    exercise("scapular-push-up", "1×8", "Warming-up"),
+    exercise("wall-slide-unweighted", "1×8", "Warming-up"),
+    exercise("warmup-set-first-exercise", "1 lichte set", "Warming-up"),
+    exercise("cable-external-rotation-dynamic", "3×8–15/arm", "Schouderkracht"),
+    exercise("serratus-wall-slide", "3×8–12", "Schouderkracht"),
+    exercise("incline-pushup-plus", "3×8–15", "Schouderkracht"),
+    exercise("cable-scaption-cuffs", "3×10–15", "Schouderkracht"),
+    exercise("rear-delt-fly-machine", "2–3×10–15", "Schouderkracht"),
+  ];
+
+  const DAY_3_EXERCISES = () => [
+    exercise("single-leg-leg-press", "3×6–10/been", "Hardloopkracht"),
+    exercise("step-up", "3×6–10/been", "Hardloopkracht"),
+    exercise("leg-curl", "3×8–12", "Hardloopkracht"),
+    exercise("standing-calf-raise", "3×6–10 + 20–30 sec hold", "Hardloopkracht"),
+    exercise("short-lever-copenhagen", "2×15–30 sec/kant", "Hardloopkracht"),
+  ];
+
+  const DAY_4_EXERCISES = () => [
+    exercise("iso-elbow-flexion-cuff", "3×25–40 sec/arm", "Elleboogflexoren"),
+    exercise("slow-cable-elbow-flexion-cuff", "3×8–12/arm", "Elleboogflexoren"),
+    exercise("weighted-wrist-flexion", "3×8–15/arm", "Golferselleboog"),
+    exercise("pronation-supination-lever", "2–3×8–12/richting/arm", "Onderarmrotatie"),
+    exercise("face-pull", "2–3×10–15", "Schouder"),
+  ];
+
+  function cardio(title, instruction, details) {
     return {
       title,
       instruction,
-      outdoor: options.outdoor || "",
-      notes: options.notes || "",
-      hasFeeling: true,
+      outdoor: details.outdoor,
+      notes: details.notes,
+      totalDuration: details.totalDuration || "ongeveer 30 min",
+      runType: details.runType,
+      rpe: details.rpe,
+      warmup: details.warmup,
+      main: details.main,
+      recovery: details.recovery,
+      cooldown: details.cooldown,
+      incline: details.incline || "0–1%",
+      talkTest: details.talkTest || "Tijdens easy lopen volledige zinnen kunnen spreken.",
+      condition: details.condition || "",
+      alternative: details.alternative || "Bij klachten: volledig easy, korter of run-walk.",
+      goal: details.goal,
+      why: details.why,
+      expectedFeel: details.expectedFeel,
+      technique: details.technique,
+      progression: details.progression,
     };
   }
 
-  function session(number, title, type, exercises, cardioBlock, options = {}) {
-    return {
-      sessionNumber: number,
-      title,
-      type,
-      plannedOffset: Number.isFinite(options.plannedOffset) ? options.plannedOffset : null,
-      goal: options.goal || "",
-      warmup: options.warmup || "500 meter roeien waar dit een gymtraining is.",
-      exercises: exercises || [],
-      cardio: cardioBlock || null,
-      notes: options.notes || "",
-      infoBlocks: options.infoBlocks || [],
-    };
-  }
-
-  function infoBlock(title, text) {
-    return { title, text };
-  }
-
-  function longRunInfo(phaseId, calendarWeek) {
-    if (phaseId === "fase-3") {
-      const base =
-        "Vanaf 75-90 min: oefenen met water en koolhydraten. Vanaf 90 min en langer: gebruik de long run om maag, timing, drinken en energie te testen.";
-      const fastFinish = {
-        33: "Fast finish alleen als alles goed voelt: laatste 10 min naar 10,5 km/u.",
-        34: "Fast finish alleen als alles goed voelt: laatste 10 min naar 10,5-11,0 km/u.",
-        35: "Fast finish alleen als alles goed voelt: laatste 10-15 min naar 10,5-11,0 km/u.",
-        36: "Geen fast finish; bewust lichter.",
-      };
-      return [infoBlock("Voeding/hydratatie", `${base} ${fastFinish[calendarWeek] || "Long run rustig houden."}`)];
+  function runForDay2(programWeek) {
+    if (programWeek <= 2) {
+      return cardio("Easy Run", "30 min volledig easy op RPE 3–4", {
+        runType: "Easy run",
+        rpe: "3–4/10",
+        warmup: "Eerste 5 minuten extra rustig.",
+        main: "Daarna ontspannen easy blijven lopen.",
+        recovery: "Niet nodig; de hele run is easy.",
+        cooldown: "Laatste minuten rustig houden.",
+        outdoor: "Praattempo; volledige zinnen mogelijk.",
+        notes: "Geen verplicht tempo. Loopband 0–1%.",
+        goal: "Loopritme en aerobe basis onderhouden zonder de schoudertraining of heup te overbelasten.",
+        why: "In de kalibratiefase moeten alle runs voorspelbaar en makkelijk blijven.",
+        expectedFeel: "Ontspannen, licht en controleerbaar.",
+        technique: "Schouders los, korte rustige pas, niet stampen en niet achter een tempo aanjagen.",
+        progression: "Week 1–2 blijft volledig easy. Pas vanaf week 3 kunnen conditionele strides worden toegevoegd.",
+      });
     }
-    if (phaseId === "fase-4") {
-      const specifics = {
-        39: "Deze long run bevat 6 km rond MP: 2 blokken van 3 km op 11,8-12,0 km/u. Zie dit als controletraining, niet als wedstrijd.",
-        40: "Cutbackweek: geen marathontempo en geen fast finish. De winst zit in herstellen van week 39.",
-        41: "Progressieve finish: 6–8 km rond MP aan het einde. Bij twijfel steady houden in plaats van forceren.",
-        42: "Belangrijkste generale repetitie: 10–12 km rond MP binnen 28 km. Midweek is bewust lichter gemaakt.",
-        43: "Langste duurloop blijft rustig. Geen verplicht MP; afstand, voeding en mentale hardheid zijn het doel.",
-        44: "Optioneel 6 km MP alleen als week 42 en 43 goed verteerd zijn. Bij vermoeidheid volledig rustig.",
-      };
-      return [
-        infoBlock(
-          "Voeding/hydratatie",
-          `Bij runs langer dan 90 min en 20 km+: oefen water, sportdrank, gelletjes, koolhydraten en timing. Geen verrassingen op marathondag. ${specifics[calendarWeek] || "Long run grotendeels rustig houden."}`
-        ),
-        infoBlock(
-          "Waarom marathontempo in long runs?",
-          "Voor een 3:30-poging geeft het vertrouwen om 11,8-12,0 km/u ook op vermoeide benen te oefenen. Deze blokken vervangen deels midweekse zware marathonpace/intervalbelasting; ze komen er niet zomaar bovenop."
-        ),
-      ];
-    }
-    if (phaseId === "fase-5") {
-      return [infoBlock("Voeding/hydratatie", "Nog een keer marathondag-voeding rustig oefenen. Geen nieuwe producten testen en niet overdrijven.")];
-    }
-    return [];
+    return cardio("Easy Run + ontspannen versnellingen", "25 min easy; 4 × 20 sec ontspannen versnellen; 40 sec rustig joggen tussen versnellingen", {
+      runType: "Easy + strides",
+      rpe: "Easy 3–4/10; versnellingen snel en soepel, niet maximaal",
+      warmup: "Eerste 5 minuten extra rustig binnen de 25 minuten easy.",
+      main: "Na 25 minuten vier versnellingen van 20 seconden.",
+      recovery: "40 seconden rustig joggen tussen de versnellingen.",
+      cooldown: "Na de laatste versnelling rustig eindigen.",
+      outdoor: "Versnel technisch soepel; geen sprint of hard vechten.",
+      notes: "Alleen uitvoeren wanneer de heup twee weken stabiel is. Loopband 0–1%.",
+      condition: "Alleen bij twee weken stabiele heup.",
+      alternative: "Als de heup niet stabiel is: 30 minuten volledig easy of run-walk.",
+      goal: "Looptechniek en lichte snelheid prikkelen zonder zware intervalbelasting.",
+      why: "Vanaf week 3 mag een kleine neuromusculaire prikkel worden toegevoegd als de heupreactie betrouwbaar rustig is.",
+      expectedFeel: "Snel en soepel met ruim controle; niet hijgen of vechten.",
+      technique: "Ontspannen schouders, korte lichte passen, geleidelijk versnellen en vóór vormverlies stoppen.",
+      progression: "Week 3–8 blijft 4 × 20 sec. Maak ze niet langer of maximaal; stabiliteit is de progressie.",
+    });
   }
 
-  function parseLocalDate(iso) {
-    const [year, month, day] = iso.split("-").map(Number);
-    return new Date(year, month - 1, day);
+  function runForDay3(programWeek) {
+    if (programWeek <= 2) {
+      return cardio("Easy Run", "30 min easy op RPE 3–4", {
+        runType: "Easy run",
+        rpe: "3–4/10",
+        warmup: "Eerste 5–8 minuten extra rustig.",
+        main: "Easy blijven lopen.",
+        recovery: "Niet nodig.",
+        cooldown: "Rustig eindigen.",
+        outdoor: "Volledige zinnen kunnen spreken.",
+        notes: "Geen tempo forceren; bij voorste heuppijn easy of run-walk.",
+        goal: "De tweede beenprikkel combineren met voorspelbaar easy loopvolume.",
+        why: "Weken 1–2 kalibreren eerst de reactie op hardloopkracht plus lopen.",
+        expectedFeel: "Makkelijk en technisch beheerst.",
+        technique: "Romp lang, pas rustig, voeten stil neerzetten en niet overstriden.",
+        progression: "Vanaf week 3 volgt pas een gecontroleerde snellere prikkel.",
+      });
+    }
+    if (programWeek <= 4) {
+      return cardio("Gecontroleerde 1-minuutblokken", "8 min easy; 6 × 1 min vlot op RPE 6; na iedere minuut 1 min rustig; 10 min easy", {
+        runType: "Gecontroleerde tempoprikkel",
+        rpe: "Vlotte stukken 6/10; herstel easy",
+        warmup: "8 minuten easy.",
+        main: "6 stukken van 1 minuut vlot op RPE 6.",
+        recovery: "Na ieder vlot stuk 1 minuut rustig.",
+        cooldown: "10 minuten easy.",
+        outdoor: "Geen vaste snelheid; loop op gecontroleerd gevoel.",
+        notes: "Geen maximale intervaltraining.",
+        alternative: "Bij pijn voorin de heup: volledige easy run of run-walk.",
+        goal: "Een eerste gecontroleerde snelheidsprikkel toevoegen zonder maximale intervalstress.",
+        why: "Na twee kalibratieweken wordt de loopbelasting iets specifieker, maar techniek en tolerantie blijven leidend.",
+        expectedFeel: "Stevig maar volledig beheerst; iedere herhaling moet vergelijkbaar blijven.",
+        technique: "Versnel geleidelijk, houd de pas licht en vertraag zodra de houding moet compenseren.",
+        progression: "Week 3–4 hetzelfde protocol. Niet extra herhalingen toevoegen.",
+      });
+    }
+    return cardio("Gecontroleerde 4-minutenblokken", "7 min easy; 3 × 4 min gecontroleerd stevig op RPE 6–7; 2 min easy tussen de blokken; 5 min uitlopen", {
+      runType: "Gecontroleerde tempoprikkel",
+      rpe: "Snelle stukken 6–7/10; geen maximale interval",
+      warmup: "7 minuten easy.",
+      main: "3 stukken van 4 minuten gecontroleerd stevig.",
+      recovery: "2 minuten easy tussen de stukken.",
+      cooldown: "5 minuten rustig uitlopen.",
+      outdoor: "Geen vaste km/u; iedere herhaling technisch beheerst.",
+      notes: "Geen tempo forceren.",
+      alternative: "Bij voorste heuppijn: volledig easy, korter of run-walk.",
+      goal: "Langer gecontroleerd stevig lopen zonder van de training een test te maken.",
+      why: "Weken 5–8 bouwen de duur van de vlotte stukken op, terwijl het totale loopblok rond dertig minuten blijft.",
+      expectedFeel: "Stevig maar herhaalbaar; na het derde stuk nog technisch netjes.",
+      technique: "Romp lang, pasfrequentie soepel, niet sprinten en herstel echt easy.",
+      progression: "Week 5–8 blijft 3 × 4 min. Verbeter controle in plaats van extra snelheid of volume toe te voegen.",
+    });
   }
 
-  function addDays(iso, days) {
-    const date = parseLocalDate(iso);
+  function runForDay4(programWeek) {
+    if (programWeek <= 2) {
+      return cardio("Easy Run", "30 min volledig easy op RPE 3–4", {
+        runType: "Easy run",
+        rpe: "3–4/10",
+        warmup: "Eerste 5 minuten extra rustig.",
+        main: "Volledig easy.",
+        recovery: "Niet nodig.",
+        cooldown: "Rustig eindigen.",
+        outdoor: "Praattempo.",
+        notes: "Geen tijdrit en geen vaste snelheid.",
+        goal: "Een derde rustige loopprikkel toevoegen zonder de armrevalidatie of heup te overbelasten.",
+        why: "In de kalibratiefase is voorspelbare, lage intensiteit belangrijker dan progressie binnen de run.",
+        expectedFeel: "Ontspannen en makkelijk.",
+        technique: "Armen los, schouders laag, natuurlijke pas en rustige ademhaling.",
+        progression: "Vanaf week 3 mag alleen de laatste 10 minuten geleidelijk iets vlotter.",
+      });
+    }
+    return cardio("Gecontroleerde progression run", "20 min easy; laatste 10 min geleidelijk iets vlotter tot maximaal RPE 5–6", {
+      runType: "Progression run",
+      rpe: "Eerste 20 min 3–4/10; einde maximaal 5–6/10",
+      warmup: "Eerste 5 minuten extra rustig binnen de 20 minuten easy.",
+      main: "Na 20 minuten geleidelijk versnellen.",
+      recovery: "Geen losse herstelblokken; versnelling blijft continu en beheerst.",
+      cooldown: "Laatste minuut zo nodig weer iets rustiger.",
+      outdoor: "Geen tijdrit; tempo loopt alleen op zolang de techniek ontspannen blijft.",
+      notes: "Gecontroleerde progression run.",
+      alternative: "Bij vermoeidheid of heuppijn: alle 30 minuten easy of run-walk.",
+      goal: "Leren iets vlotter te eindigen zonder maximale inspanning.",
+      why: "Dit geeft vanaf week 3 een lichte progressieprikkel naast de specifiekere Dag-3-run.",
+      expectedFeel: "Geleidelijk actiever, nooit buiten controle.",
+      technique: "Versnel met pasritme en ontspanning, niet door grote passen of hard duwen.",
+      progression: "Week 3–8 blijft maximaal RPE 5–6. Geen tijds- of tempojacht.",
+    });
+  }
+
+  function phaseIdForProgramWeek(programWeek) {
+    if (programWeek <= 2) return "fase-1";
+    if (programWeek <= 5) return "fase-2";
+    return "fase-3";
+  }
+
+  function isoDatePlusDays(startIso, days) {
+    const [year, month, day] = startIso.split("-").map(Number);
+    const date = new Date(year, month - 1, day);
     date.setDate(date.getDate() + days);
     return [
       date.getFullYear(),
@@ -724,816 +1095,165 @@
     ].join("-");
   }
 
-  function weekDates(calendarWeek) {
-    const offset = (calendarWeek - APP_CONFIG.startCalendarWeek) * 7;
+  function session(programWeek, number, title, type, exercises, cardioBlock, options) {
     return {
-      startDate: addDays(APP_CONFIG.startDate, offset),
-      endDate: addDays(APP_CONFIG.startDate, offset + 6),
+      sessionId: `${APP_CONFIG.planId}_w${programWeek}_d${number}`,
+      sessionNumber: number,
+      title,
+      type,
+      plannedOffset: options.plannedOffset,
+      goal: options.goal,
+      warmup: options.warmup,
+      exercises,
+      cardio: cardioBlock,
+      notes: options.notes,
+      infoBlocks: options.infoBlocks || [],
+      estimatedDuration: options.estimatedDuration,
+      displayExerciseCount: options.displayExerciseCount,
+      strengthPhilosophy: options.strengthPhilosophy,
+      runningPhilosophy: options.runningPhilosophy || "",
+      combinationPhilosophy: options.combinationPhilosophy || "",
+      goodDayAdvice: options.goodDayAdvice,
+      tiredDayAdvice: options.tiredDayAdvice,
+      focusLine: options.focusLine,
+      placementAdvice: options.placementAdvice,
     };
   }
 
-  function makeWeek(phaseId, calendarWeek, label, sessions) {
-    const dates = weekDates(calendarWeek);
+  function sessionsForWeek(programWeek) {
+    const phaseId = phaseIdForProgramWeek(programWeek);
+    const phaseRule = PHASES.find((phase) => phase.phaseId === phaseId)?.rules || "";
+    return [
+      session(programWeek, 1, "Dag 1 — Volledige krachttraining", "kracht + revalidatie", DAY_1_EXERCISES(), null, {
+        plannedOffset: 0,
+        estimatedDuration: "ongeveer 60 min",
+        displayExerciseCount: 8,
+        goal: "Zware beenkracht, peesbelasting, core en een gecontroleerde basisprikkel voor schouders en ellebogen.",
+        warmup: "3 min fietsen/wandelen, 8 squats, 8 glute bridges, 8 scapular push-ups en 5 heupcirkels per kant.",
+        notes: "Grote beenoefeningen technisch zwaar, meestal rond RIR 2; nooit tot spierfalen.",
+        strengthPhilosophy: "De sessie begint met gecontroleerde schouder- en polsflexorholds en bouwt daarna op naar zware beenkracht, heupextensie, hamstrings, unilaterale controle, kuiten en core. Machines en de Smith-opstelling maken substantiële belasting mogelijk zonder onnodige gripbelasting.",
+        goodDayAdvice: "Voer de geplande sets strakker uit en blijf binnen de fase-RIR. Verhoog alleen wanneer de bovengrens technisch goed is gehaald en de vorige reactie rustig was.",
+        tiredDayAdvice: "Verlaag één variabele: gewicht, range, holdduur of sets. Houd de beweging herkenbaar en stop bij scherpe pijn, tintelingen of krachtverlies.",
+        focusLine: "Serieuze belasting verdragen zonder techniek of volgende-ochtendherstel te verliezen.",
+        placementAdvice: "Probeer tussen Dag 1 en Dag 3 minimaal één volledige dag te laten zitten.",
+        infoBlocks: [{ title: "Faseregel", text: phaseRule }],
+      }),
+      session(programWeek, 2, "Dag 2 — Schouderkracht + Easy Run", "hybride", DAY_2_EXERCISES(), runForDay2(programWeek), {
+        plannedOffset: 2,
+        estimatedDuration: "ongeveer 60 min",
+        displayExerciseCount: 5,
+        goal: "Rotator-cuffkracht, serratusfunctie, gecontroleerd duwen, armheffen en achterste-schoudercontrole combineren met een easy run.",
+        warmup: "10 armcirkels per richting, 8 scapular push-ups, 8 wall slides en één lichte opwarmset.",
+        notes: programWeek >= 3 ? "Strides alleen bij twee weken stabiele heup." : "De run blijft volledig easy.",
+        strengthPhilosophy: "External rotation, serratuswerk, push-up plus, scaption en rear delts trainen verschillende functies van de schouder. De schouderbladen mogen natuurlijk bewegen; ze worden niet geforceerd vastgezet.",
+        runningPhilosophy: runForDay2(programWeek).goal,
+        combinationPhilosophy: "De schoudertraining belast de benen nauwelijks. Daardoor kan de easy run erna loopritme toevoegen zonder de zware beendagen direct te stapelen.",
+        goodDayAdvice: "Maak de schouderuitvoering nauwkeuriger. Houd de run easy; conditionele versnellingen blijven soepel en nooit maximaal.",
+        tiredDayAdvice: "Gebruik cuffs, minder range of lichtere kabel. Maak de run volledig easy, korter of run-walk.",
+        focusLine: "Schoudercontrole opbouwen en ontspannen lopen.",
+        placementAdvice: "Standaard op woensdag; verschuiven mag zolang herstel en volgorde logisch blijven.",
+        infoBlocks: [{ title: "Faseregel", text: phaseRule }],
+      }),
+      session(programWeek, 3, "Dag 3 — Hardloopkracht + Hardlopen", "hybride", DAY_3_EXERCISES(), runForDay3(programWeek), {
+        plannedOffset: 4,
+        estimatedDuration: "ongeveer 60 min",
+        displayExerciseCount: 5,
+        goal: "Unilaterale beenkracht, hamstrings, kuiten en adductoren trainen vóór een gecontroleerde loopprikkel.",
+        warmup: "Gebruik de eerste lichte set van de single-leg leg press als technische voorbereiding.",
+        notes: "Bij pijn aan de voorzijde van de heup: volledige easy run of run-walk; geen tempo forceren.",
+        strengthPhilosophy: "De oefeningen leggen een tweede serieuze beenprikkel op éénbenige kracht, bekkencontrole, hamstrings, kuit/Achilles en adductoren. De belasting mag zwaar worden, maar de run moet technisch uitvoerbaar blijven.",
+        runningPhilosophy: runForDay3(programWeek).goal,
+        combinationPhilosophy: "Kracht en lopen staan bewust samen: dit is de specifieke hardloopkrachtdag. Dag 1 ligt minimaal één volledige dag eerder zodat de benen niet zonder herstel opnieuw zwaar worden belast.",
+        goodDayAdvice: "Houd RIR en RPE exact aan. Maak de snelle stukken gelijkmatiger, niet sneller of langer.",
+        tiredDayAdvice: "Verminder krachtvolume en maak de run easy of run-walk. Voorste-heuppijn is geen signaal om tempo te bewijzen.",
+        focusLine: "Sterke benen en technisch gecontroleerde loopbelasting.",
+        placementAdvice: "Houd minimaal één volledige dag tussen Dag 1 en Dag 3.",
+        infoBlocks: [{ title: "Faseregel", text: phaseRule }],
+      }),
+      session(programWeek, 4, "Dag 4 — Ellebogen, brachialis, schouder + Run", "hybride", DAY_4_EXERCISES(), runForDay4(programWeek), {
+        plannedOffset: 6,
+        estimatedDuration: "ongeveer 60 min",
+        displayExerciseCount: 5,
+        goal: "Golfersellebogen, brachialis/elleboogflexoren en schouders progressief belasten en afsluiten met een beheerste run.",
+        warmup: "Eén lichte proefset/hold van de eerste oefening; schouder en pols rustig bewegen.",
+        notes: "De pijnbron rond brachialis/distale biceps kan op afstand niet worden vastgesteld. Geen pull-up-testen binnen dit blok.",
+        strengthPhilosophy: "De cuff scheidt elleboogflexie van harde grip. Isometrische en dynamische flexie, polsflexie en onderarmrotatie bouwen samen de belastbaarheid op; face pulls voegen schouder- en bovenrugcontrole toe.",
+        runningPhilosophy: runForDay4(programWeek).goal,
+        combinationPhilosophy: "De revalidatiekracht vraagt weinig beenvermoeidheid. Daardoor kan de derde run worden toegevoegd zonder een extra zware lower-bodysessie.",
+        goodDayAdvice: "Verhoog alleen volgens hold- of dubbele progressie. De run mag geleidelijk vlotter, maar blijft geen tijdrit.",
+        tiredDayAdvice: "Gebruik cuff, kortere range of lichtere hefboom. Houd de run volledig easy of kies run-walk.",
+        focusLine: "Elleboog- en schouderbelasting opbouwen zonder grip of loopsnelheid te forceren.",
+        placementAdvice: "Standaard op zondag. Houd de run beheerst zodat de nieuwe week niet met restvermoeidheid begint.",
+        infoBlocks: [{ title: "Faseregel", text: phaseRule }],
+      }),
+    ];
+  }
+
+  const WEEK_FOCUS = {
+    1: "Kalibreer techniek, pijnreactie en startgewichten. Alle runs blijven easy en geen enkele oefening hoeft maximaal te voelen.",
+    2: "Bevestig dat de gekozen belasting de volgende ochtend terugkeert naar het oude uitgangsniveau. Nog geen overhead press.",
+    3: "Bouw dynamische weerstand op. Conditionele strides en de eerste 1-minuutblokken verschijnen alleen als de heup stabiel is.",
+    4: "Maak holds stabieler en werk richting RIR 2–3. Een neutrale grip of landmine press is alleen een test na behaalde criteria.",
+    5: "De snellere Dag-3-run groeit naar drie stukken van vier minuten. Controle blijft belangrijker dan tempo.",
+    6: "Grote beenoefeningen en kleine dynamische oefeningen gaan richting RIR 2. Grip mag geleidelijk terugkomen.",
+    7: "Bouw substantiële belastbaarheid op zonder maximale pull-ups, vrije rows of curls te testen.",
+    8: "Rond het fundamentblok technisch sterk af en beoordeel wat stabiel genoeg is voor het nieuwe marathonspecifieke vervolgplan.",
+  };
+
+  const WEEKS = Array.from({ length: 8 }, (_, index) => {
+    const programWeek = index + 1;
+    const calendarWeek = 31 + index;
+    const phaseId = phaseIdForProgramWeek(programWeek);
+    const startDate = isoDatePlusDays(APP_CONFIG.startDate, index * 7);
+    const endDate = isoDatePlusDays(startDate, 6);
     return {
+      planId: APP_CONFIG.planId,
+      planVersion: APP_CONFIG.planVersion,
       phaseId,
+      programWeek,
       calendarWeek,
-      label,
-      startDate: dates.startDate,
-      endDate: dates.endDate,
-      sessions: sessions.map((item, index) => ({ ...item, sessionNumber: index + 1 })),
+      label: `Week ${programWeek}`,
+      startDate,
+      endDate,
+      sessions: sessionsForWeek(programWeek),
+      focus: WEEK_FOCUS[programWeek],
+      attention:
+        "Gebruik de 0–5/10-pijnschaal en controleer de volgende ochtend. Bij duidelijke toename was de totale dosis te groot.",
+      runProgression:
+        programWeek <= 2
+          ? "Alle drie de runs volledig easy."
+          : programWeek <= 4
+            ? "Dag 2 conditionele strides, Dag 3 6 × 1 min vlot en Dag 4 gecontroleerd progressief."
+            : "Dag 2 conditionele strides, Dag 3 3 × 4 min gecontroleerd en Dag 4 gecontroleerd progressief.",
     };
-  }
+  });
 
-  const F1_RUN1 = {
-    22: cardio("Easy Run", "20 min op 9,5 km/u", {
-      outdoor: "20 min rustig, praten in zinnen mogelijk.",
-      notes: "0% incline, optioneel 1%.",
-    }),
-    23: cardio("Easy Run", "25 min op 9,5 km/u", { outdoor: "25 min rustig.", notes: "0% incline, optioneel 1%." }),
-    24: cardio("Easy Run", "25 min op 9,5 km/u", { outdoor: "25 min rustig.", notes: "0% incline, optioneel 1%." }),
-    25: cardio("Easy Run", "30 min op 9,5 km/u", { outdoor: "30 min rustig.", notes: "0% incline, optioneel 1%." }),
-    26: cardio("Easy Run", "25-30 min op 9,5 km/u", { outdoor: "25-30 min rustig.", notes: "0% incline, optioneel 1%." }),
+  const MOBILITY_EXERCISES = [
+    exercise("half-kneeling-hip-flexor-stretch", "2×30–45 sec/kant", "Mobiliteit", { inputType: "none", optional: true, statusLabel: "Optioneel" }),
+    exercise("couch-stretch", "2×30–45 sec/kant", "Mobiliteit", { inputType: "none", optional: true, statusLabel: "Optioneel" }),
+    exercise("90-90-hip-switches", "2×6–10/kant", "Mobiliteit", { inputType: "none", optional: true, statusLabel: "Optioneel" }),
+    exercise("adductor-rock-back", "2×8–12/kant", "Mobiliteit", { inputType: "none", optional: true, statusLabel: "Optioneel" }),
+    exercise("dynamic-hamstring-mobility", "2×8/kant", "Mobiliteit", { inputType: "none", optional: true, statusLabel: "Optioneel" }),
+    exercise("calf-stretch-straight-knee", "2×30 sec/kant", "Mobiliteit", { inputType: "none", optional: true, statusLabel: "Optioneel" }),
+    exercise("calf-stretch-bent-knee", "2×30 sec/kant", "Mobiliteit", { inputType: "none", optional: true, statusLabel: "Optioneel" }),
+    exercise("open-book-rotation", "2×6–8/kant", "Mobiliteit", { inputType: "none", optional: true, statusLabel: "Optioneel" }),
+  ];
+
+  const OVERHEAD_RETURN = {
+    title: "Terugkeer naar overhead press",
+    subtitle: "Optioneel — alleen bij stabiele klachten",
+    conditions: [
+      { id: "shoulder-stable", label: "Schoudertraining verloopt twee weken stabiel" },
+      { id: "pushup-pain", label: "Incline push-up geeft maximaal 2/10 pijn" },
+      { id: "next-morning", label: "Geen extra napijn de volgende ochtend" },
+      { id: "no-weakness", label: "Geen onverwacht krachtverlies" },
+    ],
+    note: "Deze checklist is geen medische goedkeuring. Hij helpt alleen voorkomen dat de terugkeerstap te vroeg als gewone verplichte oefening wordt gezien.",
+    exercises: [
+      exercise("half-kneeling-landmine-press", "2–3×8–12 · RIR 3–4", "Eerste terugkeerstap", { optional: true, statusLabel: "Eerste terugkeerstap" }),
+      exercise("machine-overhead-press-neutral", "start 2×10–12 · RIR 4", "Tweede terugkeerstap", { optional: true, statusLabel: "Na 2 stabiele landmineweken" }),
+    ],
   };
-
-  const F1_RUN2 = {
-    22: cardio("3:30-tempo-intro", "5 min 9,5 km/u; 3 x 2 min 11,5 km/u; 2 min herstel 9,5 km/u na elk snel blok; 5 min uitlopen 9,5 km/u", {
-      outdoor: "Rustig inlopen, 3 korte blokken hard maar gecontroleerd, na elk blok rustig herstellen.",
-    }),
-    23: cardio("3:30-tempo-intro", "5 min 9,5 km/u; 4 x 2 min 11,8 km/u; 2 min herstel 9,5 km/u na elk snel blok; 5 min uitlopen 9,5 km/u", {
-      outdoor: "4 korte blokken op 3:30-tempo-gevoel, stevig maar technisch netjes.",
-    }),
-    24: cardio("3:30-tempo-intro", "5 min 9,5 km/u; 4 x 2 min 12,0 km/u; 2 min herstel 9,5 km/u na elk snel blok; 5 min uitlopen 9,5 km/u", {
-      outdoor: "4 korte snelle blokken, gecontroleerde snelheid, geen test.",
-    }),
-    25: cardio("3:30-tempo-intro", "5 min 9,5 km/u; 3 x 3 min 12,0 km/u; 3 min herstel 9,5 km/u na elk snel blok; 5 min uitlopen 9,5 km/u", {
-      outdoor: "3 blokken van 3 minuten hard maar beheerst, na elk blok rustig herstellen.",
-    }),
-    26: cardio("3:30-tempo-intro", "5 min 9,5 km/u; 4 x 3 min 12,0 km/u; 2 min herstel 9,5 km/u na elk snel blok; 5 min uitlopen 9,5 km/u", {
-      outdoor: "4 blokken van 3 minuten op 3:30-tempo-gevoel, eindigen met iets over.",
-    }),
-  };
-
-  const F2_RUN1 = {
-    27: cardio("Easy Run", "30 min op 9,5 km/u", { outdoor: "30 min rustig, praten in zinnen mogelijk.", notes: "0% incline, optioneel 1%." }),
-    28: cardio("Easy Run", "30 min op 9,5 km/u", { outdoor: "30 min rustig.", notes: "0% incline, optioneel 1%." }),
-  };
-
-  const F2_RUN2 = {
-    27: cardio("3:30 Marathonpace Intro", "8 min 9,5 km/u; 4 x 3 min 11,8-12,0 km/u; 3 min herstel 9,5 km/u na elk blok; 5 min uitlopen 9,5 km/u", {
-      outdoor: "4 blokken van 3 minuten hard maar gecontroleerd, geen sprint.",
-    }),
-    28: cardio("3:30 Marathonpace Intro", "8 min 9,5 km/u; 3 x 5 min 11,8-12,0 km/u; 3 min herstel 9,5 km/u na elk blok; 5 min uitlopen 9,5 km/u", {
-      outdoor: "3 blokken van 5 minuten op 3:30-tempo-gevoel, eindigen met iets over.",
-    }),
-  };
-
-  const F2_RUN3 = {
-    27: cardio("Easy Run", "30 min op 9,5 km/u", { outdoor: "30 min rustig.", notes: "0% incline, optioneel 1%." }),
-    28: cardio("Easy Run", "30-35 min op 9,5 km/u", { outdoor: "30-35 min rustig.", notes: "0% incline, optioneel 1%." }),
-  };
-
-  const F3_RUN1 = {
-    29: cardio("Easy Run", "35 min op 9,5 km/u", { outdoor: "Rustig, praten in zinnen mogelijk." }),
-    30: cardio("Easy Run", "40 min op 9,5 km/u", { outdoor: "Rustig en ontspannen." }),
-    31: cardio("Easy Run", "40 min op 9,5-10,0 km/u", { outdoor: "Rustig, geen tempodruk." }),
-    32: cardio("Easy Run", "45 min op 9,5 km/u", { outdoor: "Ontspannen duurloop." }),
-    33: cardio("Easy Run", "45 min op 9,5-10,0 km/u", { outdoor: "Rustig tot licht actief." }),
-    34: cardio("Easy Run", "50 min op 9,5 km/u", { outdoor: "Rustig, comfortabel." }),
-    35: cardio("Easy Run", "50 min op 9,5-10,0 km/u", { outdoor: "Ontspannen, controle houden." }),
-    36: cardio("Easy Run", "40-45 min op 9,5 km/u", { outdoor: "Bewust iets lichter." }),
-  };
-
-  const F3_RUN2 = {
-    29: cardio("3:30 Marathonpace Run", "8 min 9,5; 5 min 10,5; 3 min 9,5; 3 x 4 min 11,8; 3 min herstel 9,5 tussen blokken; 5 min uitlopen 9,5", { outdoor: "3 korte blokken op 3:30-tempo-gevoel, hard maar gecontroleerd." }),
-    30: cardio("3:30 Marathonpace Run", "8 min 9,5; 6 min 10,5; 3 min 9,5; 3 x 5 min 11,8-12,0; 3 min herstel; 5 min uitlopen", { outdoor: "3 langere blokken op 3:30-tempo-gevoel." }),
-    31: cardio("3:30 Marathonpace Run", "8 min 9,5; 8 min 10,5; 3 min 9,5; 2 x 8 min 11,8-12,0; 4 min herstel; 5 min uitlopen", { outdoor: "2 stevige blokken op 3:30-tempo-gevoel." }),
-    32: cardio("3:30 Marathonpace Run", "8 min 9,5; 8 min 10,5; 3 min 9,5; 3 x 6 min 12,0; 3 min herstel; 5 min uitlopen", { outdoor: "3 blokken op 3:30-tempo-gevoel voor controle, ritme en vertrouwen." }),
-    33: cardio("3:30 Marathonpace Run", "8 min 9,5; 10 min 10,5; 4 min 9,5; 2 x 10 min 11,8-12,0; 4 min herstel; 5 min uitlopen", { outdoor: "2 langere blokken op 3:30-tempo-gevoel, moe maar niet gesloopt." }),
-    34: cardio("3:30 Marathonpace Run", "8 min 9,5; 10 min 10,5-11,0; 4 min 9,5; 15 min 11,8-12,0; 5 min 9,5; 8 min 12,0; 5 min uitlopen", { outdoor: "Een langer blok, herstel, daarna een korter stevig blok." }),
-    35: cardio("3:30 Marathonpace Run", "8 min 9,5; 12 min 10,5-11,0; 4 min 9,5; 20 min 11,8-12,0; 5 min 9,5; 8 min 12,0-12,1; 5 min uitlopen", { outdoor: "Serieuze training met lang blok, herstel en korter stevig blok." }),
-    36: cardio("3:30 Marathonpace Run", "8 min 9,5; 8 min 10,5; 3 min 9,5; 2 x 6 min 11,8-12,0; 3 min herstel; 5 min uitlopen", { outdoor: "Kortere blokken; fris genoeg blijven voor de piekfase." }),
-  };
-
-  const F3_RUN3 = {
-    29: cardio("Long Run", "60 min op 9,5-10,0 km/u", { outdoor: "Rustige duurloop, praten mogelijk." }),
-    30: cardio("Long Run", "70 min op 9,5-10,0 km/u", { outdoor: "Rustig, comfortabel." }),
-    31: cardio("Long Run", "80 min op 9,5-10,0 km/u", { outdoor: "Ontspannen lang lopen." }),
-    32: cardio("Long Run", "90 min op 9,5-10,0 km/u", { outdoor: "Rustig, niet forceren." }),
-    33: cardio("Long Run", "100 min op 9,5-10,0 km/u", { outdoor: "Rustige lange duurloop.", notes: "Optioneel fast finish: laatste 10 min naar 10,5 km/u." }),
-    34: cardio("Long Run", "110 min op 9,5-10,0 km/u", { outdoor: "Lang, beheerst, comfortabel.", notes: "Optioneel fast finish: laatste 10 min naar 10,5-11,0 km/u." }),
-    35: cardio("Long Run", "115-120 min op 9,5-10,0 km/u", { outdoor: "Langste duurloop van deze fase.", notes: "Optioneel fast finish: laatste 10-15 min naar 10,5-11,0 km/u." }),
-    36: cardio("Long Run", "85-90 min op 9,5 km/u", { outdoor: "Lichtere long run.", notes: "Geen fast finish." }),
-  };
-
-  const F4_RUN1 = {
-    37: cardio("Easy Run", "45 min op 9,5-10,0 km/u", { outdoor: "Rustig, praten in zinnen mogelijk." }),
-    38: cardio("Easy Run", "50 min op 9,5-10,0 km/u", { outdoor: "Rustig en ontspannen." }),
-    39: cardio("Easy Run", "50 min op 9,5-10,0 km/u", { outdoor: "Rustig, geen prestatiedruk." }),
-    40: cardio("Easy Run", "40-45 min op 9,5 km/u", { outdoor: "Cutback, extra rustig." }),
-    41: cardio("Easy Run", "55 min op 9,5-10,0 km/u", { outdoor: "Ontspannen duurloop." }),
-    42: cardio("Easy Run", "55-60 min op 9,5-10,0 km/u", { outdoor: "Rustig, comfortabel." }),
-    43: cardio("Easy Run", "45-50 min op 9,5 km/u", { outdoor: "Licht houden." }),
-    44: cardio("Easy Run", "40-45 min op 9,5 km/u", { outdoor: "Rustig, fris blijven." }),
-  };
-
-  const F4_RUN2 = {
-    37: cardio("3:30 Marathonpace Run", "10 min 9,5; 10 min 10,5; 5 min 9,5; 2 x 12 min 11,8-12,0; 5 min herstel; 5 min uitlopen", { outdoor: "2 lange blokken op 3:30-tempo-gevoel." }),
-    38: cardio("3:30 Marathonpace Run", "10 min 9,5; 12 min 10,5-11,0; 5 min 9,5; 15 min 11,8-12,0; 5 min 9,5; 10 min 12,0; 5 min uitlopen", { outdoor: "Lang blok, herstel, daarna korter stevig blok." }),
-    39: cardio("Easy Run + korte strides", "45 min easy op 9,5-10,0 km/u; daarna 4 x 20 sec soepel versnellen; ruim herstel tussendoor", {
-      outdoor: "Rustig lopen, daarna 4 korte soepele versnellingen. Geen zware 12 km/u-blokken deze week.",
-      notes: "Doel: herstel, souplesse en techniek behouden zonder de week te zwaar te maken.",
-    }),
-    40: cardio("3:30 Marathonpace Run", "10 min 9,5; 10 min 10,5; 5 min 9,5; 12 min 11,8-12,0; 5 min uitlopen", { outdoor: "Cutback: korter en gecontroleerd." }),
-    41: cardio("Korte 3:30-marathontempo Run", "10 min easy; 2 x 8 min op 11,8-12,0 km/u; 4 min rustig herstel; verder easy uitlopen", {
-      outdoor: "Maximaal 2 x 8 min op 3:30-marathontempo. Verder easy, geen extra intervalbelasting.",
-      notes: "Korter gehouden omdat de long run deze week al racespecifiek is.",
-    }),
-    42: cardio("Easy Run + korte techniekblokken", "40-45 min easy op 9,5-10,0 km/u; optioneel 4 x 20 sec soepel versnellen", {
-      outdoor: "Rustig en technisch. Geen extra lange marathonpace-run midweek.",
-      notes: "Doel: fris genoeg zijn voor de 28 km generale repetitie.",
-    }),
-    43: cardio("Gecontroleerde kwaliteit", "10 min 9,5; 10 min 10,5-11,0; 5 min 9,5; 3 x 5 min 11,8-12,0; 4 min herstel; 5 min uitlopen", {
-      outdoor: "Niet maximaal. De 30-32 km long run blijft de hoofdprikkel van deze week.",
-    }),
-    44: cardio("Lichtere marathonpace/techniek", "10 min 9,5; 8 min 10,5; 4 min 9,5; 2 x 6 min 11,8-12,0; 4 min herstel; 5 min uitlopen", {
-      outdoor: "Geen zware piektraining. Kort, scherp en gecontroleerd richting taper.",
-    }),
-  };
-
-  const F4_RUN3 = {
-    37: cardio("Tempo / Interval Run", "10 min 9,5; 4 x 3 min 13,0 km/u; 3 min herstel 9,5; 5 min uitlopen", { outdoor: "4 korte snelle blokken, zwaar maar beheerst." }),
-    38: cardio("Tempo / Interval Run", "10 min 9,5; 5 x 3 min 13,0 km/u; 3 min herstel 9,5; 5 min uitlopen", { outdoor: "5 snelle blokken, sneller dan marathontempo maar niet maximaal." }),
-    39: cardio("Easy Run + techniek", "35-45 min easy op 9,5-10,0 km/u; optioneel 4 x 20 sec soepel versnellen", {
-      outdoor: "Zeer lichte techniek/souplesse of easy. Geen zware interval deze week.",
-      notes: "De 24 km long run met MP is de hoofdprikkel.",
-    }),
-    40: cardio("Tempo / Interval Run", "10 min 9,5; 3 x 3 min 12,8-13,0 km/u; 3 min herstel 9,5; 5 min uitlopen", { outdoor: "Cutback: kort en scherp, niet diep gaan." }),
-    41: cardio("Easy Run + korte techniek", "35-45 min easy op 9,5-10,0 km/u; optioneel 4 x 20 sec soepel versnellen", {
-      outdoor: "Geen extra zware interval. Licht houden voor de 26 km progressieve long run.",
-    }),
-    42: cardio("Easy Run + strides", "35-45 min easy op 9,5-10,0 km/u; 4 x 20 sec soepel versnellen; ruim herstel", {
-      outdoor: "Geen zware intervaltraining deze week. Alleen souplesse en ritme.",
-      notes: "Deze prikkel vervangt de zware kwaliteitstraining zodat de long run de hoofdtraining blijft.",
-    }),
-    43: cardio("Easy Run + techniek", "30-45 min easy op 9,5-10,0 km/u; eventueel 4 x 20 sec soepel versnellen", {
-      outdoor: "Licht houden. De langste duurloop is de hoofdtraining.",
-    }),
-    44: cardio("Easy Run", "30-40 min easy op 9,5-10,0 km/u", {
-      outdoor: "Rustig. Geen zware piektraining meer richting taper.",
-    }),
-  };
-
-  const F4_RUN4 = {
-    37: cardio("Long Run", "20 km op 9,5-10,0 km/u", { outdoor: "Lange rustige duurloop." }),
-    38: cardio("Long Run", "22 km op 9,5-10,0 km/u", { outdoor: "Lang en comfortabel." }),
-    39: cardio("Long Run 24 km met 2 × 3 km marathontempo", "10 km rustig op 9,5-10,0; 3 km op 11,8-12,0; 1 km rustig herstel; 3 km op 11,8-12,0; 7 km rustig uitlopen", {
-      outdoor: "24 km totaal met 6 km rond 3:30-marathontempo. Eerste echte marathonpace-long-run.",
-      notes: "Doel: leren dat MP controleerbaar blijft nadat je al een tijdje onderweg bent.",
-    }),
-    40: cardio("Long Run 18-20 km rustig", "18-20 km rustig op 9,5 km/u of ontspannen buitenvariant", {
-      outdoor: "Cutbackweek: volledig rustig, geen marathontempo en geen fast finish.",
-      notes: "Niet compenseren, niet harder maken. Belasting van week 39 verwerken.",
-    }),
-    41: cardio("Long Run 26 km met progressieve finish richting marathontempo", "Standaard: 18 km rustig; 2 km steady op 10,8-11,2; 6 km op 11,8-12,0. Sterker: 16 km rustig; 2 km steady; 8 km op 11,8-12,0", {
-      outdoor: "26 km totaal met 6–8 km rond 3:30-marathontempo aan het einde.",
-      notes: "Als je lichaam niet goed voelt, maak je het progressieve deel steady in plaats van marathontempo.",
-    }),
-    42: cardio("Long Run 28 km met 10–12 km marathontempo", "Standaard: 12 km rustig; 4 km steady op 10,8-11,2; 10 km op 11,8-12,0; 2 km uitlopen. Agressiever: 10 km rustig; 4 km steady; 12 km MP; 2 km uitlopen", {
-      outdoor: "Belangrijkste generale repetitie: 28 km totaal met 10–12 km rond 3:30-marathontempo.",
-      notes: "Geen volledige marathontest, wel een stevige vertrouwenstraining.",
-    }),
-    43: cardio("Long Run 30–32 km rustig", "30–32 km rustig op 9,5-10,0 km/u", {
-      outdoor: "Langste duurloop, geen verplicht marathontempo en geen verplichte fast finish.",
-      notes: "Belasting zit in de afstand: duurvermogen, mentale hardheid, voeding en hydratatie oefenen.",
-    }),
-    44: cardio("Long Run 22–24 km met optioneel 6 km marathontempo", "Standaard: 22–24 km rustig op 9,5-10,0. Optie bij goed herstel: 12–14 km rustig; 6 km op 11,8-12,0; resterend rustig uitlopen", {
-      outdoor: "Geen testweek. Alleen marathontempo toevoegen als week 42 en 43 goed verteerd zijn.",
-      notes: "Bij vermoeidheid volledig rustig houden.",
-    }),
-  };
-
-  const upperA = () => [
-    exercise("Machine Chest Press", "3×6-10"),
-    exercise("Chest-Supported Row Machine", "3×8-12"),
-    exercise("Shoulder Press Machine", "2×8-12"),
-    exercise("Pec Deck of Cable Fly", "2×10-15"),
-    exercise("Rear Delt Fly Machine", "2×12-20"),
-    exercise("Face Pull", "2×12-20"),
-    exercise("Brachialis Rehab — Hammer Curl Isometric Hold", "2×20-30 sec/arm"),
-  ];
-
-  const lowerA = () => [
-    exercise("Leg Press", "3×8-12"),
-    exercise("Hip Thrust Machine", "3×8-12"),
-    exercise("Bulgarian Split Squat", "2×8-10/been"),
-    exercise("Back Extension Machine", "2×10-15"),
-    exercise("Calf Raise", "3×10-15"),
-    exercise("Tibialis Raise tegen de muur", "2-3×15-25"),
-    exercise("Heupmobiliteit", "3-5 min"),
-  ];
-
-  const upperB = () => [
-    exercise("Machine Chest Press of Incline Machine Press", "3×8-12"),
-    exercise("Low Row Machine", "3×8-12"),
-    exercise("Dips", "2×6-10"),
-    exercise("Lateral Raise", "2×12-20"),
-    exercise("Rear Delt Fly Machine", "2×12-20"),
-    exercise("Pallof Press", "2×10-12/kant"),
-    exercise("Brachialis Rehab — Hammer Curl Isometric Hold", "2×20-30 sec/arm"),
-  ];
-
-  const lowerB = () => [
-    exercise("Hack Squat — testblok", "2×8-10"),
-    exercise("Reverse Lunge", "2×8-10/been"),
-    exercise("Leg Extension", "2×10-15"),
-    exercise("Hip Thrust Machine", "2×8-12"),
-    exercise("Calf Raise", "3×10-15"),
-    exercise("Tibialis Raise tegen de muur", "2×15-25"),
-    exercise("Landmine Rotation", "2×8-12/kant"),
-    exercise("Side Plank", "2×30-45 sec/kant"),
-  ];
-
-  const upperC = () => [
-    exercise("Machine Chest Press", "3×6-10"),
-    exercise("Chest-Supported Row Machine", "3×8-12"),
-    exercise("Dumbbell Shoulder Press of Shoulder Press Machine", "2×8-12"),
-    exercise("Cable Fly", "2×10-15"),
-    exercise("Face Pull", "2×12-20"),
-    exercise("External Rotation — elleboog op knie met dumbbell", "2×12-15/kant", {
-      inputType: "weight-reps",
-      weightRange: { min: 0, max: 25, step: 0.5 },
-      info: "Rotator cuff, schoudercontrole en voorkant-schouderklachten voorkomen.",
-      tips: "Licht en technisch.",
-      warning: "Niet zwaar maken.",
-      alternatives: ["Face Pull"],
-    }),
-    exercise("Brachialis Rehab — Hammer Curl Isometric Hold", "2×20-30 sec/arm"),
-  ];
-
-  const lowerC = (core = "Dead Bug") => [
-    exercise("Leg Press", "3×8-12"),
-    exercise("Romanian Deadlift", "2×6-10"),
-    exercise("Walking Lunge", "2×10-12 stappen/been"),
-    exercise("Back Extension Machine", "2×10-15"),
-    exercise("Calf Raise", "3×10-15"),
-    exercise("Tibialis Raise tegen muur", "2-3×15-25"),
-    exercise(core, core === "Side Plank" ? "2×30-45 sec/kant" : "2×8-12/kant"),
-  ];
-
-  const upperD = () => [
-    exercise("Shoulder Press Machine", "3×8-12"),
-    exercise("Low Row Machine", "3×8-12"),
-    exercise("Pec Deck", "2×10-15"),
-    exercise("Dips", "2×6-10"),
-    exercise("Rear Delt Fly Machine", "2×12-20"),
-    exercise("Pallof Press of Cable Woodchop", "2×10-12/kant"),
-    exercise("Brachialis Rehab — Hammer Curl Isometric Hold", "2×20-30 sec/arm"),
-  ];
-
-  const lowerD = () => [
-    exercise("Hack Squat — testblok", "2×8-10"),
-    exercise("Bulgarian Split Squat", "2×8-10/been"),
-    exercise("Hip Thrust Machine", "3×8-12"),
-    exercise("Leg Extension", "2×10-15"),
-    exercise("Calf Raise", "3×10-15"),
-    exercise("Tibialis Raise tegen de muur", "2×15-25"),
-    exercise("Farmer's Carry", "3×30-45 m"),
-    exercise("Ab Wheel of Side Plank", "2 sets"),
-  ];
-
-  const miniStrengthA = () => [
-    exercise("Hip Thrust Machine", "2×8-12"),
-    exercise("Chest-Supported Row Machine", "2×8-12"),
-    exercise("Machine Chest Press", "2×8-12"),
-    exercise("Calf Raise", "2×12-15"),
-    exercise("Tibialis Raise tegen muur", "2×15-25"),
-    exercise("Dead Bug", "2×8-12/kant"),
-    exercise("Brachialis Isometric Hold", "1-2×20-30 sec/arm"),
-  ];
-
-  const miniStrengthB = () => [
-    exercise("Hip Thrust Machine", "2×8-12"),
-    exercise("Machine Chest Press", "2×8-12"),
-    exercise("Rear Delt Fly Machine", "2×12-20"),
-    exercise("Reverse Lunge", "2×8/been"),
-    exercise("Calf Raise", "2×12-15"),
-    exercise("Tibialis Raise tegen muur", "2×15-25"),
-    exercise("Landmine Rotation", "2×8-10/kant"),
-  ];
-
-  const fullBodyA = () => [
-    exercise("Machine Chest Press", "2×8-12"),
-    exercise("Low Row Machine", "2×8-12"),
-    exercise("Hip Thrust Machine", "2×8-12"),
-    exercise("Reverse Lunge", "2×8/been"),
-    exercise("Lateral Raise", "2×12-20"),
-    exercise("Pallof Press", "2×10-12/kant"),
-    exercise("Calf Raise + Tibialis Raise Superset", "2 rondes"),
-    exercise("Brachialis Isometric Hold", "1-2×20-30 sec/arm"),
-  ];
-
-  const fullBodyB = () => [
-    exercise("Machine Chest Press", "2×8-12"),
-    exercise("Chest-Supported Row Machine", "2×8-12"),
-    exercise("Leg Press", "2×8-12"),
-    exercise("Back Extension Machine", "2×10-15"),
-    exercise("Pec Deck of Cable Fly", "2×10-15"),
-    exercise("Landmine Rotation", "2×8-10/kant"),
-    exercise("Side Plank", "2×30-45 sec/kant"),
-    exercise("Calf Raise or Tibialis Raise", "2×15-25", {
-      inputType: "reps-only",
-      info: "Kies wat die week het meest nodig voelt.",
-      tips: "Rustig en gecontroleerd.",
-      warning: "Bij peesgevoeligheid licht houden.",
-      alternatives: ["Calf Raise", "Tibialis Raise"],
-    }),
-  ];
-
-  const preLongSupportA = () => [
-    exercise("Machine Chest Press", "2×8-10"),
-    exercise("Chest-Supported Row Machine", "2×8-10"),
-    exercise("Rear Delt Fly Machine", "2×12-18"),
-    exercise("Face Pull", "2×12-20"),
-    exercise("Pallof Press", "2×10-12/kant"),
-    exercise("Side Plank", "2×30-45 sec/kant"),
-    exercise("Brachialis Isometric Hold", "1-2×20-30 sec/arm"),
-  ];
-
-  const preLongSupportB = () => [
-    exercise("Shoulder Press Machine", "2×8-10"),
-    exercise("Low Row Machine", "2×8-10"),
-    exercise("Pec Deck of Cable Fly", "2×10-15"),
-    exercise("External Rotation — elleboog op knie met dumbbell", "2×12-15/kant", { weightRange: { min: 0, max: 25, step: 0.5 } }),
-    exercise("Dead Bug", "2×8-12/kant"),
-    exercise("Landmine Rotation", "2×8-10/kant"),
-    exercise("Brachialis Rehab — Hammer Curl Isometric Hold", "1-2×20-30 sec/arm"),
-  ];
-
-  const peakLowerA = () => [
-    exercise("Leg Press", "2-3×8-10"),
-    exercise("Hip Thrust Machine", "2-3×8-12"),
-    exercise("Bulgarian Split Squat", "2×8/been"),
-    exercise("Back Extension Machine", "2×10-15"),
-    exercise("Calf Raise", "3×10-15"),
-    exercise("Tibialis Raise tegen muur", "3×15-25"),
-    exercise("Heupmobiliteit", "3-5 min"),
-  ];
-
-  const peakLowerB = () => [
-    exercise("Leg Press of Hack Squat Test", "2-3×8-10"),
-    exercise("Romanian Deadlift", "2×6-8"),
-    exercise("Walking Lunge", "2×10 stappen/been"),
-    exercise("Hip Thrust Machine", "2×8-12"),
-    exercise("Calf Raise", "3×10-15"),
-    exercise("Tibialis Raise tegen muur", "3×15-25"),
-    exercise("Dead Bug", "2×8-12/kant"),
-  ];
-
-  const f5Week45Upper = () => [
-    exercise("Machine Chest Press", "2×8-10"),
-    exercise("Chest-Supported Row Machine", "2×8-10"),
-    exercise("Shoulder Press Machine", "1-2×8-10"),
-    exercise("Rear Delt Fly Machine", "2×12-15"),
-    exercise("Face Pull", "2×12-15"),
-    exercise("Brachialis Isometric Hold", "1-2×20 sec/arm"),
-  ];
-
-  const f5Week45Lower = () => [
-    exercise("Leg Press", "2×8-10"),
-    exercise("Hip Thrust Machine", "2×8-10"),
-    exercise("Back Extension Machine", "1-2×10-12"),
-    exercise("Calf Raise", "2×10-12"),
-    exercise("Tibialis Raise tegen muur", "2×15-20"),
-    exercise("Heupmobiliteit", "3-5 min"),
-  ];
-
-  const f5Week46Full = () => [
-    exercise("Machine Chest Press", "2×8"),
-    exercise("Chest-Supported Row Machine", "2×8"),
-    exercise("Hip Thrust Machine", "1-2×8"),
-    exercise("Rear Delt Fly Machine", "2×12"),
-    exercise("Calf Raise", "2×10"),
-    exercise("Tibialis Raise", "2×15"),
-    exercise("Dead Bug of Side Plank", "1-2 sets", {
-      inputType: "reps-or-seconds",
-      info: "Lichte core. Je moet na afloop beter voelen dan ervoor.",
-      tips: "Rustig en technisch.",
-      warning: "Geen vermoeidheid najagen.",
-      alternatives: ["Dead Bug", "Side Plank"],
-    }),
-  ];
-
-  const activationGym = () => [
-    exercise("Machine Chest Press", "1-2 lichte sets×8"),
-    exercise("Chest-Supported Row Machine", "1-2 lichte sets×8"),
-    exercise("Calf Raise", "1-2 lichte sets×10"),
-    exercise("Tibialis Raise", "1-2 lichte sets×15"),
-    exercise("Dead Bug", "1-2 lichte sets"),
-    exercise("Heupmobiliteit", "3-5 min"),
-  ];
-
-  const f6FullA = () => [
-    exercise("Machine Chest Press", "2×8-10"),
-    exercise("Chest-Supported Row Machine", "2×8-10"),
-    exercise("Leg Press", "2×10"),
-    exercise("Hip Thrust Machine", "2×10"),
-    exercise("Rear Delt Fly Machine", "2×12-15"),
-    exercise("Calf Raise", "1-2×10-12"),
-    exercise("Tibialis Raise", "1-2×15"),
-    exercise("Dead Bug", "2 rustige sets"),
-  ];
-
-  const f6FullB = () => [
-    exercise("Shoulder Press Machine", "2×8-10"),
-    exercise("Low Row Machine or Chest-Supported Row", "2×8-10", {
-      weightRange: { min: 0, max: 140, step: 0.5 },
-      info: "Lichte rugprikkel in week 49.",
-      tips: "Kies de pijnvrije variant.",
-      warning: "Geen zware rows als brachialis of rhomboid reageert.",
-      alternatives: ["Low Row Machine", "Chest-Supported Row Machine"],
-    }),
-    exercise("Back Extension Machine", "2×10-12"),
-    exercise("Pec Deck or Cable Fly", "2×10-12", {
-      weightRange: { min: 0, max: 80, step: 0.5 },
-      info: "Lichte borstaccessoire.",
-      tips: "Rustig en pijnvrij.",
-      warning: "Geen extreme stretch.",
-      alternatives: ["Pec Deck", "Cable Fly"],
-    }),
-    exercise("Reverse Lunge", "1-2×6-8/been"),
-    exercise("Side Plank", "2×20-30 sec/kant"),
-    exercise("Heupmobiliteit", "5 min"),
-  ];
-
-  const f6Week50Upper = () => [
-    exercise("Machine Chest Press", "3×8-10"),
-    exercise("Chest-Supported Row Machine", "3×8-12"),
-    exercise("Shoulder Press Machine", "2×8-10"),
-    exercise("Pec Deck or Cable Fly", "2×10-15", {
-      weightRange: { min: 0, max: 80, step: 0.5 },
-      info: "Borstaccessoire, matig en gecontroleerd.",
-      tips: "Geen extreme stretch.",
-      warning: "Stop bij schouderpijn.",
-      alternatives: ["Pec Deck", "Cable Fly"],
-    }),
-    exercise("Rear Delt Fly Machine", "2×12-15"),
-    exercise("Face Pull", "2×12-15"),
-    exercise("Brachialis Isometric Hold", "1-2×20 sec"),
-  ];
-
-  const f6Week50Lower = () => [
-    exercise("Leg Press", "3×8-10"),
-    exercise("Hip Thrust Machine", "3×8-10"),
-    exercise("Back Extension Machine", "2×10-12"),
-    exercise("Reverse Lunge", "2×8/been"),
-    exercise("Calf Raise", "2-3×10-12"),
-    exercise("Tibialis Raise", "2×15-20"),
-    exercise("Dead Bug", "2 sets"),
-  ];
-
-  function f1Sessions(calendarWeek, variant) {
-    const phaseId = "fase-1";
-    if (variant === "A") {
-      return [
-        session(1, "Upper A + Easy Run", "hybride", upperA(), F1_RUN1[calendarWeek], { phaseId, goal: "Borst, rug en schouders zonder brachialisirritatie + rustige loopbasis." }),
-        session(2, "Lower A — Leg Press Focus", "kracht", lowerA(), null, { phaseId, goal: "Sterke benen en billen, heupcontrole, kuit/tibialis/enkel." }),
-        session(3, "Upper B + 3:30-tempo-intro", "hybride", upperB(), F1_RUN2[calendarWeek], { phaseId, goal: "Upper body + korte blokken richting 3:30-marathontempo." }),
-        session(4, "Lower B — Runner Legs + Core", "kracht", lowerB(), null, { phaseId, goal: "Runner legs, heupcontrole, core, enkels en kuiten." }),
-      ];
-    }
-    return [
-      session(1, "Upper C + Easy Run", "hybride", upperC(), F1_RUN1[calendarWeek], { phaseId, goal: "Upper-variatie + rustige easy run." }),
-      session(2, "Lower C — Posterior Chain + Runner Legs", "kracht", lowerC("Dead Bug"), null, { phaseId, goal: "Benen, billen, hamstrings en posterior chain zonder leg curl." }),
-      session(3, "Upper D + 3:30-tempo-intro", "hybride", upperD(), F1_RUN2[calendarWeek], { phaseId, goal: "Schouders, borst, rug en core + gecontroleerde snelheid." }),
-      session(4, "Lower D — Hack Test + Stability", "kracht", lowerD(), null, { phaseId, goal: "Hack squat testen, single-leg kracht, heupcontrole, enkelstabiliteit en core." }),
-    ];
-  }
-
-  function f2Sessions(calendarWeek) {
-    const phaseId = "fase-2";
-    if (calendarWeek === 27) {
-      return [
-        session(1, "Upper A + Easy Run", "hybride", upperA(), F2_RUN1[27], { phaseId }),
-        session(2, "Lower A — Leg Press Focus", "kracht", lowerA().map((item) => item.id === "tibialis-raise-tegen-de-muur" ? exercise("Tibialis Raise tegen muur", "3×15-25") : item), null, { phaseId }),
-        session(3, "Upper B + 3:30 Marathonpace Intro", "hybride", upperB(), F2_RUN2[27], { phaseId }),
-        session(4, "Easy Run + Mini Strength A", "hybride", miniStrengthA(), F2_RUN3[27], { phaseId, warmup: "Hardlopen mag de warming-up zijn; 500 meter roeien kan ook." }),
-      ];
-    }
-    return [
-      session(1, "Upper C + Easy Run", "hybride", upperC(), F2_RUN1[28], { phaseId }),
-      session(2, "Lower C — Posterior Chain + Runner Legs", "kracht", lowerC("Side Plank").map((item) => item.id === "tibialis-raise-tegen-muur" ? exercise("Tibialis Raise tegen muur", "3×15-25") : item), null, { phaseId }),
-      session(3, "Upper D + 3:30 Marathonpace Intro", "hybride", upperD(), F2_RUN2[28], { phaseId }),
-      session(4, "Easy Run + Mini Strength B", "hybride", miniStrengthB(), F2_RUN3[28], { phaseId, warmup: "Hardlopen mag de warming-up zijn; 500 meter roeien kan ook." }),
-    ];
-  }
-
-  function f3Sessions(calendarWeek) {
-    const phaseId = "fase-3";
-    const isA = [29, 31, 33, 35].includes(calendarWeek);
-    return [
-      session(1, isA ? "Gym 1 — Upper Strength A" : "Gym 1 — Upper Strength B", "kracht", isA ? upperA() : [
-        exercise("Shoulder Press Machine", "3×8-12"),
-        exercise("Machine Chest Press", "3×8-12"),
-        exercise("Chest-Supported Row Machine", "3×8-12"),
-        exercise("Dips", "2×6-10"),
-        exercise("Rear Delt Fly Machine", "2×12-20"),
-        exercise("External Rotation — elleboog op knie met dumbbell", "2×12-15/kant", { weightRange: { min: 0, max: 25, step: 0.5 } }),
-        exercise("Brachialis Rehab — Hammer Curl Isometric Hold", "2×20-30 sec/arm"),
-      ], null, { phaseId }),
-      session(2, "Run 1 — Easy Run", "run", [], F3_RUN1[calendarWeek], { phaseId, warmup: "Rustig starten.", goal: "Rustige kilometers en herstelvermogen." }),
-      session(3, isA ? "Gym 2 — Lower Strength A" : "Gym 2 — Lower Strength B", "kracht", isA ? lowerA().map((item) => item.id === "tibialis-raise-tegen-de-muur" ? exercise("Tibialis Raise tegen de muur", "3×15-25") : item) : [
-        exercise("Leg Press of Hack Squat Test", "3×8-12"),
-        exercise("Romanian Deadlift", "2×6-10"),
-        exercise("Walking Lunge", "2×10-12 stappen/been"),
-        exercise("Hip Thrust Machine", "2×8-12"),
-        exercise("Calf Raise", "3×10-15"),
-        exercise("Tibialis Raise tegen muur", "3×15-25"),
-        exercise("Dead Bug", "2×8-12/kant"),
-      ], null, { phaseId, notes: "Plan lower strength liever niet direct voor de long run." }),
-      session(4, "Run 2 — 3:30 Marathonpace Run", "run", [], F3_RUN2[calendarWeek], { phaseId, warmup: "Rustig inlopen volgens blok.", goal: "12 km/u gecontroleerd leren vasthouden." }),
-      session(5, isA ? "Gym 3 — Upper/Core Support A" : "Gym 3 — Upper/Core Support B", "kracht", isA ? preLongSupportA() : preLongSupportB(), null, { phaseId, notes: "Beensparende onderhoudsprikkel; houd genoeg over voor de long run." }),
-      session(6, "Run 3 — Long Run", "long-run", [], F3_RUN3[calendarWeek], {
-        phaseId,
-        warmup: "Rustig starten.",
-        goal: "Duurvermogen en marathonmotor opbouwen.",
-        infoBlocks: longRunInfo(phaseId, calendarWeek),
-      }),
-    ];
-  }
-
-  function f4Sessions(calendarWeek) {
-    const phaseId = "fase-4";
-    const isA = [37, 39, 41, 43].includes(calendarWeek);
-    const run2 = F4_RUN2[calendarWeek];
-    const run3 = F4_RUN3[calendarWeek];
-    const longRun = F4_RUN4[calendarWeek];
-    const run2Goal = [39, 42].includes(calendarWeek)
-      ? "Herstel, souplesse en techniek bewaren zonder extra zware marathonpace-belasting."
-      : calendarWeek === 41
-        ? "Kort marathontempo vasthouden, maar de week niet stapelen."
-        : "12 km/u steeds normaler laten voelen.";
-    const run3Goal = [39, 41, 42, 43, 44].includes(calendarWeek)
-      ? "Licht houden zodat de long run de hoofdtraining blijft."
-      : "Snelheidsreserve bouwen boven marathontempo.";
-    const lowerNote = calendarWeek === 42
-      ? "Week 42: onderhoudend houden. Geen zware benen maken voor de 28 km generale repetitie."
-      : isA && calendarWeek === 43
-        ? "Week 43: houd lower body kort/licht als je 30–32 km loopt."
-        : "Niet vlak voor de long run plannen.";
-    const fullBodyNote = calendarWeek === 42
-      ? "Optioneel en licht houden. De 28 km long run is deze week de hoofdtraining."
-      : "3e gym is optioneel als herstel goed is. Houd hem compact zodat tempo en long run goed blijven.";
-    return [
-      session(1, isA ? "Gym 1 — Upper Maintenance A" : "Gym 1 — Upper Maintenance B", "kracht", isA ? upperA() : [
-        exercise("Shoulder Press Machine", "2-3×8-12"),
-        exercise("Machine Chest Press", "3×8-12"),
-        exercise("Chest-Supported Row Machine", "3×8-12"),
-        exercise("Dips", "2×6-10"),
-        exercise("Rear Delt Fly Machine", "2×12-20"),
-        exercise("External Rotation — elleboog op knie met dumbbell", "2×12-15/kant", { weightRange: { min: 0, max: 25, step: 0.5 } }),
-        exercise("Brachialis Rehab — Hammer Curl Isometric Hold", "2×20-30 sec/arm"),
-      ], null, { phaseId, goal: "Onderhoud voor borst, rug en schouders." }),
-      session(2, "Run 1 — Easy Run", "run", [], F4_RUN1[calendarWeek], { phaseId, goal: "Rustige kilometers, herstel en aerobe basis." }),
-      session(3, isA ? "Gym 2 — Lower Runner Strength A" : "Gym 2 — Lower Runner Strength B", "kracht", isA ? peakLowerA() : peakLowerB(), null, { phaseId, notes: lowerNote }),
-      session(4, `Run 2 — ${run2.title}`, "run", [], run2, { phaseId, goal: run2Goal }),
-      session(5, isA ? "Gym 3 — Full Body + Core A" : "Gym 3 — Full Body + Core B", "kracht", isA ? fullBodyA() : [
-        exercise("Machine Chest Press", "2×8-12"),
-        exercise("Chest-Supported Row Machine", "2×8-12"),
-        exercise("Leg Press", "2×8-10"),
-        exercise("Back Extension Machine", "2×10-15"),
-        exercise("Pec Deck of Cable Fly", "2×10-15"),
-        exercise("Landmine Rotation", "2×8-10/kant"),
-        exercise("Side Plank", "2×30-45 sec/kant"),
-        exercise("Tibialis Raise", "2×15-25"),
-      ], null, { phaseId, notes: fullBodyNote }),
-      session(6, `Run 3 — ${run3.title}`, "run", [], run3, { phaseId, goal: run3Goal }),
-      session(7, `Run 4 — ${longRun.title}`, "long-run", [], longRun, {
-        phaseId,
-        goal: "Marathonmotor, peesbelasting en energiehuishouding.",
-        infoBlocks: longRunInfo(phaseId, calendarWeek),
-      }),
-    ];
-  }
-
-  function f5Sessions(calendarWeek) {
-    const phaseId = "fase-5";
-    if (calendarWeek === 45) {
-      return [
-        session(1, "Run 1 — Easy Run", "run", [], cardio("Easy Run", "40-45 min op 9,5-10,0 km/u", { outdoor: "Rustige duurloop, praten in zinnen mogelijk.", notes: "0% incline." }), { phaseId }),
-        session(2, "Run 2 — Marathonpace Onderhoud", "run", [], cardio("Marathonpace Onderhoud", "10 min 9,5; 8 min 10,5; 5 min 9,5; 2 x 10 min 11,8-12,0; 5 min herstel; 5 min uitlopen", { outdoor: "2 blokken op marathontempo-gevoel, geen test." }), { phaseId }),
-        session(3, "Run 3 — Korte Scherpte / Tempo Light", "run", [], cardio("Korte Scherpte", "10 min 9,5; 4 x 2 min 12,5-12,8; 3 min herstel; 5 min uitlopen", { outdoor: "4 korte blokken sneller dan marathontempo, wakker en scherp, niet leeg." }), { phaseId }),
-        session(4, "Run 4 — Verkorte Long Run", "long-run", [], cardio("Verkorte Long Run", "16-18 km op 9,5-10,0 km/u", { outdoor: "Rustige lange duurloop, geen fast finish.", notes: "Nog een keer voeding oefenen; geen nieuwe producten." }), {
-          phaseId,
-          infoBlocks: longRunInfo(phaseId, calendarWeek),
-        }),
-        session(5, "Gym 1 — Upper Light Maintenance", "kracht", f5Week45Upper(), null, { phaseId, warmup: "500 meter rustig roeien." }),
-        session(6, "Gym 2 — Lower Light Maintenance", "kracht", f5Week45Lower(), null, { phaseId, warmup: "500 meter rustig roeien.", notes: "Geen Bulgarian split squat of walking lunge als je snel spierpijn krijgt." }),
-      ];
-    }
-    if (calendarWeek === 46) {
-      return [
-        session(1, "Run 1 — Easy Run", "run", [], cardio("Easy Run", "35-40 min op 9,5 km/u", { outdoor: "Rustig lopen, praten in zinnen mogelijk.", notes: "0% incline." }), { phaseId }),
-        session(2, "Run 2 — Korte Marathonpace Prikkel", "run", [], cardio("Korte Marathonpace Prikkel", "10 min 9,5; 5 min 10,5; 4 min 9,5; 2 x 6 min 11,8-12,0; 4 min herstel; 5 min uitlopen", { outdoor: "2 korte blokken op marathontempo-gevoel. Het moet goed voelen, niet zwaar." }), { phaseId }),
-        session(3, "Run 3 — Korte Easy Run met Strides", "run", [], cardio("Easy Run met Strides", "25-30 min op 9,5 km/u; daarna 4 x 20 sec naar 12,5-13,0; 90 sec rustig tussen versnellingen", { outdoor: "25-30 min rustig + 4 korte versnellingen van ongeveer 20 sec, niet sprinten.", notes: "Geen echte long run in week 46." }), { phaseId }),
-        session(4, "Gym 1 — Full Body Light", "kracht", f5Week46Full(), null, {
-          phaseId,
-          warmup: "500 meter rustig roeien.",
-          notes: "Alles licht. Je moet na afloop beter voelen dan ervoor.",
-          infoBlocks: [
-            infoBlock(
-              "Optionele mobility/prehab",
-              "Eventueel tweede korte mobility/prehab-sessie deze week, maar niet nodig. Alleen doen als je je er beter door voelt; geen vermoeidheid of spierpijn maken."
-            ),
-          ],
-        }),
-      ];
-    }
-    return [
-      session(1, "Run 1 — Easy Run + korte prikkel", "run", [], cardio("Easy Run + korte prikkel", "25-30 min op 9,5 km/u; 3 x 1 min op 11,8-12,0; 2 min 9,5 tussen blokken; rustig uitlopen", { outdoor: "Rustig lopen met 3 korte stukjes op marathontempo-gevoel." }), { phaseId, plannedOffset: 0 }),
-      session(2, "Optionele Activatiegym", "kracht", activationGym(), null, { phaseId, plannedOffset: 1, warmup: "5-10 min rustig bewegen of 500 meter roeien.", notes: "Logisch vroeg in marathonweek of vóór de shake-out/marathon. Niet doen als je moe, druk of gespannen bent. Geen dips, zware leg press, RDL of split squats." }),
-      session(3, "Run 2 — Shake-out Run", "run", [], cardio("Shake-out Run", "15-20 min op 9,5 km/u; eventueel 3 x 20 sec rond 11,8-12,5 met veel rust", { outdoor: "15-20 min heel rustig, eventueel 3 korte versnellingen.", notes: "Bij voorkeur 1-3 dagen voor de marathon." }), { phaseId, plannedOffset: 4 }),
-      session(4, "Run 3 — Marathon", "marathon", [], cardio("Marathon", "Zondag 22 november 2026. A-doel richting 3:30, B-doel sterk finishen rond 3:45.", { outdoor: "Start gecontroleerd, ritme vasthouden, voeding/drinken volgens plan. Na 30–32 km pas denken aan vasthouden of voorzichtig versnellen." }), { phaseId, plannedOffset: 6, goal: "Fris aan de start en gecontroleerd lopen." }),
-    ];
-  }
-
-  function f6Sessions(calendarWeek) {
-    const phaseId = "fase-6";
-    if (calendarWeek === 48) {
-      return [
-        session(1, "Herstel — Wandelen en mobiliteit", "herstel", [exercise("Heupmobiliteit", "5-10 min")], cardio("Wandelen / herstel", "1-3 wandelingen van 20-45 min later in de week", { outdoor: "Alles licht. Dag 1-3: wandelen, licht rekken als het goed voelt, geen gym, geen hardlopen." }), { phaseId, warmup: "Rustig bewegen.", goal: "Volledig herstellen van de marathon." }),
-        session(2, "Optionele herstelgym", "kracht", [
-          exercise("Machine Chest Press", "1-2×10"),
-          exercise("Chest-Supported Row Machine", "1-2×10"),
-          exercise("Rear Delt Fly Machine", "1-2×12"),
-          exercise("Dead Bug", "1-2 rustige sets"),
-          exercise("Heupmobiliteit", "5 min"),
-        ], null, { phaseId, warmup: "5-10 min rustig bewegen of 500 meter heel rustig roeien.", notes: "Geen lower body kracht. Geen calf raises als kuiten nog pijnlijk zijn. Geen hardlopen." }),
-        session(3, "Optioneel — heel rustige jog", "run", [], cardio("Heel rustige jog", "Maximaal 15-20 min heel rustig", { outdoor: "Alleen als benen, heupen, kuiten en enkel uitzonderlijk goed voelen.", notes: "Bij voorkeur niet hardlopen in week 48. Geen tempo." }), { phaseId }),
-      ];
-    }
-    if (calendarWeek === 49) {
-      return [
-        session(1, "Gym 1 — Full Body Light A", "kracht", f6FullA(), null, { phaseId, warmup: "500 meter rustig roeien." }),
-        session(2, "Gym 2 — Full Body Light B", "kracht", f6FullB(), null, { phaseId, warmup: "500 meter rustig roeien." }),
-        session(3, "Optionele Gym 3 — Mobility + Pump", "kracht", [
-          exercise("Machine Chest Press", "2 lichte sets"),
-          exercise("Rear Delt Fly Machine", "2 lichte sets"),
-          exercise("Calf Raise", "1-2 lichte sets"),
-          exercise("Tibialis Raise", "1-2 lichte sets"),
-          exercise("Dead Bug or Side Plank", "2 sets", { inputType: "reps-or-seconds" }),
-          exercise("Heupmobiliteit", "5 min"),
-        ], null, { phaseId, notes: "Alleen als je goed hersteld bent." }),
-        session(4, "Easy Run optie", "run", [], cardio("Easy Run", "1-2 easy runs van 20-30 min op 9,5 km/u", { outdoor: "Praten in zinnen mogelijk.", notes: "Geen tempo, intervals of lange duurloop." }), { phaseId }),
-      ];
-    }
-    if (calendarWeek === 50) {
-      return [
-        session(1, "Gym 1 — Upper Light/Moderate", "kracht", f6Week50Upper(), null, { phaseId, warmup: "500 meter roeien." }),
-        session(2, "Gym 2 — Lower Light/Moderate", "kracht", f6Week50Lower(), null, { phaseId, warmup: "500 meter roeien." }),
-        session(3, "Gym 3 — Full Body Moderate", "kracht", [
-          exercise("Machine Chest Press", "2×8-12"),
-          exercise("Low Row Machine", "2×8-12"),
-          exercise("Hip Thrust Machine", "2×8-12"),
-          exercise("Leg Press", "2×8-10"),
-          exercise("Lateral Raise", "2×12-15"),
-          exercise("Pallof Press", "2×10-12/kant"),
-          exercise("Calf Raise + Tibialis Raise Superset", "2 rustige rondes"),
-        ], null, { phaseId }),
-        session(4, "Easy Run optie", "run", [], cardio("Easy Run", "1-2 easy runs van 25-35 min op 9,5 km/u", { outdoor: "Rustig.", notes: "Geen tempo, 12 km/u-blokken of intervals." }), { phaseId }),
-      ];
-    }
-    if (calendarWeek === 51) {
-      return [
-        session(1, "Upper A", "kracht", upperA().map((item) => item.id === "brachialis-rehab-hammer-curl-isometric-hold" ? exercise("Brachialis Rehab — Hammer Curl Isometric Hold", "1-2 sets") : item), null, { phaseId }),
-        session(2, "Lower A", "kracht", [
-          exercise("Leg Press", "3×8-12"),
-          exercise("Hip Thrust Machine", "3×8-12"),
-          exercise("Bulgarian Split Squat", "2×8/been"),
-          exercise("Back Extension Machine", "2×10-15"),
-          exercise("Calf Raise", "3×10-15"),
-          exercise("Tibialis Raise", "2-3×15-25"),
-        ], null, { phaseId, notes: "Bulgarian split squat alleen als bovenbeen/heup goed voelt." }),
-        session(3, "Upper B", "kracht", [
-          exercise("Shoulder Press Machine", "3×8-12"),
-          exercise("Low Row Machine", "3×8-12"),
-          exercise("Machine Chest Press or Pec Deck", "2-3×8-12", {
-            weightRange: { min: 0, max: 150, step: 0.5 },
-            info: "Kies machine chest press of pec deck.",
-            alternatives: ["Machine Chest Press", "Pec Deck"],
-          }),
-          exercise("Dips", "2×6-10"),
-          exercise("Rear Delt Fly Machine", "2×12-20"),
-          exercise("External Rotation", "2×12-15", {
-            weightRange: { min: 0, max: 25, step: 0.5 },
-            info: "Rotator cuff, licht en technisch.",
-          }),
-        ], null, { phaseId }),
-        session(4, "Lower B / Full Body", "kracht", [
-          exercise("Leg Press or Hack Squat Test", "2-3×8-10"),
-          exercise("Romanian Deadlift", "2×6-8"),
-          exercise("Reverse Lunge or Walking Lunge", "2×8-10/been", {
-            weightRange: { min: 0, max: 80, step: 0.5 },
-            info: "Kies reverse lunge of walking lunge.",
-            alternatives: ["Reverse Lunge", "Walking Lunge"],
-          }),
-          exercise("Hip Thrust Machine", "2×8-12"),
-          exercise("Core: Pallof Press / Dead Bug / Side Plank", "2 sets", {
-            inputType: "reps-or-seconds",
-            info: "Kies een corevariant die goed voelt.",
-            alternatives: ["Pallof Press", "Dead Bug", "Side Plank"],
-          }),
-          exercise("Calf/Tibialis", "2 sets", {
-            inputType: "reps-only",
-            info: "Kuit/tibialis onderhoud.",
-            alternatives: ["Calf Raise", "Tibialis Raise"],
-          }),
-        ], null, { phaseId }),
-        session(5, "Easy Run optie", "run", [], cardio("Easy Run", "1-2 easy runs van 25-40 min op 9,5-10,0 km/u", { outdoor: "Rustig.", notes: "Geen intervals." }), { phaseId }),
-      ];
-    }
-    return [
-      session(1, "Upper A", "kracht", upperA().map((item) => item.id === "shoulder-press-machine" ? exercise("Shoulder Press Machine", "2-3×8-12") : item), null, { phaseId }),
-      session(2, "Lower A", "kracht", [
-        exercise("Leg Press", "3×8-12"),
-        exercise("Hip Thrust Machine", "3×8-12"),
-        exercise("Bulgarian Split Squat", "2×8-10/been"),
-        exercise("Back Extension Machine", "2×10-15"),
-        exercise("Calf Raise", "3×10-15"),
-        exercise("Tibialis Raise", "2-3×15-25"),
-        exercise("Heupmobiliteit", "3-5 min"),
-      ], null, { phaseId }),
-      session(3, "Upper B", "kracht", [
-        exercise("Shoulder Press Machine", "3×8-12"),
-        exercise("Low Row Machine", "3×8-12"),
-        exercise("Machine Chest Press or Incline Machine Press", "3×8-12", {
-          weightRange: { min: 0, max: 150, step: 0.5 },
-          info: "Kies machine chest press of incline machine press.",
-          alternatives: ["Machine Chest Press", "Incline Machine Press"],
-        }),
-        exercise("Dips", "2×6-10"),
-        exercise("Rear Delt Fly Machine", "2×12-20"),
-        exercise("External Rotation", "2×12-15", { weightRange: { min: 0, max: 25, step: 0.5 } }),
-        exercise("Brachialis Rehab — Hammer Curl Isometric Hold", "1-2 sets"),
-      ], null, { phaseId }),
-      session(4, "Lower B", "kracht", [
-        exercise("Leg Press or Hack Squat Test", "3×8-12"),
-        exercise("Romanian Deadlift or Back Extension", "2×6-10", {
-          weightRange: { min: 0, max: 180, step: 0.5 },
-          info: "Kies RDL of back extension afhankelijk van onderrug/rhomboid.",
-          alternatives: ["Romanian Deadlift", "Back Extension Machine"],
-        }),
-        exercise("Reverse Lunge or Walking Lunge", "2×8-10/been", {
-          weightRange: { min: 0, max: 80, step: 0.5 },
-          alternatives: ["Reverse Lunge", "Walking Lunge"],
-        }),
-        exercise("Hip Thrust Machine", "2×8-12"),
-        exercise("Calf Raise", "3×10-15"),
-        exercise("Tibialis Raise", "2-3×15-25"),
-        exercise("Core: Pallof / Dead Bug / Side Plank", "2 sets", {
-          inputType: "reps-or-seconds",
-          alternatives: ["Pallof Press", "Dead Bug", "Side Plank"],
-        }),
-      ], null, { phaseId }),
-      session(5, "Easy Run optie", "run", [], cardio("Easy Run", "1-2 rustige runs van 25-45 min op 9,5-10,0 km/u", { outdoor: "Rustig.", notes: "Geen verplichte snelheid. Hardlopen is onderhoud." }), { phaseId }),
-    ];
-  }
-
-  const WEEKS = [
-    makeWeek("fase-1", 22, "Week A", f1Sessions(22, "A")),
-    makeWeek("fase-1", 23, "Week B", f1Sessions(23, "B")),
-    makeWeek("fase-1", 24, "Week A", f1Sessions(24, "A")),
-    makeWeek("fase-1", 25, "Week B", f1Sessions(25, "B")),
-    makeWeek("fase-1", 26, "Week A", f1Sessions(26, "A")),
-    makeWeek("fase-2", 27, "Overgang A", f2Sessions(27)),
-    makeWeek("fase-2", 28, "Overgang B", f2Sessions(28)),
-    ...Array.from({ length: 8 }, (_, i) => {
-      const week = 29 + i;
-      const label = [29, 31, 33, 35].includes(week) ? "Hybride A" : week === 36 ? "Hybride B — lichtere brug" : "Hybride B";
-      return makeWeek("fase-3", week, label, f3Sessions(week));
-    }),
-    ...Array.from({ length: 8 }, (_, i) => {
-      const week = 37 + i;
-      const labels = {
-        37: "Piek A",
-        38: "Piek B",
-        39: "Piek A",
-        40: "Piek B — cutback",
-        41: "Piek A",
-        42: "Piek B",
-        43: "Piek A — zwaarste long-run week",
-        44: "Piek B — brug naar taper",
-      };
-      return makeWeek("fase-4", week, labels[week], f4Sessions(week));
-    }),
-    makeWeek("fase-5", 45, "Taper 1", f5Sessions(45)),
-    makeWeek("fase-5", 46, "Taper 2", f5Sessions(46)),
-    makeWeek("fase-5", 47, "Marathonweek", f5Sessions(47)),
-    makeWeek("fase-6", 48, "Herstelweek", f6Sessions(48)),
-    makeWeek("fase-6", 49, "Herstart kracht", f6Sessions(49)),
-    makeWeek("fase-6", 50, "Opbouw kracht", f6Sessions(50)),
-    makeWeek("fase-6", 51, "Terug naar krachtbasis", f6Sessions(51)),
-    makeWeek("fase-6", 52, "Nieuwe basis", f6Sessions(52)),
-  ];
 
   const TRAINING_PLAN = PHASES.map((phase) => ({
     ...phase,
@@ -1541,6 +1261,17 @@
   }));
 
   window.APP_CONFIG = APP_CONFIG;
+  window.GENERAL_TRAINING_RULES = GENERAL_RULES;
   window.TRAINING_PLAN = TRAINING_PLAN;
   window.TRAINING_WEEKS = WEEKS;
+  window.REHAB_REFERENCE = {
+    mobility: {
+      title: "Mobiliteitsroutine",
+      labels: ["Optioneel", "3–5× per week", "Buiten training", "15–20 min"],
+      intro:
+        "Deze routine ondersteunt bewegingsruimte en controle, maar vervangt de progressieve krachttraining niet. Voer hem buiten de vier hoofdsessies uit.",
+      exercises: MOBILITY_EXERCISES,
+    },
+    overhead: OVERHEAD_RETURN,
+  };
 })();

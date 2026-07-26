@@ -1,7 +1,7 @@
 (function () {
   "use strict";
 
-  const APP_VERSION = "clean-storage-v1";
+  const APP_VERSION = "rehab-foundation-2026-07-27-v1";
   const APP_SCOPE = "/marathon-330/";
   const STORAGE_KEY = "marathon330TrainingAppData_v1";
   const STORAGE = {
@@ -27,6 +27,10 @@
   const weeks = window.TRAINING_WEEKS || [];
   const phases = window.TRAINING_PLAN || [];
   const config = window.APP_CONFIG || {};
+  const rehabReference = window.REHAB_REFERENCE || {};
+  const generalTrainingRules = window.GENERAL_TRAINING_RULES || {};
+  const ACTIVE_PLAN_ID = config.planId || "rehab_foundation_2026_07_27";
+  const ACTIVE_PLAN_VERSION = Number(config.planVersion) || 1;
   const MARATHON_DATE = "2026-11-22";
   const VIEWS = {
     TODAY: "today",
@@ -226,6 +230,8 @@
       meta: {
         lastMigrationAt: null,
         storageInitialized: true,
+        activePlanId: ACTIVE_PLAN_ID,
+        activePlanVersion: ACTIVE_PLAN_VERSION,
       },
     };
   }
@@ -237,9 +243,31 @@
   function validateAppData(raw) {
     const source = isPlainObject(raw) ? { ...raw } : createEmptyAppData();
     const createdAt = source.createdAt || new Date().toISOString();
-    const workoutLogs = normalizeLogs(source.workoutLogs || source.logs || {});
-    const runLogs = Array.isArray(source.runLogs) ? source.runLogs.filter(isPlainObject) : workoutLogs.cardio.slice();
-    const completedSessions = normalizeCompleted(source.completedSessions || source.completed);
+    const rawWorkoutLogs = normalizeLogs(source.workoutLogs || source.logs || {});
+    const withPlanMetadata = (entry) => ({
+      ...entry,
+      planId: entry.planId || (String(entry.sessionKey || entry.sessionId || "").startsWith(ACTIVE_PLAN_ID) ? ACTIVE_PLAN_ID : "legacy_marathon_plan"),
+      planVersion: Number(entry.planVersion) || 1,
+      sessionId: entry.sessionId || entry.sessionKey || "",
+    });
+    const separateRunLogs = Array.isArray(source.runLogs) ? source.runLogs.filter(isPlainObject).map(withPlanMetadata) : [];
+    const cardioByIdentity = new Map();
+    [...rawWorkoutLogs.cardio.map(withPlanMetadata), ...separateRunLogs].forEach((entry, index) => {
+      const parts = [
+        entry.sessionKey || entry.sessionId || "run",
+        entry.date || "",
+        entry.loggedAt || "",
+        entry.cardioFeeling || "",
+      ];
+      const identity = parts.some((part, partIndex) => partIndex > 0 && part) ? parts.join("|") : `run|${index}`;
+      cardioByIdentity.set(identity, entry);
+    });
+    const workoutLogs = {
+      strength: rawWorkoutLogs.strength.map(withPlanMetadata),
+      cardio: [...cardioByIdentity.values()],
+    };
+    const runLogs = workoutLogs.cardio.slice();
+    const completedSessions = normalizeCompleted(source.completedSessions || source.completed).map(withPlanMetadata);
     return {
       ...source,
       appDataVersion: Number(source.appDataVersion) || APP_DATA_VERSION,
@@ -258,6 +286,8 @@
         ...(isPlainObject(source.meta) ? source.meta : {}),
         storageInitialized: true,
         lastMigrationAt: source.meta?.lastMigrationAt || null,
+        activePlanId: ACTIVE_PLAN_ID,
+        activePlanVersion: ACTIVE_PLAN_VERSION,
       },
     };
   }
@@ -321,7 +351,6 @@
   function ensureCleanStorageStart() {
     try {
       if (localStorage.getItem(STORAGE.appData)) return;
-      removeLegacyStorageKeys();
       createFreshAppData();
     } catch (error) {
       console.warn("Schone storage-start kon niet worden uitgevoerd:", error);
@@ -344,7 +373,6 @@
     }
 
     if (!rawAppData) {
-      removeLegacyStorageKeys();
       const fresh = saveAppData(createEmptyAppData(), { touchUpdatedAt: false, status: "empty-created" });
       lastStorageStatus = { ...lastStorageStatus, status: "empty-created", error: null, lastLoadedAt: new Date().toISOString(), lastSavedAt: fresh.updatedAt };
       debugStorage({
@@ -657,6 +685,13 @@
     return Math.max(0, Math.min(rawIndex, weeks.length - 1));
   }
 
+  function scheduleAwareDateIso(date = today()) {
+    const dateIso = toIsoDate(date);
+    if (!weeks.length) return dateIso;
+    if (dateIso < weeks[0].startDate) return weeks[0].startDate;
+    return dateIso;
+  }
+
   function getWeekByIndex(index) {
     return weeks[Math.max(0, Math.min(index, weeks.length - 1))];
   }
@@ -666,7 +701,7 @@
   }
 
   function sessionKey(week, session) {
-    return `week-${week.calendarWeek}:session-${session.sessionNumber}`;
+    return session?.sessionId || `${ACTIVE_PLAN_ID}:week-${week.calendarWeek}:session-${session.sessionNumber}`;
   }
 
   function isCompleted(key) {
@@ -689,8 +724,12 @@
     const completed = getCompleted();
     if (!completed.some((item) => item.sessionKey === key)) {
       completed.push({
+        planId: ACTIVE_PLAN_ID,
+        planVersion: ACTIVE_PLAN_VERSION,
         sessionKey: key,
+        sessionId: session.sessionId || key,
         week: week.calendarWeek,
+        programWeek: week.programWeek || null,
         phase: week.phaseId,
         session: session.sessionNumber,
         title: session.title,
@@ -721,8 +760,12 @@
       const found = findSessionByKey(key);
       if (!found) return;
       completed.push({
+        planId: ACTIVE_PLAN_ID,
+        planVersion: ACTIVE_PLAN_VERSION,
         sessionKey: key,
+        sessionId: found.session.sessionId || key,
         week: found.week.calendarWeek,
+        programWeek: found.week.programWeek || null,
         phase: found.week.phaseId,
         session: found.session.sessionNumber,
         title: found.session.title,
@@ -812,6 +855,9 @@
   function todayViewContext() {
     const realTodayIso = toIsoDate(today());
     const selectedIso = state.selectedDateIso || realTodayIso;
+    if (weeks.length && selectedIso > weeks[weeks.length - 1].endDate) {
+      return { week: weeks[weeks.length - 1], session: null, dateIso: selectedIso, afterPlan: true };
+    }
     if (state.selectedSessionKey) {
       const found = findSessionByKey(state.selectedSessionKey);
       if (found) return { ...found, dateIso: selectedIso };
@@ -825,8 +871,21 @@
   function moveTodaySelection(direction) {
     const context = todayViewContext();
     const items = flatSessions();
+    if (context.afterPlan) {
+      if (direction < 0 && items.length) {
+        const previous = items[items.length - 1];
+        state.selectedSessionKey = previous.key;
+        state.selectedDateIso = plannedDateForSession(previous.week, previous.session);
+      }
+      return;
+    }
     const currentKey = context.session ? sessionKey(context.week, context.session) : `week-${context.week.calendarWeek}:session-${context.week.sessions.length}`;
     const currentIndex = Math.max(0, items.findIndex((item) => item.key === currentKey));
+    if (direction > 0 && currentIndex === items.length - 1) {
+      state.selectedSessionKey = null;
+      state.selectedDateIso = toIsoDate(addDays(parseLocalDate(config.endDate), 1));
+      return;
+    }
     const next = items[Math.max(0, Math.min(items.length - 1, currentIndex + direction))];
     if (!next) return;
     state.selectedSessionKey = next.key;
@@ -835,7 +894,7 @@
 
   function resetTodaySelection() {
     state.selectedSessionKey = null;
-    state.selectedDateIso = toIsoDate(today());
+    state.selectedDateIso = scheduleAwareDateIso();
   }
 
   function goHomeToday() {
@@ -917,17 +976,14 @@
 
   function phaseFocus(phaseId) {
     const focus = {
-      "fase-1": "Rustig beginnen. De basis leggen. Nog niet bewijzen, maar bouwen.",
-      "fase-2": "Drie runs per week normaal laten voelen zonder te forceren.",
-      "fase-3": "Long runs en 12 km/u als werktempo opbouwen.",
-      "fase-4": "Marathonspecifiek trainen: tempo leren vasthouden op vermoeide benen.",
-      "fase-5": "Fris worden, scherp blijven en geen vermoeidheid meer verzamelen.",
-      "fase-6": "Herstellen, rustig bewegen en opnieuw opbouwen.",
+      "fase-1": "Techniek, pijnreactie en startgewichten kalibreren. Alle runs blijven easy.",
+      "fase-2": "Dynamische weerstand verhogen en één gecontroleerde snellere loopprikkel toevoegen.",
+      "fase-3": "Substantiële belastbaarheid opbouwen en terugkeer naar normale druk- en trekbewegingen voorbereiden.",
     };
     return focus[phaseId] || "Consistent trainen en slim herstellen.";
   }
 
-  function milestoneDefinitions() {
+  function legacyMilestoneDefinitions() {
     return [
       {
         key: "phase-1-start",
@@ -1077,6 +1133,79 @@
     ];
   }
 
+  function milestoneDefinitions() {
+    return [
+      {
+        key: "rehab-plan-start",
+        week: 31,
+        triggerDate: "2026-07-27",
+        type: "phase-start",
+        phaseId: "fase-1",
+        label: "Fase-update",
+        title: "Start herstel- en fundamentprogramma",
+        intro: "Vandaag begint het nieuwe achtweekse blok met serieuze krachttraining, progressieve revalidatie en gecontroleerd hardlopen.",
+        change: "Vier sessies per week: één volledige krachttraining en drie combinaties van ongeveer 30 minuten kracht/revalidatie plus 30 minuten lopen.",
+        running: "Alle drie de runs blijven de eerste twee weken volledig easy op RPE 3–4.",
+        strength: "Zoek technisch sterke startgewichten. Grote beenoefeningen mogen stevig zijn; dynamische revalidatie blijft rond RIR 3–4.",
+        rehab: "Houd isometrische oefeningen op 5–6/10 en beoordeel steeds de reactie dezelfde dag en de volgende ochtend.",
+        nutrition: "Normaal en voldoende eten, genoeg eiwit en nog geen ingewikkelde marathonvoeding.",
+        focus: "Kalibreer eerst; bewijs niets met pijn of falen.",
+        actions: ["week", "phase", "nutritionPhase"],
+      },
+      {
+        key: "rehab-load-start",
+        week: 33,
+        triggerDate: "2026-08-10",
+        type: "phase-start",
+        phaseId: "fase-2",
+        label: "Fase-update",
+        title: "Fase 2 — Belasting opbouwen",
+        intro: "De techniek en eerste reactie zijn gekalibreerd. Nu wordt de weerstand doelgericht verhoogd.",
+        change: "Dynamische oefeningen gaan richting RIR 2–3 en holds naar 30–40 seconden op 6–7/10.",
+        running: "Dag 3 krijgt een gecontroleerde snellere prikkel. Strides op Dag 2 alleen als de heup twee weken stabiel is.",
+        strength: "Verhoog pas na de bovengrens met goede techniek. Landmine press is alleen een voorwaardelijke terugkeerstap.",
+        rehab: "Cuff-curls worden zwaarder; een losse neutrale grip mag alleen worden getest als de elleboog rustig blijft.",
+        nutrition: "Neem iets bewuster koolhydraten rond de snellere run en hybride trainingen.",
+        focus: "Meer belasting verdragen zonder de volgende-ochtendregel te verliezen.",
+        actions: ["week", "phase", "nutritionPhase"],
+      },
+      {
+        key: "rehab-strength-start",
+        week: 36,
+        triggerDate: "2026-08-31",
+        type: "phase-start",
+        phaseId: "fase-3",
+        label: "Fase-update",
+        title: "Fase 3 — Sterkte en terugkeer voorbereiden",
+        intro: "De laatste drie weken richten zich op substantiële belastbaarheid en gecontroleerde terugkeer naar normale bewegingen.",
+        change: "Grote beenoefeningen en kleine dynamische oefeningen gaan meestal richting RIR 2; holds naar 7–8/10.",
+        running: "Dag 3 bevat drie gecontroleerde stukken van vier minuten. De andere runs blijven beheerst.",
+        strength: "Grip mag geleidelijk terugkomen. Machine overhead press alleen na twee probleemloze landmineweken.",
+        rehab: "Geen maximale pull-ups, zware vrije rows of maximale gewone curls binnen dit blok.",
+        nutrition: "Voldoende koolhydraten en eiwit; niet agressief cutten als herstel daardoor verslechtert.",
+        focus: "Sterker worden zonder de terugkeercriteria over te slaan.",
+        actions: ["week", "phase", "nutritionPhase"],
+      },
+      {
+        key: "rehab-block-complete",
+        week: 39,
+        triggerDate: "2026-09-21",
+        type: "key-week",
+        phaseId: "fase-3",
+        label: "Mijlpaal",
+        title: "Achtweekse blok afgerond",
+        intro: "Het herstel- en fundamentprogramma is afgerond. De actieve planning stopt hier bewust.",
+        change: "Voor de resterende periode richting de marathon is een nieuw vervolgschema nodig.",
+        running: "Drie runs van ongeveer dertig minuten zijn nog geen volledige voorbereiding op 42,2 km. Een langere duurloop moet in het vervolgplan terugkomen.",
+        strength: "Beoordeel welke belastingen stabiel zijn en welke terugkeerstappen nog niet klaar zijn.",
+        rehab: "Gebruik de resultaten van deze acht weken om het vervolg te doseren; test niet ineens alle oude oefeningen maximaal.",
+        nutrition: "Stem voeding opnieuw af zodra langere duurlopen en marathonspecifieke trainingen beginnen.",
+        focus: "Eerst evalueren, daarna pas het nieuwe vervolgblok starten.",
+        actions: ["phase", "nutritionPhase"],
+      },
+    ];
+  }
+
   function getMilestoneForDate(dateIso) {
     return milestoneDefinitions().find((item) => item.triggerDate === dateIso) || null;
   }
@@ -1118,15 +1247,16 @@
 
   function resultText(entry) {
     if (!entry) return "nog geen data";
+    const variantPrefix = entry.selectedVariant ? `${entry.selectedVariant}: ` : "";
     if (Number(entry.selectedWeight) > 0 && Number(entry.selectedReps) > 0) {
-      return `${entry.selectedReps} × ${formatNumber(entry.selectedWeight)} kg`;
+      return `${variantPrefix}${entry.selectedReps} × ${formatNumber(entry.selectedWeight)} kg`;
     }
-    if (Number(entry.selectedSeconds) > 0) return `${entry.selectedSeconds} sec`;
-    if (Number(entry.selectedMinutes) > 0) return `${entry.selectedMinutes} min`;
+    if (Number(entry.selectedSeconds) > 0) return `${variantPrefix}${entry.selectedSeconds} sec`;
+    if (Number(entry.selectedMinutes) > 0) return `${variantPrefix}${entry.selectedMinutes} min`;
     if (Number(entry.selectedDistance) > 0 && Number(entry.selectedWeight) > 0) {
-      return `${entry.selectedDistance} m × ${formatNumber(entry.selectedWeight)} kg`;
+      return `${variantPrefix}${entry.selectedDistance} m × ${formatNumber(entry.selectedWeight)} kg`;
     }
-    if (Number(entry.selectedReps) > 0) return `${entry.selectedReps} reps`;
+    if (Number(entry.selectedReps) > 0) return `${variantPrefix}${entry.selectedReps} reps`;
     return "nog geen data";
   }
 
@@ -1180,6 +1310,9 @@
   }
 
   function runCardSummary(session, cardioBlock) {
+    if (cardioBlock.totalDuration || cardioBlock.runType) {
+      return `${cardioBlock.totalDuration || "ongeveer 30 min"} · ${cardioBlock.runType || "hardlopen"}`;
+    }
     const kind = runKind(session, cardioBlock);
     const source = `${cardioBlock.title} ${cardioBlock.instruction}`;
     const km = source.match(/(?:^|[^\d,])(\d+(?:[–-]\d+)?)\s*km(?!\/u)/i);
@@ -1250,6 +1383,26 @@
   }
 
   function renderRunDetails(session, cardioBlock) {
+    if (cardioBlock.runType || cardioBlock.rpe || cardioBlock.warmup || cardioBlock.main) {
+      const rows = [
+        ["Type", cardioBlock.runType],
+        ["Duur en intensiteit", `${cardioBlock.totalDuration || "ongeveer 30 min"}${cardioBlock.rpe ? ` · RPE ${cardioBlock.rpe.replace(/^\s*RPE\s*/i, "")}` : ""}`],
+        ["Warming-up", cardioBlock.warmup],
+        ["Hoofddeel", cardioBlock.main],
+        ["Herstel", cardioBlock.recovery],
+        ["Cooling-down", cardioBlock.cooldown],
+        ["Loopband", cardioBlock.incline ? `Incline ${cardioBlock.incline}; snelheid op gevoel, niet op een verplicht getal.` : ""],
+        ["Buiten", cardioBlock.outdoor],
+        ["Praattest", cardioBlock.talkTest],
+        ["Voorwaarde", cardioBlock.condition],
+        ["Bij klachten", cardioBlock.alternative],
+      ].filter(([, value]) => value);
+      return `
+        <div class="run-detail-grid">
+          ${rows.map(([label, value]) => `<div class="run-detail-row"><span>${label}</span><p>${value}</p></div>`).join("")}
+        </div>
+      `;
+    }
     const kind = runKind(session, cardioBlock);
     const parts = String(cardioBlock.instruction || "")
       .split(";")
@@ -1304,10 +1457,10 @@
   }
 
   function sessionSummary(session) {
-    const strengthCount = session.exercises.length;
+    const strengthCount = Number(session.displayExerciseCount) || session.exercises.length;
     const runCount = session.cardio ? 1 : 0;
     const parts = [];
-    if (strengthCount) parts.push(`${strengthCount} ${strengthCount === 1 ? "krachtoefening" : "krachtoefeningen"}`);
+    if (strengthCount) parts.push(`${strengthCount} ${strengthCount === 1 ? "hoofdonderdeel" : "hoofdonderdelen"}`);
     if (runCount) parts.push("1 run");
     if (!parts.length) parts.push(`${Math.max(1, strengthCount + runCount)} onderdeel`);
     return `${parts.join(" + ")} · ${estimatedSessionDuration(session)}`;
@@ -1389,11 +1542,12 @@
   }
 
   function runKind(session, cardioBlock) {
-    const text = `${session.title} ${cardioBlock.title} ${cardioBlock.instruction}`.toLowerCase();
+    const text = `${session.title} ${cardioBlock.title} ${cardioBlock.runType || ""} ${cardioBlock.instruction}`.toLowerCase();
     if (session.type === "long-run" || text.includes("long run")) return "long";
     if (session.type === "marathon") return "marathon";
     if (text.includes("shake-out")) return "shakeout";
-    if (text.includes("stride")) return "strides";
+    if (text.includes("stride") || text.includes("versnelling")) return "strides";
+    if (text.includes("progression") || text.includes("tempoprikkel") || text.includes("vlot")) return "tempo";
     if (text.includes("marathonpace") || text.includes("3:30") || text.includes("11,8") || text.includes("12,0")) return "mp";
     if (text.includes("interval") || text.includes("tempo / interval") || text.includes("13,0") || text.includes("12,8")) return "tempo";
     return "easy";
@@ -1468,6 +1622,16 @@
     }[kind];
     return {
       ...base,
+      goal: cardioBlock.goal || base.goal,
+      tempo: cardioBlock.rpe
+        ? `${cardioBlock.rpe}. Gebruik de praattest en techniek; er is in dit herstelblok geen verplichte km/u.`
+        : base.tempo,
+      incline: cardioBlock.incline ? `${cardioBlock.incline}. Kies alleen een helling die klachten en techniek niet verslechtert.` : base.incline,
+      good: cardioBlock.progression || base.good,
+      tired: cardioBlock.alternative || base.tired,
+      technique: cardioBlock.technique || base.technique,
+      why: cardioBlock.why || base.why,
+      expectedFeel: cardioBlock.expectedFeel || "",
       phase: phaseFocus(week.phaseId),
     };
   }
@@ -1484,6 +1648,7 @@
           <p><strong>Als je je goed voelt:</strong> ${info.good}</p>
           <p><strong>Als je moe bent:</strong> ${info.tired}</p>
           <p><strong>Techniek:</strong> ${info.technique}</p>
+          ${info.expectedFeel ? `<p><strong>Verwacht gevoel:</strong> ${info.expectedFeel}</p>` : ""}
           <p><strong>Waarom vandaag:</strong> ${info.why}</p>
         </div>
       </details>
@@ -1504,18 +1669,32 @@
   }
 
   function renderSessionBlocks(session, key, week, mode, dateIso) {
+    const exerciseGroups = [];
+    (session.exercises || []).forEach((exercise) => {
+      const label = exercise.block || "Oefeningen";
+      const current = exerciseGroups[exerciseGroups.length - 1];
+      if (current?.label === label) current.items.push(exercise);
+      else exerciseGroups.push({ label, items: [exercise] });
+    });
+    const displayCount = Number(session.displayExerciseCount) || session.exercises.length;
     const strength = session.exercises.length
       ? `
         <section class="training-section strength-section">
         <div class="section-title section-title-strong">
           <div>
-            <h2>Krachttraining</h2>
-            <p>${session.exercises.length} ${session.exercises.length === 1 ? "oefening" : "oefeningen"}</p>
+            <h2>Kracht en revalidatie</h2>
+            <p>${displayCount} ${displayCount === 1 ? "hoofdonderdeel" : "hoofdonderdelen"}${session.exercises.length > displayCount ? " + klikbare warming-up" : ""}</p>
           </div>
         </div>
-        <section class="exercise-list">
-          ${session.exercises.map((item) => renderExercise(item, key, week, session, mode, dateIso)).join("")}
-        </section>
+        ${exerciseGroups
+          .map(
+            (group) => `
+              <section class="exercise-block-group">
+                <h3 class="exercise-block-title">${group.label}</h3>
+                <div class="exercise-list">${group.items.map((item) => renderExercise(item, key, week, session, mode, dateIso)).join("")}</div>
+              </section>`
+          )
+          .join("")}
         </section>
       `
       : "";
@@ -1544,11 +1723,13 @@
 
   function exerciseControls(exercise, log) {
     const type = exercise.inputType;
+    if (type === "none") return "";
     const weight = log?.selectedWeight ?? "";
     const reps = log?.selectedReps ?? "";
     const seconds = log?.selectedSeconds ?? "";
     const minutes = log?.selectedMinutes ?? "";
     const distance = log?.selectedDistance ?? "";
+    const variant = log?.selectedVariant ?? "";
     const makeSelect = (kind, label, optionHtml) => `
       <div class="field">
         <label>${label}</label>
@@ -1557,25 +1738,36 @@
         </select>
       </div>`;
 
+    const choiceField = Array.isArray(exercise.choices) && exercise.choices.length
+      ? `<div class="field choice-field">
+          <label>Variant</label>
+          <select data-log-field="variant" data-exercise-id="${exercise.id}" autocomplete="off">
+            ${[`<option value="">Kies variant</option>`]
+              .concat(exercise.choices.map((item) => `<option value="${escapeAttr(item)}"${item === variant ? " selected" : ""}>${item}</option>`))
+              .join("")}
+          </select>
+        </div>`
+      : "";
+    const wrapControls = (fields, single = false) => `<div class="log-controls${single && !choiceField ? " single" : ""}">${choiceField}${fields}</div>`;
     if (type === "reps-only") {
-      return `<div class="log-controls single">${makeSelect("reps", "Reps", options({ ...exercise.repRange, step: 1 }, "reps", reps))}</div>`;
+      return wrapControls(makeSelect("reps", "Reps", options({ ...exercise.repRange, step: 1 }, "reps", reps)), true);
     }
     if (type === "seconds") {
-      return `<div class="log-controls single">${makeSelect("seconds", "Seconden", options(exercise.secondsRange, "sec", seconds))}</div>`;
+      return wrapControls(makeSelect("seconds", "Seconden", options(exercise.secondsRange, "sec", seconds)), true);
     }
     if (type === "minutes") {
-      return `<div class="log-controls single">${makeSelect("minutes", "Minuten", options(exercise.minutesRange, "min", minutes))}</div>`;
+      return wrapControls(makeSelect("minutes", "Minuten", options(exercise.minutesRange, "min", minutes)), true);
     }
     if (type === "weight-seconds") {
-      return `<div class="log-controls">${makeSelect("weight", "Gewicht", options(exercise.weightRange, "kg", weight))}${makeSelect("seconds", "Seconden", options(exercise.secondsRange, "sec", seconds))}</div>`;
+      return wrapControls(`${makeSelect("weight", "Gewicht", options(exercise.weightRange, "kg", weight))}${makeSelect("seconds", "Seconden", options(exercise.secondsRange, "sec", seconds))}`);
     }
     if (type === "weight-distance") {
-      return `<div class="log-controls">${makeSelect("weight", "Gewicht", options(exercise.weightRange, "kg", weight))}${makeSelect("distance", "Meters", options(exercise.distanceRange, "m", distance))}</div>`;
+      return wrapControls(`${makeSelect("weight", "Gewicht", options(exercise.weightRange, "kg", weight))}${makeSelect("distance", "Meters", options(exercise.distanceRange, "m", distance))}`);
     }
     if (type === "reps-or-seconds") {
-      return `<div class="log-controls">${makeSelect("reps", "Reps", options({ ...exercise.repRange, step: 1 }, "reps", reps))}${makeSelect("seconds", "Seconden", options(exercise.secondsRange, "sec", seconds))}</div>`;
+      return wrapControls(`${makeSelect("reps", "Reps", options({ ...exercise.repRange, step: 1 }, "reps", reps))}${makeSelect("seconds", "Seconden", options(exercise.secondsRange, "sec", seconds))}`);
     }
-    return `<div class="log-controls">${makeSelect("weight", "Gewicht", options(exercise.weightRange, "kg", weight))}${makeSelect("reps", "Reps", options({ ...exercise.repRange, step: 1 }, "reps", reps))}</div>`;
+    return wrapControls(`${makeSelect("weight", "Gewicht", options(exercise.weightRange, "kg", weight))}${makeSelect("reps", "Reps", options({ ...exercise.repRange, step: 1 }, "reps", reps))}`);
   }
 
   function renderToday() {
@@ -1583,6 +1775,28 @@
     const { week, session: active, dateIso } = context;
     todayPill.textContent = parseLocalDate(dateIso).toLocaleDateString("nl-NL", { weekday: "short", day: "numeric", month: "short" });
     state.viewedWeekIndex = weeks.indexOf(week);
+
+    if (context.afterPlan) {
+      app.innerHTML = `
+        <section class="hero-card session-hero-card plan-complete-card">
+          <p class="status-line">${config.planName}</p>
+          <h2 class="training-title">Achtweekse blok afgerond</h2>
+          <p>${config.continuationNotice}</p>
+          <div class="compact-meta">
+            <span class="chip">8 weken voltooid</span>
+            <span class="chip">Nieuw vervolgblok nodig</span>
+          </div>
+          <div class="session-actions">
+            <button class="detail-action-button" type="button" data-open-week-current>Bekijk week 8</button>
+          </div>
+        </section>
+        <article class="info-card">
+          <h3>Belangrijke marathonnuance</h3>
+          <p>${config.marathonNuance}</p>
+        </article>
+      `;
+      return;
+    }
 
     if (!active) {
       app.innerHTML = `
@@ -1612,11 +1826,12 @@
     return `
       ${isPreview ? `<button class="secondary-button back-button" type="button" data-back-week>Terug naar weekoverzicht</button>` : ""}
       <section class="hero-card session-hero-card">
-        <p class="status-line">${phase.phaseName} · Week ${week.calendarWeek} · Sessie ${sessionOrderNumber(week, active)}/${week.sessions.length}</p>
+        <p class="status-line">${config.planName}</p>
+        <p class="status-line session-context-line">${phase.phaseName} · Week ${week.programWeek} · Sessie ${sessionOrderNumber(week, active)}/${week.sessions.length}</p>
         <h2 class="training-title">${active.title}</h2>
         <p class="session-summary">${sessionSummary(active)}</p>
         <div class="compact-meta">
-          <span class="chip">${week.label}</span>
+          <span class="chip">Week ${week.programWeek}</span>
           <span class="chip">${formatDate(week.startDate)} - ${formatDate(week.endDate)}</span>
           <span class="chip">${active.type}</span>
         </div>
@@ -1838,6 +2053,40 @@
       .join("");
   }
 
+  function renderDetailList(items) {
+    if (!Array.isArray(items) || !items.length) return "";
+    return `<ul class="compact-list">${items.map((item) => `<li>${item}</li>`).join("")}</ul>`;
+  }
+
+  function renderExerciseExplanation(exercise, options = {}) {
+    const details = exercise.details || {};
+    const protocol = exercise.protocol || {};
+    const best = options.best || null;
+    return `
+      ${options.showBest === false ? "" : `<p><strong>Beste resultaat:</strong> ${best ? resultText(best) : "nog geen data"}</p>`}
+      <div class="exercise-protocol">
+        <span><strong>Dosering</strong>${plannedLabel(exercise) || exercise.planned || "volgens schema"}</span>
+        ${protocol.rest ? `<span><strong>Rust</strong>${protocol.rest}</span>` : ""}
+        ${protocol.tempo ? `<span><strong>Tempo</strong>${protocol.tempo}</span>` : ""}
+        ${protocol.intensity ? `<span><strong>Intensiteit</strong>${protocol.intensity}</span>` : ""}
+      </div>
+      <section class="exercise-detail-section"><h4>Doel van de oefening</h4><p>${details.purpose || exercise.info}</p></section>
+      <section class="exercise-detail-section"><h4>Getrainde spieren en structuren</h4>${renderDetailList(details.muscles)}</section>
+      <section class="exercise-detail-section"><h4>Waarom deze oefening in het schema staat</h4><p>${details.why || exercise.info}</p></section>
+      <section class="exercise-detail-section"><h4>Opstelling</h4>${renderDetailList(details.setup)}</section>
+      <section class="exercise-detail-section"><h4>Uitvoering</h4>${renderDetailList(details.execution)}</section>
+      <section class="exercise-detail-section"><h4>Houding en techniek</h4>${renderDetailList(details.posture)}</section>
+      <section class="exercise-detail-section"><h4>Waar moet je het voelen?</h4><p>${details.feel || "Een gecontroleerde spierbelasting zonder scherpe of toenemende pijn."}</p></section>
+      <section class="exercise-detail-section"><h4>Veelgemaakte fouten</h4>${renderDetailList(details.mistakes)}</section>
+      <section class="exercise-detail-section exercise-pain-section"><h4>Pijn- en stopregels</h4>${renderDetailList(details.painRules)}</section>
+      <section class="exercise-detail-section"><h4>Progressie</h4>${renderDetailList(details.progression)}</section>
+      <section class="exercise-detail-section"><h4>Regressie of lichtere variant</h4>${renderDetailList(details.regression)}</section>
+      <section class="exercise-detail-section"><h4>Alternatieven</h4>${renderDetailList(details.alternatives)}</section>
+      <section class="exercise-detail-section"><h4>Verschil per fase</h4>${renderDetailList(details.phaseDifferences)}</section>
+      <p class="exercise-cue"><strong>Praktische cue:</strong> ${details.cue || exercise.tips}</p>
+    `;
+  }
+
   function renderExercise(exercise, key, week, active, mode = "today", dateIso = toIsoDate(today())) {
     const isPreview = mode === "preview";
     const log = isPreview ? null : latestStrengthLog(key, exercise.id);
@@ -1845,22 +2094,19 @@
     const alternatives = Array.isArray(exercise.alternatives) ? exercise.alternatives : [];
     const trackingAttrs = isPreview
       ? ""
-      : `data-exercise-row data-session-key="${key}" data-log-date="${dateIso}" data-week="${week.calendarWeek}" data-phase="${week.phaseId}" data-session="${active.sessionNumber}" data-exercise-id="${exercise.id}" data-exercise-name="${escapeAttr(exercise.name)}" data-planned="${escapeAttr(exercise.planned)}"`;
+      : `data-exercise-row data-plan-id="${ACTIVE_PLAN_ID}" data-plan-version="${ACTIVE_PLAN_VERSION}" data-session-key="${key}" data-session-id="${escapeAttr(active.sessionId || key)}" data-log-date="${dateIso}" data-week="${week.calendarWeek}" data-program-week="${week.programWeek || ""}" data-phase="${week.phaseId}" data-session="${active.sessionNumber}" data-exercise-id="${exercise.id}" data-exercise-name="${escapeAttr(exercise.name)}" data-planned="${escapeAttr(exercise.planned)}"`;
     return `
       <article class="exercise-card" ${trackingAttrs}>
-        <div class="exercise-top">
-          <button class="exercise-name" type="button" data-toggle-details>${exercise.name}</button>
-          <div class="planned">${plannedLabel(exercise)}</div>
-        </div>
+        <button class="exercise-top exercise-header-button" type="button" data-toggle-details aria-label="Uitleg over ${escapeAttr(exercise.name)} openen">
+          <span class="exercise-name">${exercise.name}</span>
+          <span class="planned">${plannedLabel(exercise)}</span>
+        </button>
+        ${exercise.statusLabel ? `<div class="compact-meta exercise-labels"><span class="chip">${exercise.statusLabel}</span></div>` : ""}
         ${isPreview ? "" : exerciseControls(exercise, log)}
         <details>
           <summary>Info bekijken</summary>
           <div class="details-body">
-            ${isPreview ? "" : `<p><strong>Beste resultaat:</strong> ${best ? resultText(best) : "nog geen data"}</p>`}
-            <p><strong>Tips:</strong> ${exercise.tips}</p>
-            <p><strong>Regel:</strong> ${exercise.warning}</p>
-            ${alternatives.length ? `<p><strong>Alternatieven:</strong> ${alternatives.join(", ")}</p>` : ""}
-            <p>${exercise.info}</p>
+            ${renderExerciseExplanation(exercise, { best, showBest: !isPreview })}
             <button class="inline-link-button" type="button" data-open-exercise-stats="${escapeAttr(exercise.id)}" data-exercise-name="${escapeAttr(exercise.name)}">Bekijk statistieken →</button>
           </div>
         </details>
@@ -1878,7 +2124,7 @@
     ];
     const trackingAttrs = isPreview
       ? ""
-      : `data-cardio-key="${key}" data-log-date="${dateIso}" data-week="${week.calendarWeek}" data-phase="${week.phaseId}" data-session="${active.sessionNumber}"`;
+      : `data-cardio-key="${key}" data-plan-id="${ACTIVE_PLAN_ID}" data-plan-version="${ACTIVE_PLAN_VERSION}" data-session-id="${escapeAttr(active.sessionId || key)}" data-log-date="${dateIso}" data-week="${week.calendarWeek}" data-program-week="${week.programWeek || ""}" data-phase="${week.phaseId}" data-session="${active.sessionNumber}" data-run-title="${escapeAttr(cardioBlock.title)}" data-run-duration="${escapeAttr(cardioBlock.totalDuration || "")}"`;
     const summary = runCardSummary(active, cardioBlock);
     return `
       <section class="training-section running-section">
@@ -3219,6 +3465,412 @@
     `;
   }
 
+  // Active renderers for rehab_foundation_2026_07_27. Legacy marathon render
+  // helpers remain below the data layer only so historical logs stay readable.
+  function sessionGoalText(session) {
+    return session.goal || "De geplande kracht-, revalidatie- en loopbelasting technisch beheerst uitvoeren.";
+  }
+
+  function strengthPhilosophyText(session) {
+    return session.strengthPhilosophy || "Bouw de voorgeschreven structuren progressief op zonder pijn- of herstelreacties te negeren.";
+  }
+
+  function runningPhilosophyText(session, cardioBlock) {
+    const build = [cardioBlock.warmup, cardioBlock.main, cardioBlock.recovery, cardioBlock.cooldown].filter(Boolean).join(" ");
+    return `${session.runningPhilosophy || cardioBlock.goal} ${build} Gebruik RPE en de praattest; dit is geen maximale training.`;
+  }
+
+  function combinationPhilosophyText(session) {
+    return session.combinationPhilosophy || "De onderdelen zijn samengevoegd om herstelruimte tussen de vier hoofdsessies te behouden.";
+  }
+
+  function phaseSessionFitText(phase, kind, hasStrength, hasRun) {
+    const suffix = hasStrength && hasRun
+      ? "De combinatie bouwt twee passende prikkels op één dag, zodat de tussenliggende dagen voor herstel beschikbaar blijven."
+      : hasRun
+        ? "De loopbelasting blijft ondergeschikt aan herstel en technisch gecontroleerde opbouw."
+        : "Deze dag levert de grootste volledige krachtprikkel van de week.";
+    return `${phase.goal} ${suffix}`;
+  }
+
+  function trainingPrinciplesText(phase, kind, hasStrength) {
+    return `${phase.rules} ${hasStrength ? "Gebruik dubbele progressie: eerst technisch naar de bovengrens, daarna pas de kleinste gewichtsstap." : ""} De reactie de volgende ochtend bepaalt of de totale dosis passend was.`;
+  }
+
+  function goodDayAdvice(session) {
+    return session.goodDayAdvice || "Voer de geplande belasting nauwkeuriger uit; voeg niet spontaan sets, tempo of intensiteit toe.";
+  }
+
+  function tiredDayAdvice(session) {
+    return session.tiredDayAdvice || "Verlaag gewicht, bewegingsuitslag, holdduur of totaal volume en behoud een rustige uitvoering.";
+  }
+
+  function sessionFocusLine(session) {
+    return session.focusLine || "Technische belasting opbouwen met een rustige reactie de volgende ochtend.";
+  }
+
+  function placementAdvice(session) {
+    return session.placementAdvice || "";
+  }
+
+  function weekFocusText(week) {
+    return week.focus || "Bouw belastbaarheid op binnen de pijn- en herstelregels.";
+  }
+
+  function weekAttentionText(week) {
+    return week.attention || "De volgende ochtend hoort de klacht ongeveer terug te zijn op het oude uitgangsniveau.";
+  }
+
+  function weekOrderLogicText() {
+    return "Volg Dag 1 → Dag 4. Probeer tussen Dag 1 en Dag 3 minimaal één volledige dag te laten zitten.";
+  }
+
+  function renderWeek() {
+    const week = getWeekByIndex(state.viewedWeekIndex);
+    const phase = getPhase(week.phaseId);
+    const active = activeSessionForWeek(week);
+    const summary = weekDashboardSummary(week);
+    app.innerHTML = `
+      <section class="week-dashboard">
+        <div class="week-nav week-dashboard-header">
+          <button type="button" data-week-prev aria-label="Vorige week">‹</button>
+          <div class="week-title">
+            <h2>Week ${week.programWeek}</h2>
+            <p class="week-phase-line">${phase.phaseName}</p>
+            <div class="week-title-tags"><span class="chip">Kalenderweek ${week.calendarWeek}</span></div>
+            <p class="muted small">${formatDate(week.startDate)} - ${formatDate(week.endDate)} · 4 sessies</p>
+          </div>
+          <button type="button" data-week-next aria-label="Volgende week">›</button>
+        </div>
+        <div class="week-summary-strip">
+          <span>4 sessies</span>
+          <span>${summary.strengthCount} kracht/rehab</span>
+          <span>${summary.runCount} runs</span>
+          <span>${summary.totalTime}</span>
+        </div>
+        <div class="section-title section-title-strong week-sessions-title">
+          <div><h2>Sessies deze week</h2><p>Vier dagen in vaste volgorde; verschuiven mag met voldoende herstel.</p></div>
+        </div>
+        ${renderWeekSessions(week, active)}
+        ${renderWeekProgress(week)}
+        <details class="info-block">
+          <summary>Weekfocus bekijken</summary>
+          <div class="details-body"><p>${week.focus}</p><p><strong>Runprogressie:</strong> ${week.runProgression}</p></div>
+        </details>
+        <details class="info-block">
+          <summary>Weekbelasting bekijken</summary>
+          <div class="details-body">
+            <p><strong>Kracht en revalidatie:</strong> vier gerichte prikkels.</p>
+            <p><strong>Hardlopen:</strong> drie runs van ongeveer 30 minuten.</p>
+            <p><strong>Geschatte totale duur:</strong> ${summary.totalTime}.</p>
+            <p><strong>Volgordelogica:</strong> ${weekOrderLogicText()}</p>
+            <p><strong>Herstelregel:</strong> ${week.attention}</p>
+          </div>
+        </details>
+        <details class="info-block">
+          <summary>Deze week binnen de fase</summary>
+          <div class="details-body"><p>${phase.goal}</p><p>${phase.rules}</p></div>
+        </details>
+      </section>
+    `;
+  }
+
+  function rehabPhaseGuide(phase) {
+    const details = phase.phaseDetails || {};
+    const sections = details.sections || [];
+    const find = (title) => sections.find((section) => section.title === title)?.text || "";
+    return {
+      running: find("Hardlopen"),
+      strength: find("Kracht en revalidatie"),
+      isometric: find("Isometrisch") || "Verhoog eerst de holdduur en daarna pas weerstand. Blijf ademen en laat de houding niet instorten.",
+      overhead: find("Overhead press") || find("Terugkeerstatus"),
+      grip: find("Grip en elleboogflexie") || find("Grip en trekken") || "Grip en elleboogflexie volgen de faseregels en worden niet maximaal getest.",
+      outcome: find("Wat moet dit opleveren?"),
+    };
+  }
+
+  function renderPhaseDetails(phase) {
+    const guide = rehabPhaseGuide(phase);
+    return `
+      <div class="phase-detail-block"><h4>Doel</h4><p>${phase.goal}</p></div>
+      <div class="phase-detail-block"><h4>Frequentie</h4><p>${phase.phaseDetails.runsPerWeek}; ${phase.phaseDetails.gymPerWeek}.</p></div>
+      <div class="phase-detail-block"><h4>Kracht en dynamische progressie</h4><p>${guide.strength}</p></div>
+      <div class="phase-detail-block"><h4>Hardloopprogressie</h4><p>${guide.running}</p></div>
+      <div class="phase-detail-block"><h4>Isometrische progressie</h4><p>${guide.isometric}</p></div>
+      <div class="phase-detail-block"><h4>Pijn- en herstelregels</h4><p>${generalTrainingRules.painScale?.join(" ")}</p></div>
+      <div class="phase-detail-block"><h4>Overhead-press-status</h4><p>${guide.overhead}</p></div>
+      <div class="phase-detail-block"><h4>Gripstatus</h4><p>${guide.grip}</p></div>
+      <div class="phase-detail-block"><h4>Wat moet aan het einde behaald zijn?</h4><p>${guide.outcome}</p></div>
+    `;
+  }
+
+  function referenceExerciseCard(exercise, allowLogging = false) {
+    const week = getWeekByIndex(currentWeekIndex(parseLocalDate(state.selectedDateIso || config.startDate)));
+    const session = {
+      sessionId: `${ACTIVE_PLAN_ID}_optional_overhead`,
+      sessionNumber: 0,
+      title: "Terugkeer naar overhead press",
+      exercises: [exercise],
+    };
+    return renderExercise(
+      exercise,
+      session.sessionId,
+      week,
+      session,
+      allowLogging ? "today" : "preview",
+      state.selectedDateIso || scheduleAwareDateIso()
+    );
+  }
+
+  function overheadChecklistState() {
+    return loadAppData().uiState?.overheadChecklist || {};
+  }
+
+  function overheadReady() {
+    const saved = overheadChecklistState();
+    return (rehabReference.overhead?.conditions || []).every((condition) => saved[condition.id] === true);
+  }
+
+  function renderReferencePrograms() {
+    const mobility = rehabReference.mobility || {};
+    const overhead = rehabReference.overhead || {};
+    const saved = overheadChecklistState();
+    const ready = overheadReady();
+    const landmineStable = saved["landmine-two-weeks"] === true;
+    const overheadExercises = overhead.exercises || [];
+    return `
+      <section class="reference-programs">
+        <details class="info-block reference-module">
+          <summary>Mobiliteitsroutine openen</summary>
+          <div class="details-body">
+            <div class="compact-meta">${(mobility.labels || []).map((label) => `<span class="chip">${label}</span>`).join("")}</div>
+            <p>${mobility.intro}</p>
+            <div class="exercise-list">${(mobility.exercises || []).map((exercise) => referenceExerciseCard(exercise, false)).join("")}</div>
+          </div>
+        </details>
+        <details class="info-block reference-module">
+          <summary>Terugkeer naar overhead press</summary>
+          <div class="details-body">
+            <div class="compact-meta"><span class="chip">Optioneel</span><span class="chip">Alleen bij stabiele klachten</span></div>
+            <p>${overhead.note || ""}</p>
+            <div class="overhead-checklist">
+              ${(overhead.conditions || []).map((condition) => `
+                <label>
+                  <input type="checkbox" data-overhead-condition="${condition.id}" ${saved[condition.id] ? "checked" : ""}>
+                  <span>${condition.label}</span>
+                </label>`).join("")}
+            </div>
+            <p class="status-line">${ready ? "Stap 1 is beschikbaar om gecontroleerd te testen." : "Bevestig alle voorwaarden voordat je de landmine press logt."}</p>
+            <div class="exercise-list">${overheadExercises[0] ? referenceExerciseCard(overheadExercises[0], ready) : ""}</div>
+            ${ready ? `
+              <label class="overhead-followup-check">
+                <input type="checkbox" data-overhead-condition="landmine-two-weeks" ${landmineStable ? "checked" : ""}>
+                <span>Landmine press verloopt twee weken probleemloos</span>
+              </label>
+              <p class="status-line">${landmineStable ? "Stap 2 is beschikbaar om voorzichtig te testen." : "Machine overhead press blijft vergrendeld tot twee stabiele landmineweken zijn bevestigd."}</p>
+            ` : ""}
+            <div class="exercise-list">${overheadExercises[1] ? referenceExerciseCard(overheadExercises[1], ready && landmineStable) : ""}</div>
+          </div>
+        </details>
+      </section>
+    `;
+  }
+
+  function renderPhases() {
+    app.innerHTML = `
+      <section class="build-page phase-list">
+        <article class="info-card build-hero-card">
+          <h2>${config.planName}</h2>
+          <p>${config.description}</p>
+          <p class="muted">${config.marathonNuance}</p>
+        </article>
+        <details class="info-block">
+          <summary>Algemene programma- en pijnregels</summary>
+          <div class="details-body">
+            <h4>Pijnschaal</h4>${renderDetailList(generalTrainingRules.painScale)}
+            <h4>Dubbele progressie</h4>${renderDetailList(generalTrainingRules.doubleProgression)}
+            <h4>Isometrische progressie</h4>${renderDetailList(generalTrainingRules.isometricProgression)}
+          </div>
+        </details>
+        ${phases.map((phase) => `
+          <article class="phase-card" data-phase-id="${phase.phaseId}">
+            <h3>${phase.phaseName}</h3>
+            <p class="status-line">${phase.weekRange} · ${formatDate(phase.startDate)} - ${formatDate(phase.endDate)}</p>
+            <div class="compact-meta phase-meta">
+              <span class="chip">Duur: ${phaseDuration(phase)} weken</span>
+              <span class="chip">${phase.phaseDetails.runsPerWeek}</span>
+              <span class="chip">${phase.phaseDetails.gymPerWeek}</span>
+            </div>
+            <p class="goal"><strong>Doel:</strong> ${phase.goal}</p>
+            <details class="phase-details"${state.targetPhaseId === phase.phaseId ? " open" : ""}>
+              <summary>Lees faseplan</summary>
+              <div class="details-body">${renderPhaseDetails(phase)}</div>
+            </details>
+          </article>`).join("")}
+        ${renderReferencePrograms()}
+      </section>
+    `;
+    if (state.targetPhaseId) {
+      window.requestAnimationFrame(() => document.querySelector(`[data-phase-id="${state.targetPhaseId}"]`)?.scrollIntoView({ block: "start", behavior: "smooth" }));
+    }
+  }
+
+  function rehabRunWeekCard(week) {
+    const runs = runSessions(week);
+    return `
+      <article class="info-card">
+        <h3>Week ${week.programWeek}</h3>
+        <p class="status-line">${formatDate(week.startDate)} - ${formatDate(week.endDate)} · ${getPhase(week.phaseId).phaseName}</p>
+        <p>${week.runProgression}</p>
+        ${runs.map((session) => `<div class="phase-detail-block"><h4>${session.title}</h4><p>${session.cardio.instruction}</p><p class="muted small">RPE ${session.cardio.rpe}</p></div>`).join("")}
+      </article>
+    `;
+  }
+
+  function renderRehabRunOverview() {
+    return `
+      <article class="info-card build-hero-card">
+        <h3>Loopopbouw — 8 weken</h3>
+        <p>Drie runs per week van ongeveer dertig minuten. Weken 1–2 blijven volledig easy. Daarna komen alleen conditionele strides, gecontroleerde vlotte stukken en een rustige progression finish.</p>
+        <p><strong>Belangrijk:</strong> ${config.marathonNuance}</p>
+      </article>
+      <article class="info-card">
+        <h3>In één oogopslag</h3>
+        <ul class="compact-list">
+          <li>Dag 2: easy; vanaf week 3 alleen bij stabiele heup 4 × 20 sec ontspannen versnellen.</li>
+          <li>Dag 3: week 3–4 zes stukken van 1 minuut op RPE 6; week 5–8 drie stukken van 4 minuten op RPE 6–7.</li>
+          <li>Dag 4: vanaf week 3 de laatste 10 minuten geleidelijk vlotter, maximaal RPE 5–6.</li>
+          <li>Geen maximale intervaltraining, geen verplichte km/u en geen echte long run in dit tijdelijke blok.</li>
+          <li>Bij pijn voorin de heup: volledig easy, korter of run-walk.</li>
+        </ul>
+      </article>
+    `;
+  }
+
+  function renderRehabEasyRuns() {
+    return `
+      <section class="info-list">
+        ${foodListCard("Easy betekent echt easy", ["RPE 3–4/10", "Volledige zinnen kunnen spreken", "Eerste vijf minuten extra rustig", "Loopband 0–1% helling", "Ontspannen schouders en lichte pas"])}
+        ${foodListCard("Aanpassen bij klachten", ["Tempo loslaten", "Run inkorten", "Run-walk gebruiken", "Stoppen bij scherpe pijn, tintelingen of krachtverlies", "De reactie de volgende ochtend beoordelen"])}
+      </section>
+    `;
+  }
+
+  function renderRehabFasterRuns() {
+    return `
+      <section class="info-list">
+        ${foodListCard("Dag 2 — conditionele strides", ["Vanaf week 3", "Alleen na twee weken stabiele heup", "4 × 20 sec ontspannen snel", "40 sec rustig joggen", "Geen sprint"])}
+        ${foodListCard("Dag 3 — gecontroleerde prikkel", ["Week 3–4: 6 × 1 min op RPE 6", "Week 5–8: 3 × 4 min op RPE 6–7", "Herstel altijd easy", "Iedere herhaling technisch vergelijkbaar", "Geen tempo forceren"])}
+        ${foodListCard("Dag 4 — progression", ["Vanaf week 3", "Eerste 20 min easy", "Laatste 10 min geleidelijk vlotter", "Maximaal RPE 5–6", "Geen tijdrit"])}
+      </section>
+    `;
+  }
+
+  function renderRunBuild() {
+    const tabs = [
+      ["overview", "Overzicht"],
+      ["weeks", "Week per week"],
+      ["easy", "Easy runs"],
+      ["faster", "Snellere prikkels"],
+      ["followup", "Vervolg na week 8"],
+    ];
+    const renderer = {
+      overview: renderRehabRunOverview,
+      weeks: () => `<section class="info-list">${weeks.map(rehabRunWeekCard).join("")}</section>`,
+      easy: renderRehabEasyRuns,
+      faster: renderRehabFasterRuns,
+      followup: () => `<article class="info-card build-hero-card"><h3>Vervolg na week 8</h3><p>${config.continuationNotice}</p><p>${config.marathonNuance}</p><p>Beoordeel na ongeveer vier tot zes weken of één run geleidelijk langer kan worden. Bouw pas in het vervolgplan echte long runs en marathonspecifieke belasting op.</p></article>`,
+    }[state.runBuildTab] || renderRehabRunOverview;
+    if (!tabs.some(([id]) => id === state.runBuildTab)) state.runBuildTab = "overview";
+    app.innerHTML = `
+      <section class="build-page">
+        <div class="section-title build-title"><h2>Loopopbouw — 8 weken</h2></div>
+        <div class="build-tabs" role="tablist" aria-label="Loopopbouw onderdelen">
+          ${tabs.map(([id, label]) => `<button type="button" data-run-tab="${id}" class="${state.runBuildTab === id ? "is-active" : ""}">${label}</button>`).join("")}
+        </div>
+        ${renderer()}
+      </section>
+    `;
+  }
+
+  function renderActiveNutritionOverview() {
+    return `
+      <article class="info-card build-hero-card">
+        <h3>Voeding tijdens het herstel- en fundamentblok</h3>
+        <p>Voeding ondersteunt krachtopbouw, peesbelasting, loopherstel en een rustige reactie tussen de sessies. Dit blok vraagt voldoende energie en eiwit, maar nog geen volledig marathonspecifiek voedingsplan.</p>
+      </article>
+      <article class="info-card nutrition-glance">
+        <h3>Voeding in één oogopslag</h3>
+        ${[
+          ["Week 1–2", "Kalibreren", "Normaal en voldoende eten, genoeg eiwit en geen ingewikkelde marathonvoeding."],
+          ["Week 3–5", "Belasting opbouwen", "Iets bewuster koolhydraten rond de snellere run en de drie hybride trainingen."],
+          ["Week 6–8", "Sterkte en terugkeer", "Voldoende koolhydraten en eiwit; niet agressief cutten als herstel daardoor verslechtert."],
+          ["Na week 8", "Nieuw plan nodig", "Pas voeding opnieuw aan zodra langere duurlopen en marathonspecifieke trainingen beginnen."],
+        ].map(([phase, title, text]) => `<div class="nutrition-glance-row"><span class="chip">${phase}</span><div><h4>${title}</h4><p>${text}</p></div></div>`).join("")}
+      </article>
+    `;
+  }
+
+  function renderActiveNutritionPhases() {
+    const rows = [
+      ["Fase 1 — Kalibreren", "Week 1–2", "Normaal en voldoende eten. Houd eiwit hoog genoeg en neem rond trainingen gewone koolhydraatbronnen. De eerste prioriteit is consequent trainen en herstel beoordelen."],
+      ["Fase 2 — Belasting opbouwen", "Week 3–5", "Neem iets bewuster koolhydraten vóór en na de snellere run en hybride sessies. Start niet leeg aan Dag 3."],
+      ["Fase 3 — Sterkte en terugkeer", "Week 6–8", "Ondersteun zwaardere kracht- en revalidatiebelasting met voldoende energie, eiwit en koolhydraten. Vermijd agressief cutten als herstel of slaap daaronder lijdt."],
+    ];
+    return `<section class="info-list">${rows.map(([title, meta, text]) => `<article class="info-card"><h3>${title}</h3><p class="status-line">${meta}</p><p>${text}</p><p><strong>Aandachtspunt:</strong> vocht, normale maaltijden en een rustige maag blijven belangrijker dan supplementen.</p></article>`).join("")}</section>`;
+  }
+
+  function renderActiveNutritionTraining() {
+    const rows = [
+      ["Dag 1 — volledige kracht", "Eet normaal en start niet uitgehongerd. Neem na afloop eiwit plus koolhydraten."],
+      ["Dag 2 — schouder + easy", "Een lichte koolhydraatrijke maaltijd vooraf is meestal genoeg. Tijdens dertig minuten easy is geen gel nodig."],
+      ["Dag 3 — hardloopkracht + run", "Start niet leeg, zeker vanaf de vlotte stukken. Neem na afloop koolhydraten, eiwit en vocht."],
+      ["Dag 4 — arm/schouder + run", "Normale maaltijd vooraf; herstel met eiwit en koolhydraten. De progression run vraagt geen racevoeding."],
+    ];
+    return `<section class="info-list">${rows.map(([title, text]) => `<article class="info-card"><h3>${title}</h3><p>${text}</p></article>`).join("")}</section>`;
+  }
+
+  function renderFutureFueling() {
+    return `
+      <article class="info-card build-hero-card">
+        <h3>Toekomstige informatie — gels en lange runs</h3>
+        <p>Het actieve achtweekse programma bevat geen echte long run. Gebruik deze richtlijnen pas wanneer langere trainingen in het vervolgplan terugkomen.</p>
+      </article>
+      <section class="info-list">
+        ${foodListCard("Wanneer later beginnen met oefenen?", ["60–70 min: meestal nog niets nodig", "80–90 min: een eerste rustige test kan passend zijn", "90+ min: gels of sportdrank doelgericht oefenen", "Twee uur of langer: voeding en drinken vooraf plannen"])}
+        ${foodListCard("Praktische regels", ["Begin niet pas als je leeg bent", "Test gels met water", "Test sportdrank afzonderlijk", "Noteer maag- en energiegevoel", "Gebruik op marathondag niets nieuws"])}
+      </section>
+    `;
+  }
+
+  function renderNutrition() {
+    const tabs = [
+      ["overview", "Overzicht"],
+      ["phases", "Per fase"],
+      ["training", "Voor trainingen"],
+      ["longRuns", "Gels & lange runs"],
+      ["marathonWeek", "Marathonweek"],
+      ["practical", "Praktisch eten"],
+    ];
+    const renderer = {
+      overview: renderActiveNutritionOverview,
+      phases: renderActiveNutritionPhases,
+      training: renderActiveNutritionTraining,
+      longRuns: renderFutureFueling,
+      marathonWeek: () => `<article class="info-card build-hero-card"><h3>Toekomstige informatie</h3><p>Marathonweek valt buiten dit actieve herstelblok. Gebruik dit pas samen met het nieuwe marathonspecifieke vervolgplan.</p></article>${renderNutritionMarathonWeek()}`,
+      practical: renderNutritionPractical,
+    }[state.nutritionTab] || renderActiveNutritionOverview;
+    app.innerHTML = `
+      <section class="build-page nutrition-page">
+        <div class="section-title build-title"><h2>Voeding</h2></div>
+        <div class="build-tabs" role="tablist" aria-label="Voeding onderdelen">
+          ${tabs.map(([id, label]) => `<button type="button" data-nutrition-tab="${id}" class="${state.nutritionTab === id ? "is-active" : ""}">${label}</button>`).join("")}
+        </div>
+        ${renderer()}
+      </section>
+    `;
+  }
+
   function renderDataPage() {
     const diagnostics = storageDiagnostics();
     app.innerHTML = `
@@ -3435,7 +4087,18 @@
       .filter((entry) => entry?.cardioDone)
       .map((entry) => {
         const found = findSessionByKey(entry.sessionKey);
-        if (!found?.session?.cardio) return null;
+        if (!found?.session?.cardio) {
+          return {
+            ...entry,
+            week: Number(entry.week || 0),
+            date: entry.date || entry.loggedAt?.slice(0, 10) || "",
+            session: null,
+            kind: entry.runType || "historisch",
+            km: Number(entry.km || entry.distanceKm || 0),
+            minutes: Number(entry.minutes || entry.durationMinutes || 0),
+            mpMinutes: Number(entry.mpMinutes || 0),
+          };
+        }
         const kind = runKind(found.session, found.session.cardio);
         const km = inferRunKm(found.session);
         const minutes = inferRunMinutes(found.session);
@@ -3484,6 +4147,7 @@
     const shakeouts = runEntries.filter((entry) => entry.kind === "shakeout").length;
     const completedByWeek = new Map();
     completed.forEach((item) => {
+      if (item.planId !== ACTIVE_PLAN_ID) return;
       const weekNo = Number(item.week || 0);
       if (!weekNo) return;
       completedByWeek.set(weekNo, (completedByWeek.get(weekNo) || 0) + 1);
@@ -3629,13 +4293,13 @@
 
   function renderStatsOverview(analytics) {
     return `
-      ${renderStatsTabsHeader("Trainingsoverzicht", `${analytics.phase.phaseName} · Week ${analytics.currentWeek.calendarWeek}`)}
+      ${renderStatsTabsHeader("Trainingsoverzicht", `${analytics.phase.phaseName} · Programmaweek ${analytics.currentWeek.programWeek}`)}
       <section class="stat-grid">
         ${metricCard("Totaal gelopen", formatKm(analytics.totalKm))}
         ${metricCard("Voltooide runs", analytics.runCount)}
         ${metricCard("Krachttrainingen", analytics.strengthTrainingCount)}
         ${metricCard("Gelogde werksets", analytics.strengthSetCount)}
-        ${metricCard("Huidige week", `Week ${analytics.currentWeek.calendarWeek}`, `${analytics.currentWeekCompleted} van ${analytics.currentWeek.sessions.length} sessies voltooid`)}
+        ${metricCard("Huidige week", `Week ${analytics.currentWeek.programWeek}`, `${analytics.currentWeekCompleted} van ${analytics.currentWeek.sessions.length} sessies voltooid`)}
         ${metricCard("Marathon", countdownParts(toIsoDate(today())).label)}
       </section>
       <section class="stat-card">
@@ -3755,24 +4419,22 @@
   }
 
   function renderStatsMarathon(analytics) {
-    const scoreData = marathonReadiness(analytics);
     return `
-      ${renderStatsTabsHeader("Marathonvoorbereiding", "Indicatie, geen voorspelling")}
-      <section class="stat-card readiness-card">
-        <h3>Op schema-indicatie</h3>
-        <p class="readiness-score">${scoreData.score}%</p>
-        <p class="status-line">${scoreData.label}</p>
-        <p>Deze score is geen garantie voor je marathontijd. Het is een praktische indicatie op basis van consistentie, long runs, marathontempo en voltooide trainingsweken.</p>
+      ${renderStatsTabsHeader("Marathonvoorbereiding", "Huidig fundamentblok en historische trainingsdata")}
+      <section class="stat-card">
+        <h3>Tijdelijk herstel- en fundamentblok</h3>
+        <p>${config.marathonNuance}</p>
+        <p class="status-line">Na week 8 is een nieuw marathonspecifiek vervolgplan nodig; deze pagina doet daarom nu geen gereedheidsvoorspelling.</p>
       </section>
       <section class="stat-grid">
-        ${metricCard("Consistentie", `${analytics.runCount} runs`, "op basis van afgevinkte runs")}
-        ${metricCard("Long runs", analytics.longRuns)}
-        ${metricCard("Langste run", formatKm(analytics.longestRun))}
-        ${metricCard("MP-training", formatMinutes(analytics.runEntries.reduce((sum, entry) => sum + entry.mpMinutes, 0)))}
+        ${metricCard("Afgevinkte runs", analytics.runCount)}
+        ${metricCard("Totale looptijd", formatMinutes(analytics.totalMinutes))}
+        ${metricCard("Voltooide sessies", analytics.completed.length)}
+        ${metricCard("Gelogde werksets", analytics.strengthSetCount)}
       </section>
       <section class="stat-card">
-        <h3>Piektrainingen</h3>
-        <p class="status-line">${[39, 41, 42, 43].map((weekNo) => `Week ${weekNo}: ${peakWeekDone(analytics, weekNo) ? "gedaan" : "nog niet gedaan"}`).join(" · ")}</p>
+        <h3>Historische cijfers</h3>
+        <p>Oude runs en krachtoefeningen blijven in de algemene statistieken zichtbaar. Ze worden niet gebruikt om het nieuwe achtweekse programma automatisch zwaarder te maken.</p>
       </section>
     `;
   }
@@ -3965,7 +4627,11 @@
         if (found) return found;
       }
     }
-    return null;
+    const references = [
+      ...(rehabReference.mobility?.exercises || []),
+      ...(rehabReference.overhead?.exercises || []),
+    ];
+    return references.find((exercise) => exercise.id === exerciseId) || null;
   }
 
   function drawSparklines(byExercise) {
@@ -4197,7 +4863,10 @@
     logs.strength = logs.strength.filter((entry) => !(entry.sessionKey === key && entry.exerciseId === exerciseId));
     if (hasAny) {
       logs.strength.push({
+        planId: row.dataset.planId || ACTIVE_PLAN_ID,
+        planVersion: Number(row.dataset.planVersion) || ACTIVE_PLAN_VERSION,
         sessionKey: key,
+        sessionId: row.dataset.sessionId || key,
         exerciseId,
         exerciseName: row.dataset.exerciseName,
         plannedSets: planned.sets,
@@ -4207,9 +4876,11 @@
         selectedSeconds: fields.seconds === "" || fields.seconds === undefined ? null : Number(fields.seconds),
         selectedMinutes: fields.minutes === "" || fields.minutes === undefined ? null : Number(fields.minutes),
         selectedDistance: fields.distance === "" || fields.distance === undefined ? null : Number(fields.distance),
+        selectedVariant: fields.variant || "",
         date: row.dataset.logDate || toIsoDate(today()),
         phase: row.dataset.phase,
         week: Number(row.dataset.week),
+        programWeek: Number(row.dataset.programWeek) || null,
         session: Number(row.dataset.session),
         loggedAt: new Date().toISOString(),
       });
@@ -4235,12 +4906,18 @@
     logs.cardio = logs.cardio.filter((entry) => entry.sessionKey !== key);
     if (checked || selectedFeeling) {
       logs.cardio.push({
+        planId: card.dataset.planId || ACTIVE_PLAN_ID,
+        planVersion: Number(card.dataset.planVersion) || ACTIVE_PLAN_VERSION,
         sessionKey: key,
+        sessionId: card.dataset.sessionId || key,
+        title: card.dataset.runTitle || "Hardlopen",
+        plannedDuration: card.dataset.runDuration || "",
         cardioDone: checked,
         cardioFeeling: selectedFeeling,
         date: card.dataset.logDate || toIsoDate(today()),
         phase: card.dataset.phase,
         week: Number(card.dataset.week),
+        programWeek: Number(card.dataset.programWeek) || null,
         session: Number(card.dataset.session),
         loggedAt: new Date().toISOString(),
       });
@@ -4316,6 +4993,7 @@
         <div class="phase-detail-block"><h4>Wat verandert er?</h4><p>${milestone.change}</p></div>
         <div class="phase-detail-block"><h4>Hardloopfocus</h4><p>${milestone.running}</p></div>
         <div class="phase-detail-block"><h4>Krachtfocus</h4><p>${milestone.strength}</p></div>
+        ${milestone.rehab ? `<div class="phase-detail-block"><h4>Revalidatiefocus</h4><p>${milestone.rehab}</p></div>` : ""}
         <div class="phase-detail-block"><h4>Voedingsfocus</h4><p>${milestone.nutrition}</p></div>
         <div class="phase-detail-block"><h4>Belangrijkste focus</h4><p>${milestone.focus}</p></div>
       </div>
@@ -4668,6 +5346,16 @@
 
   document.addEventListener("change", (event) => {
     const target = event.target;
+    if (target.matches("[data-overhead-condition]")) {
+      const data = loadAppData();
+      data.uiState.overheadChecklist = {
+        ...(data.uiState.overheadChecklist || {}),
+        [target.dataset.overheadCondition]: target.checked,
+      };
+      saveAppData(data);
+      renderPhases();
+      return;
+    }
     if (target.matches("[data-log-field]")) {
       const row = target.closest("[data-exercise-row]");
       if (row) upsertStrength(row);
@@ -4730,7 +5418,7 @@
     ensureCleanStorageStart();
     autoCompleteStaleSessions();
     state.viewedWeekIndex = currentWeekIndex();
-    state.selectedDateIso = toIsoDate(today());
+    state.selectedDateIso = scheduleAwareDateIso();
     installDoubleTapGuard();
     render();
     if ("serviceWorker" in navigator) {

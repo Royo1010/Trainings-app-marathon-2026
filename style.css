@@ -631,6 +631,165 @@ button:disabled {
   align-items: start;
 }
 
+.exercise-header-button {
+  width: 100%;
+  padding: 0;
+  border: 0;
+  color: inherit;
+  background: transparent;
+  cursor: pointer;
+  text-align: left;
+}
+
+.exercise-header-button:focus-visible {
+  outline: 2px solid var(--blue);
+  outline-offset: 5px;
+  border-radius: 4px;
+}
+
+.exercise-block-group {
+  margin-top: 10px;
+}
+
+.exercise-block-title {
+  margin: 0 2px 7px;
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.exercise-labels {
+  margin-top: 7px;
+}
+
+.exercise-protocol {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 6px;
+  margin: 4px 0 10px;
+}
+
+.exercise-protocol span {
+  min-width: 0;
+  padding: 7px 8px;
+  border: 1px solid rgba(51, 65, 85, 0.66);
+  border-radius: var(--radius);
+  color: var(--muted);
+  background: rgba(15, 23, 34, 0.55);
+  font-size: 12px;
+  line-height: 1.35;
+}
+
+.exercise-protocol strong {
+  display: block;
+  margin-bottom: 2px;
+  color: var(--muted-2);
+  font-size: 10px;
+  text-transform: uppercase;
+}
+
+.exercise-detail-section {
+  padding: 8px 0;
+  border-top: 1px solid rgba(51, 65, 85, 0.52);
+}
+
+.exercise-detail-section h4 {
+  margin: 0 0 5px;
+  color: var(--text);
+  font-size: 13px;
+}
+
+.exercise-detail-section p,
+.exercise-detail-section ul {
+  margin-top: 0;
+  margin-bottom: 0;
+}
+
+.exercise-pain-section {
+  border-top-color: rgba(245, 158, 11, 0.34);
+}
+
+.exercise-cue {
+  padding: 8px;
+  border: 1px solid rgba(59, 130, 246, 0.28);
+  border-radius: var(--radius);
+  background: rgba(59, 130, 246, 0.08);
+}
+
+.session-context-line {
+  margin-bottom: 5px;
+  color: var(--muted-2);
+}
+
+.reference-programs {
+  display: grid;
+  gap: 8px;
+}
+
+.reference-module {
+  margin-top: 0;
+}
+
+.reference-module .exercise-list {
+  margin-top: 10px;
+}
+
+.overhead-checklist {
+  display: grid;
+  gap: 7px;
+  margin: 10px 0;
+}
+
+.overhead-checklist label {
+  display: grid;
+  grid-template-columns: 20px minmax(0, 1fr);
+  gap: 8px;
+  align-items: start;
+  min-height: 42px;
+  padding: 9px;
+  border: 1px solid rgba(51, 65, 85, 0.72);
+  border-radius: var(--radius);
+  color: var(--text);
+  background: rgba(17, 24, 39, 0.62);
+  font-size: 13px;
+  line-height: 1.35;
+}
+
+.overhead-checklist input {
+  width: 18px;
+  height: 18px;
+  margin: 0;
+  accent-color: var(--blue);
+}
+
+.overhead-followup-check {
+  display: grid;
+  grid-template-columns: 20px minmax(0, 1fr);
+  gap: 8px;
+  align-items: start;
+  min-height: 42px;
+  padding: 9px;
+  margin: 10px 0 6px;
+  border: 1px solid rgba(59, 130, 246, 0.32);
+  border-radius: var(--radius);
+  color: var(--text);
+  background: rgba(59, 130, 246, 0.08);
+  font-size: 13px;
+}
+
+.overhead-followup-check input {
+  width: 18px;
+  height: 18px;
+  margin: 0;
+  accent-color: var(--blue);
+}
+
+.plan-complete-card p:not(.status-line) {
+  color: var(--muted);
+  line-height: 1.45;
+}
+
 .exercise-name {
   display: inline;
   padding: 0;
@@ -659,6 +818,10 @@ button:disabled {
 
 .log-controls.single {
   grid-template-columns: 1fr;
+}
+
+.choice-field {
+  grid-column: 1 / -1;
 }
 
 .field label {

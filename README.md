@@ -1,12 +1,27 @@
-# Marathon & Kracht Training Webapp
+# Herstel- en fundamentprogramma
 
-Statische iPhone-first webapp voor het schema uit `trainingsschema_marathon_codex.md`.
+Statische iPhone-first trainingsapp voor het achtweekse programma van 27 juli
+tot en met 20 september 2026.
+
+## Actief plan
+
+- Plan-ID: `rehab_foundation_2026_07_27`
+- Vier sessies per week
+- Drie looptrainingen van ongeveer dertig minuten
+- Drie fases: kalibreren, belasting opbouwen, sterkte en terugkeer voorbereiden
+- Aparte optionele mobiliteitsroutine
+- Voorwaardelijk pad naar landmine press en machine overhead press
+
+Na week 8 stopt de actieve planning bewust. Voor de resterende periode richting
+de marathon van 22 november 2026 is een nieuw marathonspecifiek vervolgblok
+nodig.
 
 ## Gebruik
 
-Upload deze bestanden naar een GitHub-repository en zet GitHub Pages aan. Er is geen buildstap, npm, backend, account of database nodig.
+Publiceer de bestanden rechtstreeks via GitHub Pages onder `/marathon-330/`.
+Er is geen buildstap, backend, account of externe database nodig.
 
-Bestanden:
+De app gebruikt:
 
 - `index.html`
 - `style.css`
@@ -16,65 +31,36 @@ Bestanden:
 - `icon.svg`
 - `service-worker.js`
 
-## Privacy
+## Data
 
-Het schema staat in de code en kan dus online staan via GitHub Pages. Je persoonlijke trainingslogs worden alleen in `localStorage` van het apparaat opgeslagen:
+Trainingsdata blijft lokaal op het apparaat onder:
 
-- `marathonApp.logs`
-- `marathonApp.completedSessions`
-- `marathonApp.preferences`
-- `marathonApp.version`
+`marathon330TrainingAppData_v1`
 
-Er is geen cloudopslag en geen login.
+Nieuwe logs bevatten `planId`, `planVersion`, `sessionId`, `exerciseId` en
+datum. Logs zonder plan-ID worden als `legacy_marathon_plan` behandeld en
+blijven als historische statistiekdata behouden.
 
-## Inhoudelijke omzetting
+Wijzig de storage-key niet zonder migratie en schrijf bij appstart nooit lege
+defaults over bestaande data. Export, import en diagnose staan onder `Data`.
 
-Alle fases van week 22 t/m 52 zijn opgenomen. Waar het bronschema met terugkerende templates werkt, gebruikt de app dezelfde aanpak:
+## Inhoud
 
-- Fase 1: Week A/B met 4 sessies.
-- Fase 2: Overgang A/B met 4 sessies.
-- Fase 3: 3 runs + 3 gymtrainingen per week in afwisselende weekflow.
-- Fase 4: 4 runs + 3 gymopties per week in afwisselende weekflow.
-- Fase 5: taperweken, marathonweek en lichte gym.
-- Fase 6: herstel en terugkeer naar krachttraining.
+Elke warming-up, hoofd- en revalidatieoefening heeft een klikbare uitleg met:
 
-Fasedoelen, blessureregels, alternatieven en uitgebreide fase-uitleg zijn samengevat in ingeklapte UI-onderdelen. De exacte trainingsdetails voor oefeningen en hardloopblokken zijn in `training-data.js` gestructureerd opgenomen.
+- doel en getrainde structuren;
+- reden voor opname;
+- opstelling, uitvoering en houding;
+- normaal verwacht gevoel en veelgemaakte fouten;
+- pijn- en stopregels;
+- progressie, regressie, alternatieven en faseverschillen;
+- sets, reps, rust, tempo en intensiteit.
 
-Fase 4 is racespecifieker gemaakt richting een 3:30 marathon:
+Runkaarten gebruiken RPE en de concrete weekopbouw uit het bronprogramma.
+Er worden geen niet-voorgeschreven snelheden verzonnen.
 
-- Week 39: 24 km met 2 × 3 km marathontempo.
-- Week 41: 26 km met 6–8 km marathontempo aan het einde.
-- Week 42: 28 km met 10–12 km marathontempo als generale repetitie.
-- Week 44: optioneel 22–24 km met 6 km marathontempo.
+## Offline en updates
 
-De zware marathontempo-long-runs vervangen deels midweekse kwaliteit. Ze zijn dus niet bovenop alle bestaande zware tempo/intervalbelasting gestapeld.
-
-## Home screen
-
-De app bevat manifest- en iOS-meta-tags voor gebruik via "Zet op beginscherm". Er is een eenvoudige SVG-icon meegeleverd. Voor een extra strakke iOS-icon kun je later PNG-iconen toevoegen, maar dit is niet nodig om de app te gebruiken.
-
-## UX-regels
-
-Het Vandaag-scherm is compact gemaakt voor iPhone-gebruik: geen vaste ondernavigatie, een klein hamburgermenu bovenin en direct zicht op de oefeningen. In hybride upper/lower/gym + run-sessies toont de app kracht eerst en hardlopen daarna. Echte run-first sessies, zoals long runs, shake-outs, marathon en easy run + mini strength, tonen hardlopen eerst.
-
-Het Week-scherm is een compact weekdashboard: eerst weekheader en korte samenvatting, daarna direct de sessies van die week. Sessiekaarten tonen type, omvang, duur, run-samenvatting, focus en status. Per sessie kun je extra info openklappen, een preview openen of via `Bekijk op Vandaag` naar die sessie springen zonder logging aan te passen.
-
-De vorige/volgende-dagnavigatie zit compact in de header rondom `MARATHON SCHEMA / Training`. De pijlen tonen vorige/volgende geplande sessies, zonder schema te verschuiven of backlog te maken. Logging blijft gekoppeld aan de getoonde sessie en datum. De datumknop rechtsboven toont de geselecteerde datum en opent een compacte countdown tot de marathon.
-
-De header `MARATHON SCHEMA / Training` is een gecentreerde home-knop: tikken brengt je vanuit elk scherm terug naar Vandaag en reset alleen de geselecteerde kijkdatum. De bovenste Vandaag-navigatie is compact gehouden; countdown-informatie staat alleen achter de datumknop.
-
-Bij elke sessie staan compacte knoppen voor `Trainingsfilosofie` en `Week`. Trainingsfilosofie beschrijft bij hybride sessies zowel krachttraining als hardlopen, waarom die combinatie logisch is, de fasecontext, principes en aanpassingen. Hardloopkaarten hebben een korte samenvatting plus gestructureerde regels voor loopband/opbouw, buiten en incline, gevolgd door `Run-info`.
-
-Elke Vandaag-sessie toont een praktische omvangsregel, bijvoorbeeld `7 krachtoefeningen + 1 run · geschatte tijd 70–75 min`. In oefening-info staat `Bekijk statistieken →`, met een directe interne link naar de statistieken van precies die oefening.
-
-Het tabblad `Fases` is bedoeld als brede fase-uitleg: doel, waarom, trainingsfilosofie, hardlopen, krachttraining, marathontempo, long run, aandachtspunten en mentale focus. Het tabblad `Hardloopopbouw` is de praktische routekaart met subtabs voor overzicht, week per week, long runs, marathontempo, sleutelweken en tempo's.
-
-De Statistieken-pagina heeft subtabs voor overzicht, hardlopen, krachttraining, oefeningen, marathonvoorbereiding en inzichten. Er zijn compacte dashboardkaarten, hardloopgrafieken, oefeningdetailgrafieken, een kaart voor meeste vooruitgang en een indicatieve marathonvoorbereiding. De resetactie staat onder `Data beheren` en vraagt dubbele bevestiging voordat lokale data wordt gewist.
-
-De oude groen/oranje/rood herstelknoppen zijn verwijderd. De app blijft een eenvoudige schema-lezer/logger en geen coachingsflow.
-
-Voor iPhone-gebruik zijn `touch-action: manipulation`, 16px form controls en een voorzichtige double-tap guard binnen de app-shell toegevoegd om ongewenst inzoomen bij snelle dubbele taps zoveel mogelijk te voorkomen zonder de viewport agressief te blokkeren.
-
-## Offline
-
-`service-worker.js` cachet de basisbestanden zodat de app na een eerste bezoek ook offline kan openen. Bij wijzigingen op GitHub Pages kan een refresh nodig zijn voordat de nieuwste cache actief is.
+De service worker cachet de basisbestanden. Onder `Data` staan knoppen om de app
+normaal te herladen of met een cache-busting parameter de nieuwste versie op te
+vragen. Geen van beide acties wist trainingsdata.
